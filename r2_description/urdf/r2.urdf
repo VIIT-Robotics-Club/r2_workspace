@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2">
+
+    <!-- Define your robot's links and joints here -->
+
+</robot>
