@@ -17,7 +17,8 @@
         "/home/adyansh04/bumperbot_ws/install/bumperbot_cpp_examples/include/**",
         "/home/adyansh04/bumperbot_ws/install/bumperbot_controller/include/**",
         "/opt/ros/humble/include/**",
-        "/usr/include/**"
+        "/usr/include/**",
+        "/home/adyansh04/r2_ws/src/**"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",
