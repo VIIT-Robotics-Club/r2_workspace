@@ -30,6 +30,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install python executables
 install(PROGRAMS
   line_following/line_following.py
+  line_following/lsa08_due_fake.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
