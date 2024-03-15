@@ -20,6 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "number_publisher = r2_py.number_publisher:main",
+            "number_counter = r2_py.number_counter:main",
         ],
     },
 )
