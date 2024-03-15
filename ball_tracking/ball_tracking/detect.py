@@ -43,7 +43,18 @@ from utils.general import (
 )
 from utils.torch_utils import select_device, smart_inference_mode
 
-redblue_model_path = os.path.join(get_package_share_directory('ball_tracking'), 'ball_tracking', 'weights', 'redbluesilo.pt')
+
+
+# Get the directory path of the current script
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# Define the relative path to the model file
+MODEL_RELATIVE_PATH = "weights/redbluesilo.pt"
+
+# Combine the current directory and the relative path to get the absolute path
+redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
+
+# Now you can use redblue_model_path from anywhere in your project
 
 class YOLOv5ROS2(Node):
     def __init__(self):
