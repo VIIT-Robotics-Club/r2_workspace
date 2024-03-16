@@ -5,7 +5,7 @@ from rclpy.node import Node
 from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
 
-from example_interfaces.msg import Int32
+from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 
 
@@ -48,7 +48,7 @@ class LineFollowerNode(Node):
         # Create a subscription to the lsa_08 topic
         self.subscription = self.create_subscription(
             Int32,
-            '/lsa_08',
+            '/line_lsa',
             self.listener_callback,
             10)
         
@@ -115,7 +115,7 @@ class LineFollowerNode(Node):
         output_linear_x = self.calculate_linear_velocity(error)
 
         twist.angular.z = output_angular_z
-        twist.linear.x = output_linear_x  
+        twist.linear.x = -output_linear_x  
 
         # Publish the new Twist message
         self.publisher_.publish(twist)

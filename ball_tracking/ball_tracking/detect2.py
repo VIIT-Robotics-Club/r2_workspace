@@ -60,7 +60,7 @@ class YOLOv5ROS2(Node):
     @smart_inference_mode()
     def run(
         self,
-        weights="runs/train/exp/weights/redbluesilo.pt",  # model path or triton URL
+        weights="weights/redbluesilo.pt",  # model path or triton URL
         source=3,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
