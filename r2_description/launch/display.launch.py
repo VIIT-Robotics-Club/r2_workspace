@@ -8,9 +8,9 @@ from ament_index_python.packages import get_package_share_path
 def generate_launch_description():
 
     urdf_path = os.path.join(get_package_share_path('r2_description'),
-                             'urdf', 'r2.urdf.xacro')
+                             'urdf', 'r2.urdf')
     rviz_cofig_path = os.path.join(get_package_share_path('r2_description'),
-                                   'rviz', 'urdf_config.rviz')
+                                   'rviz', 'model.rviz')
     robot_description = ParameterValue(Command(['xacro ', urdf_path]), value_type=str)
 
     robot_state_publisher_node = Node(
@@ -31,7 +31,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        # robot_state_publisher_node,
-        # joint_state_publisher_gui_node,
-        # rviz2_node
+        robot_state_publisher_node,
+        joint_state_publisher_gui_node,
+        rviz2_node
     ])
