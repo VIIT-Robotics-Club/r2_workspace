@@ -31,6 +31,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   line_following/line_following.py
   line_following/lsa08_due_fake.py
+  line_following/pid_tuning.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

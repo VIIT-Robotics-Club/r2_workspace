@@ -4,14 +4,22 @@ import rclpy
 from rclpy.node import Node
 from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
+from rclpy.parameter import Parameter
+from rclpy.executors import MultiThreadedExecutor
+
 
 from example_interfaces.msg import Int32
 from geometry_msgs.msg import Twist
 
+import tkinter as tk
+from tkinter import Scale, HORIZONTAL
+import threading
+from queue import Queue
 
-class LineFollowerNode(Node):
+
+class PidTuningNode(Node):
     def __init__(self):
-        super().__init__('line_follower')
+        super().__init__('pid_tuning')
         self.get_logger().info('Line Follower Node Started')
 
         # Declare and get parameters
@@ -19,25 +27,30 @@ class LineFollowerNode(Node):
         self.declare_parameter("Kp", 0.01)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
-        self.declare_parameter("linear_x_min", 0.0)         # Minimum linear speed
-        self.declare_parameter("linear_x_max", 1.0)         # Maximum linear speed
-        self.declare_parameter("angular_z_min", -0.5)       # Minimum angular speed
-        self.declare_parameter("angular_z_max", 0.5)        # Maximum angular speed
 
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
         self.Ki = self.get_parameter("Ki").value
         self.Kd = self.get_parameter("Kd").value
-        self.linear_x_min = self.get_parameter("linear_x_min").value
-        self.linear_x_max = self.get_parameter("linear_x_max").value
-        self.angular_z_min = self.get_parameter("angular_z_min").value
-        self.angular_z_max = self.get_parameter("angular_z_max").value
 
 
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
         self.state = "FOLLOWING"     # Initial State
 
+        self.window = tk.Tk()
+        self.window.title("PID Tuner")
+
+        self.kp_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Kp", command=self.update_kp)
+        self.kp_scale.pack()
+
+        self.ki_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
+        self.ki_scale.pack()
+
+        self.kd_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Kd", command=self.update_kd)
+        self.kd_scale.pack()
+
+        self.pid_params_queue = Queue()        
 
         # Create a publisher for the cmd_vel topic
         self.publisher_ = self.create_publisher(
@@ -52,6 +65,35 @@ class LineFollowerNode(Node):
             self.listener_callback,
             10)
         
+    def run(self):
+        self.window.mainloop()
+
+    def on_slider_change(self, value):
+        # Put the new PID parameters in the queue
+        self.pid_params_queue.put(self.get_pid_params())
+
+    def get_pid_params(self):
+        # If there are new PID parameters in the queue, return them
+        if not self.pid_params_queue.empty():
+            return self.pid_params_queue.get()
+        # Otherwise, return the current PID parameters
+        return self.kp, self.ki, self.kd
+        
+    def update_kp(self, value):
+        self.Kp = float(value)
+        self.set_parameters([Parameter("Kp", Parameter.Type.DOUBLE, self.Kp)])
+        self.pid_params_queue.put((self.Kp, self.Ki, self.Kd))
+
+    def update_ki(self, value):
+        self.Ki = float(value)
+        self.set_parameters([Parameter("Ki", Parameter.Type.DOUBLE, self.Ki)])
+        self.pid_params_queue.put((self.Kp, self.Ki, self.Kd))
+
+    def update_kd(self, value):
+        self.Kd = float(value)
+        self.set_parameters([Parameter("Kd", Parameter.Type.DOUBLE, self.Kd)])
+        self.pid_params_queue.put((self.Kp, self.Ki, self.Kd))
+        
     def calculate_angular_velocity(self, current_sensor_reading):
         # Calculate the error
         error = self.desired_value - current_sensor_reading
@@ -62,17 +104,15 @@ class LineFollowerNode(Node):
 
         # Calculate the control output
         output = self.Kp * error + self.Ki * self.error_sum + self.Kd * error_derivative
-    
+
         # Clamp the turn rate between -0.5 and 0.5
-        # angular_z = max(min(output, 0.5), -0.5)  
-        angular_z = max(min(output, self.angular_z_max), self.angular_z_min)
+        angular_z = max(min(output, 0.5), -0.5)  
 
         return angular_z, error
     
     def calculate_linear_velocity(self, error):
         # Calculate the forward speed based on the absolute error
-        # linear_x = max(min(1.0 - abs(error) / 75.0, 1.0), -1.0)
-        linear_x = max(min(self.linear_x_max - abs(error) / 75.0, self.linear_x_max), -self.linear_x_max)
+        linear_x = max(min(1.0 - abs(error) / 75.0, 1.0), -1.0)
         return linear_x
 
         
@@ -129,8 +169,31 @@ class LineFollowerNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    line_follower = LineFollowerNode()
-    rclpy.spin(line_follower)
+    line_follower = PidTuningNode()
+
+    # Use the multithreaded executor
+    executor = MultiThreadedExecutor()
+
+    def spin_ros():
+        executor.add_node(line_follower)
+        try:
+            executor.spin()
+        except KeyboardInterrupt:
+            pass
+
+        # Shutdown and cleanup
+        executor.shutdown()
+        line_follower.destroy_node()
+        rclpy.shutdown()
+
+    # Start the ROS2 node in a separate thread
+    threading.Thread(target=spin_ros).start()
+
+    # Start the Tkinter main loop in the main thread
+    line_follower.run()
+
+    # Shutdown and cleanup
+    executor.shutdown()
     line_follower.destroy_node()
     rclpy.shutdown()
 
