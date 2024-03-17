@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from example_interfaces.srv import SetBool
+import time
 
 class SetBoolServer(Node):
     def __init__(self):
@@ -10,6 +11,7 @@ class SetBoolServer(Node):
         self.srv = self.create_service(SetBool, 'setbool', self.set_bool_callback)
 
     def set_bool_callback(self, request, response):
+        time.sleep(3)
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'
         self.get_logger().info('Incoming request\n%s' % request.data)

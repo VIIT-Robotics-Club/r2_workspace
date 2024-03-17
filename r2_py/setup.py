@@ -24,6 +24,8 @@ setup(
             "number_counter = r2_py.number_counter:main",
             "motor_server_fake = r2_py.motor_server_fake:main",
             "motor_client = r2_py.motor_client:main",
+            "test_node1 = r2_py.test_node1:main",
+            "test_node2 = r2_py.test_node2:main",
         ],
     },
 )
