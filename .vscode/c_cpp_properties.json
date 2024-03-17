@@ -6,25 +6,13 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "/home/adyansh04/ros2_ws/install/sjtu_drone_description/include/**",
-        "/home/adyansh04/ros2_ws/install/my_robot_interfaces/include/**",
-        "/home/adyansh04/turtlebot3_ws/install/turtlebot3_gazebo/include/**",
-        "/home/adyansh04/turtlebot3_ws/install/turtlebot3_fake_node/include/**",
-        "/home/adyansh04/colcon_ws/install/realsense_gazebo_plugin/include/**",
-        "/home/adyansh04/colcon_ws/install/linkattacher_msgs/include/**",
-        "/home/adyansh04/colcon_ws/install/gazebo_ros2_control/include/**",
-        "/home/adyansh04/colcon_ws/install/ebot_docking/include/**",
-        "/home/adyansh04/bumperbot_ws/install/bumperbot_cpp_examples/include/**",
-        "/home/adyansh04/bumperbot_ws/install/bumperbot_controller/include/**",
-        "/opt/ros/humble/include/**",
-        "/usr/include/**",
-        "/home/adyansh04/r2_ws/src/**"
+        "${workspaceFolder}/**"
       ],
-      "name": "ROS",
-      "intelliSenseMode": "gcc-x64",
+      "name": "linux-gcc-x64",
+      "intelliSenseMode": "linux-gcc-x64",
       "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
-      "cppStandard": "c++14"
+      "cStandard": "${default}",
+      "cppStandard": "${default}"
     }
   ],
   "version": 4

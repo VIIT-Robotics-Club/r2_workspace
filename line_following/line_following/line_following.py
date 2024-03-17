@@ -5,7 +5,6 @@ from rclpy.node import Node
 from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
 
-from example_interfaces.msg import Int32
 
 from std_msgs.msg import Int32
 
@@ -19,13 +18,13 @@ class LineFollowerNode(Node):
 
         # Declare and get parameters
         self.declare_parameter("desired_value", 35.0)       # The desired sensor reading
-        self.declare_parameter("Kp", 0.01)                  # Proportional gain
+        self.declare_parameter("Kp", 0.5)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
         self.declare_parameter("linear_x_min", 0.0)         # Minimum linear speed
-        self.declare_parameter("linear_x_max", 1.0)         # Maximum linear speed
-        self.declare_parameter("angular_z_min", -0.5)       # Minimum angular speed
-        self.declare_parameter("angular_z_max", 0.5)        # Maximum angular speed
+        self.declare_parameter("linear_x_max", 5.0)         # Maximum linear speed
+        self.declare_parameter("angular_z_min", 0.0)       # Minimum angular speed
+        self.declare_parameter("angular_z_max", 5.0)        # Maximum angular speed
 
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value

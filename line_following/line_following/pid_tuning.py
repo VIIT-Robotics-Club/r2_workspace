@@ -8,7 +8,7 @@ from rclpy.parameter import Parameter
 from rclpy.executors import MultiThreadedExecutor
 
 
-from example_interfaces.msg import Int32
+from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 
 import tkinter as tk
@@ -41,13 +41,13 @@ class PidTuningNode(Node):
         self.window = tk.Tk()
         self.window.title("PID Tuner")
 
-        self.kp_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Kp", command=self.update_kp)
+        self.kp_scale = Scale(self.window, from_=0, to=5, resolution=0.1, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
         self.kp_scale.pack()
 
         self.ki_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
         self.ki_scale.pack()
 
-        self.kd_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Kd", command=self.update_kd)
+        self.kd_scale = Scale(self.window, from_=0, to=10, resolution=0.1, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
         self.kd_scale.pack()
 
         self.pid_params_queue = Queue()        
@@ -61,7 +61,7 @@ class PidTuningNode(Node):
         # Create a subscription to the lsa_08 topic
         self.subscription = self.create_subscription(
             Int32,
-            '/lsa_08',
+            '/line_lsa',
             self.listener_callback,
             10)
         
@@ -105,14 +105,14 @@ class PidTuningNode(Node):
         # Calculate the control output
         output = self.Kp * error + self.Ki * self.error_sum + self.Kd * error_derivative
 
-        # Clamp the turn rate between -0.5 and 0.5
-        angular_z = max(min(output, 0.5), -0.5)  
+        # Clamp the turn rate between -5.0 and 5.0
+        angular_z = max(min(output, 5.0), -5.0)  
 
         return angular_z, error
     
     def calculate_linear_velocity(self, error):
         # Calculate the forward speed based on the absolute error
-        linear_x = max(min(1.0 - abs(error) / 75.0, 1.0), -1.0)
+        linear_x = max(min(5.0 - abs(error) / 75.0, 5.0), -5.0)
         return linear_x
 
         
@@ -147,15 +147,15 @@ class PidTuningNode(Node):
         elif self.state == "SWEEPING":
             # If the sensor reading is 255, the line is lost
             # Make the robot sweep towards the last known direction of the black line
-            twist.angular.z = 0.5 if self.last_error < 0 else -0.5
+            twist.angular.z = 5.0 if self.last_error < 0 else -5.0
             twist.linear.x = 0.0  # Stop moving forward
 
         # Calculate the control output
         output_angular_z,error = self.calculate_angular_velocity(current_sensor_reading)
         output_linear_x = self.calculate_linear_velocity(error)
 
-        twist.angular.z = output_angular_z
-        twist.linear.x = output_linear_x  
+        twist.angular.z = -output_angular_z
+        twist.linear.x = -output_linear_x  
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
