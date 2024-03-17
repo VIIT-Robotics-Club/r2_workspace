@@ -5,10 +5,7 @@ from rclpy.node import Node
 from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
 
-from example_interfaces.msg import Int32
-
 from std_msgs.msg import Int32
-
 from geometry_msgs.msg import Twist
 
 
