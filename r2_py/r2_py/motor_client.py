@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from example_interfaces.srv import SetBool
+import time
 
 class SetBoolClient(Node):
     def __init__(self):
@@ -10,6 +11,7 @@ class SetBoolClient(Node):
         self.cli = self.create_client(SetBool, 'setbool')
         self.get_logger().info('SetBool client has been started')
         self.req = SetBool.Request()
+
 
     def send_request(self):
         self.req.data = False
@@ -25,7 +27,10 @@ def main(args=None):
     rclpy.init(args=args)
 
     set_bool_client = SetBoolClient()
-    set_bool_client.send_request()
+    # set_bool_client.send_request()
+    while rclpy.ok():
+        set_bool_client.send_request()
+        time.sleep(7)
 
     rclpy.spin(set_bool_client)
 
