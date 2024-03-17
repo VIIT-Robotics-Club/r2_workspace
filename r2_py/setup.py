@@ -22,6 +22,8 @@ setup(
         'console_scripts': [
             "number_publisher = r2_py.number_publisher:main",
             "number_counter = r2_py.number_counter:main",
+            "motor_server_fake = r2_py.motor_server_fake:main",
+            "motor_client = r2_py.motor_client:main",
         ],
     },
 )
