@@ -45,7 +45,13 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-
+        self.declare_parameter("setupareaball", -51000.0)       # The desired sensor reading
+        self.declare_parameter("setupdev", -120.01)                  # Proportional gain
+        self.declare_parameter("setupareasilo", -40000.00)                  # Integral gain
+        self.setupareaball = self.get_parameter("setupareaball").value
+        self.setupdev = self.get_parameter("setupdev").value
+        self.setupareasilo = self.get_parameter("setupareasilo").value
+        # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
 
@@ -60,8 +66,8 @@ class YOLOv5ROS2(Node):
     @smart_inference_mode()
     def run(
         self,
-        weights="runs/train/exp/weights/redbluesilo.pt",  # model path or triton URL
-        source=3,  # file/dir/URL/glob/screen/0(webcam)
+        weights="weights/redbluesilo.pt",  # model path or triton URL
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -222,17 +228,17 @@ class YOLOv5ROS2(Node):
                         # else:
                         #     twist_msg.linear.x = 0.0
                         # deviation1=deviation
-                        setupdis =-53000    
+                        # self.setupareaball =-40000    
                         deviation=-deviation   
                         AngZpb = map(deviation, -230, 90, 4, 0)
-                        LinXb=map(area, setupdis,120, 0, 4)
-                        LinXs=map(area, -100000,100, 0, 4)
+                        LinXb=map(area, self.setupareaball,120, 0, 4)
+                        LinXs=map(area, -40000,100, 0, 4)
                         
-                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= setupdis:
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
                             twist_msg.linear.x = float(LinXb)
                             twist_msg.angular.z = float(AngZpb)
 
-                        if len(detections_ball) > 0 and len(detections_silo) > 0 and detections_ball[0][1] <= setupdis and detections_silo[0][1] >= -100000:
+                        elif len(detections_ball) > 0 and len(detections_silo) > 0 and detections_ball[0][1] <= self.setupareaball and detections_silo[0][1] >= self.setupareasilo:
                             twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
                         
