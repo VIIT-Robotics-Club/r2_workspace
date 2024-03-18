@@ -12,7 +12,7 @@ class SetBoolServer(Node):
         self.motor_lift_service = self.create_service(SetBool, 'motor_lift', self.motor_lift_callback)
 
     def motor_claw_callback(self, request, response):
-        # self.get_logger().info('Started motor_claw_callback')
+        self.get_logger().info('Started motor_claw_callback')
         time.sleep(3)
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'
@@ -22,7 +22,7 @@ class SetBoolServer(Node):
         return response
     
     def motor_lift_callback(self, request, response):
-        # self.get_logger().info('Started motor_lift_callback')
+        self.get_logger().info('Started motor_lift_callback')
         time.sleep(3) 
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'

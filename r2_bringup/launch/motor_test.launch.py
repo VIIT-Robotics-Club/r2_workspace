@@ -95,8 +95,8 @@ def generate_launch_description():
             OnProcessIO(
                 target_action=motor_claw_open_client,
                 on_stdout=lambda event: 
-                    logger.info(event.text.decode())
-                    # test_node1 if 'success: True' in event.text.decode() else test_node2
+                    logger.info(event.text.decode(),'Hi')
+                    # test_node1 if 'response:True' in event.text.decode() else test_node2
             )
         ),
     ])
