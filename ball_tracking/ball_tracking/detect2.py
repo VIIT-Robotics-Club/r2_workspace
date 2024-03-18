@@ -12,7 +12,13 @@ import sys
 from pathlib import Path
 
 import torch
+current_directory = os.path.dirname(os.path.abspath(__file__))
 
+# Define the relative path to the model file
+MODEL_RELATIVE_PATH = "weights/redbluesilo2.pt"
+
+# Combine the current directory and the relative path to get the absolute path
+redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -45,9 +51,9 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -51000.0)       # The desired sensor reading
-        self.declare_parameter("setupdev", -120.01)                  # Proportional gain
-        self.declare_parameter("setupareasilo", -40000.00)                  # Integral gain
+        self.declare_parameter("setupareaball", -50000.0)       # The desired sensor reading
+        self.declare_parameter("setupdev", 135.01)                  # Proportional gain
+        self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
         self.setupareasilo = self.get_parameter("setupareasilo").value
@@ -66,8 +72,8 @@ class YOLOv5ROS2(Node):
     @smart_inference_mode()
     def run(
         self,
-        weights="weights/redbluesilo.pt",  # model path or triton URL
-        source=2,  # file/dir/URL/glob/screen/0(webcam)
+        weights=redblue_model_path,  # model path or triton URL
+        source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -213,11 +219,14 @@ class YOLOv5ROS2(Node):
                         # Publish area and deviation on cmd_vel topic
                         
                         # if label=="Red-ball":
+                        # detections_silo[0][1]=69
                         area=-area
                         if label == "Red-ball" or label=="blue-ball":
                             detections_ball.append((label, area, deviation, x1, y1, x2, y2))
                         if label == "silo":
+                            print("hi 2")
                             detections_silo.append((label, area, deviation, x1, y1, x2, y2))
+                            # print(detections_silo[0][1])
                         #     twist_msg.linear.x = float(area1)
                         #     twist_msg.angular.z = float(deviation)
                         # else:
@@ -230,17 +239,36 @@ class YOLOv5ROS2(Node):
                         # deviation1=deviation
                         # self.setupareaball =-40000    
                         deviation=-deviation   
-                        AngZpb = map(deviation, -230, 90, 4, 0)
-                        LinXb=map(area, self.setupareaball,120, 0, 4)
-                        LinXs=map(area, -40000,100, 0, 4)
-                        
+                        AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
+                        LinXb=map(area, self.setupareaball,120, 0, 1)
+                        LinXs=map(area,self.setupareasilo,100, 0, 1)
+                                                                        
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
                             twist_msg.linear.x = float(LinXb)
                             twist_msg.angular.z = float(AngZpb)
 
-                        elif len(detections_ball) > 0 and len(detections_silo) > 0 and detections_ball[0][1] <= self.setupareaball and detections_silo[0][1] >= self.setupareasilo:
-                            twist_msg.linear.x = float(LinXs)
-                            twist_msg.angular.z = float(AngZpb)
+
+                        # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
+                        #     # Robot holds the ball, move towards the silo
+                        #     print("hi")
+                        #     if label=="silo":
+                        #         print("Moving towards silo while holding the ball")
+                        #         # Calculate LinXs and AngZpb using your map function based on silo detection
+                              
+                        #         twist_msg.linear.x = float(LinXs)
+                        #         twist_msg.angular.z = float(AngZpb)
+                        # if  label=="":    
+                        # twist_msg.angular.z = 1.0
+                        # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
+                        #     twist_msg.linear.x = float(LinXb)
+                        #     twist_msg.angular.z = float(AngZpb)
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                        
+                        
+
+
                         
 
                         self.publisher_.publish(twist_msg)
@@ -278,7 +306,7 @@ class YOLOv5ROS2(Node):
                 else:
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.0
+                    twist_msg.angular.z = 0.30
                     self.publisher_.publish(twist_msg)        
                 # Stream results
                 im0 = annotator.result()

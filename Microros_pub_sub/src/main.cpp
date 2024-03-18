@@ -27,7 +27,7 @@
 #include <geometry_msgs/msg/twist.h>
 #include <std_msgs/msg/int32.h>
 #include <sensor_msgs/msg/imu.h>
-#include <std_srvs/srv/set_bool.h>
+// #include <std_srvs/srv/set_bool.h>
 
 
 #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
@@ -52,14 +52,14 @@ int BR_motor;
 #define dirBL 27
 #define dirBR 33
 
-#define pwmPin1 21
-#define dir1 22
-#define pwmPin2 2
-#define dir2 3
-#define pwmPin3 23
-#define dir3 25
-#define pwmPin4 13
-#define dir4 31
+// #define pwmPin1 21
+// #define dir1 22
+// #define pwmPin2 2
+// #define dir2 3
+// #define pwmPin3 23
+// #define dir3 25
+// #define pwmPin4 13
+// #define dir4 31
 
 
 rcl_publisher_t publisher_imu;
@@ -79,11 +79,11 @@ rcl_node_t node;
 rcl_timer_t timer_line;
 rcl_timer_t timer_imu;
 
-rcl_service_t service;
-rcl_wait_set_t wait_set;
+// rcl_service_t service;
+// rcl_wait_set_t wait_set;
 
-std_srvs__srv__SetBool_Response req;
-std_srvs__srv__SetBool_Response res;
+// std_srvs__srv__SetBool_Response req;
+// std_srvs__srv__SetBool_Response res;
 
 
 Adafruit_MPU6050 mpu;
@@ -104,14 +104,14 @@ void pinSetup()
   pinMode(dirBL, OUTPUT);
   pinMode(dirBR, OUTPUT);
   
-  pinMode(dir1, OUTPUT);
-  pinMode(pwmPin1, OUTPUT);
-  pinMode(dir2, OUTPUT);
-  pinMode(pwmPin2, OUTPUT);
-  pinMode(dir3, OUTPUT);
-  pinMode(pwmPin3, OUTPUT);
-  pinMode(dir4, OUTPUT);
-  pinMode(pwmPin4, OUTPUT);
+  // pinMode(dir1, OUTPUT);
+  // pinMode(pwmPin1, OUTPUT);
+  // pinMode(dir2, OUTPUT);
+  // pinMode(pwmPin2, OUTPUT);
+  // pinMode(dir3, OUTPUT);
+  // pinMode(pwmPin3, OUTPUT);
+  // pinMode(dir4, OUTPUT);
+  // pinMode(pwmPin4, OUTPUT);
 
 }
 
@@ -122,41 +122,41 @@ void error_loop() {
   }
 }
 
-void rotate_clockwise(bool &success)
-{
-  digitalWrite(dir1, HIGH);
-  digitalWrite(dir2, HIGH);
-  digitalWrite(dir3, HIGH);
-  digitalWrite(dir4, HIGH);
-  analogWrite(pwmPin1, 255);
-  analogWrite(pwmPin2, 255);
-  analogWrite(pwmPin3, 255);
-  analogWrite(pwmPin4, 255);
-  delay(3000);
-  analogWrite(pwmPin1, 0);
-  analogWrite(pwmPin2, 0);
-  analogWrite(pwmPin3, 0);
-  analogWrite(pwmPin4, 0);
-  success = true;
-}
+// void rotate_clockwise(bool &success)
+// {
+//   digitalWrite(dir1, HIGH);
+//   digitalWrite(dir2, HIGH);
+//   digitalWrite(dir3, HIGH);
+//   digitalWrite(dir4, HIGH);
+//   analogWrite(pwmPin1, 255);
+//   analogWrite(pwmPin2, 255);
+//   analogWrite(pwmPin3, 255);
+//   analogWrite(pwmPin4, 255);
+//   delay(3000);
+//   analogWrite(pwmPin1, 0);
+//   analogWrite(pwmPin2, 0);
+//   analogWrite(pwmPin3, 0);
+//   analogWrite(pwmPin4, 0);
+//   success = true;
+// }
 
-void rotate_anticlockwise(bool &success)
-{
-  digitalWrite(dir1, LOW);
-  digitalWrite(dir2, LOW);
-  digitalWrite(dir3, LOW);
-  digitalWrite(dir4, LOW);
-  analogWrite(pwmPin1, 255);
-  analogWrite(pwmPin2, 255);
-  analogWrite(pwmPin3, 255);
-  analogWrite(pwmPin4, 255);
-  delay(3000);
-  analogWrite(pwmPin1, 0);
-  analogWrite(pwmPin2, 0);
-  analogWrite(pwmPin3, 0);
-  analogWrite(pwmPin4, 0);
-  success = true;
-}
+// void rotate_anticlockwise(bool &success)
+// {
+//   digitalWrite(dir1, LOW);
+//   digitalWrite(dir2, LOW);
+//   digitalWrite(dir3, LOW);
+//   digitalWrite(dir4, LOW);
+//   analogWrite(pwmPin1, 255);
+//   analogWrite(pwmPin2, 255);
+//   analogWrite(pwmPin3, 255);
+//   analogWrite(pwmPin4, 255);
+//   delay(3000);
+//   analogWrite(pwmPin1, 0);
+//   analogWrite(pwmPin2, 0);
+//   analogWrite(pwmPin3, 0);
+//   analogWrite(pwmPin4, 0);
+//   success = true;
+// }
 
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
   RCLC_UNUSED(last_call_time);
@@ -205,36 +205,36 @@ void timer_callback_imu(rcl_timer_t * timer, int64_t last_call_time) {
   }
 }
 
-void service_callback(const void * req, void * res){
+// void service_callback(const void * req, void * res){
   
   
-  std_srvs__srv__SetBool_Request * req_in=(std_srvs__srv__SetBool_Request *) req;
-  std_srvs__srv__SetBool_Response * res_in=(std_srvs__srv__SetBool_Response *) res;
+//   std_srvs__srv__SetBool_Request * req_in=(std_srvs__srv__SetBool_Request *) req;
+//   std_srvs__srv__SetBool_Response * res_in=(std_srvs__srv__SetBool_Response *) res;
 
-  //printf("Service request value: %d + %d.\n", (int) req_in->a, (int) req_in->b);
-//  String response_str = "f1";
-  bool success = false;
+//   //printf("Service request value: %d + %d.\n", (int) req_in->a, (int) req_in->b);
+// //  String response_str = "f1";
+//   bool success = false;
 
-  if(req_in->data == 1)
-  {
-//    res_in->success = true;
-//    res_in->message = response_str;
+//   if(req_in->data == 1)
+//   {
+// //    res_in->success = true;
+// //    res_in->message = response_str;
 
-      rotate_clockwise(success);
-      res_in->success = success;
+//       rotate_clockwise(success);
+//       res_in->success = success;
     
-  }
+//   }
 
-  else
-  {
-//    res_in->success = true;
-//    res_in->message = "f0";
+//   else
+//   {
+// //    res_in->success = true;
+// //    res_in->message = "f0";
 
-      rotate_anticlockwise(success);
-      res_in->success = success;
-  }
+//       rotate_anticlockwise(success);
+//       res_in->success = success;
+//   }
 
-}
+// }
 
 void subscription_callback(const void *msgin) {
   const geometry_msgs__msg__Twist * msg = (const geometry_msgs__msg__Twist *)msgin;
@@ -345,11 +345,11 @@ void setup() {
   RCCHECK(rclc_node_init_default(&node, "r2_vrc", "", &support));
 
   // create service
-  RCCHECK(rclc_service_init_default(
-    &service, 
-    &node, 
-    ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool), 
-    "/setbool"));
+  // RCCHECK(rclc_service_init_default(
+  //   &service, 
+  //   &node, 
+  //   ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool), 
+  //   "/setbool"));
 
 
   // create publisher lsa08 data
@@ -395,7 +395,7 @@ void setup() {
   RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_imu));
   RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
-  RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
+  // RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   mpu.setGyroRange(MPU6050_RANGE_250_DEG);
