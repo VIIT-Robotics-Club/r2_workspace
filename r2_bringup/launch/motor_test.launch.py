@@ -37,28 +37,63 @@ def generate_launch_description():
         shell=True,
     )
 
-    call_service = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/setbool', 'example_interfaces/srv/SetBool', '{data: true}'],
+    motor_claw_open_client = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
         output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'motor_claw', 'request_data': True}
+        ]
     )
 
-    log_info = ExecuteProcess(
-        cmd=['ros2', 'topic', 'list'],
+    motor_claw_close_client = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
         output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'motor_claw', 'request_data': False}
+        ]
     )
+
+    motor_lift_open_client = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'motor_lift', 'request_data': True}
+        ]
+    )
+
+    motor_lift_close_client = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'motor_lift', 'request_data': False}
+        ]
+    )
+
+
 
     return LaunchDescription([
         motor_server_fake,
-        # RegisterEventHandler(
-        #     OnProcessStart(
-        #         target_action=motor_server_fake,
-        #         on_start=[call_service],
-        #     )
-        # ),
-        call_service,
+        RegisterEventHandler(
+            OnProcessStart(
+                target_action=motor_server_fake,
+                on_start=[motor_claw_open_client],
+            )
+        ),
         RegisterEventHandler(
             OnProcessIO(
-                target_action=call_service,
+                target_action=motor_claw_open_client,
                 on_stdout=lambda event: 
                     logger.info(event.text.decode())
                     # test_node1 if 'success: True' in event.text.decode() else test_node2

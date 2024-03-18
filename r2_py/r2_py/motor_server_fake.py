@@ -9,25 +9,25 @@ class SetBoolServer(Node):
     def __init__(self):
         super().__init__('set_bool_server')
         self.motor_claw_service = self.create_service(SetBool, 'motor_claw', self.motor_claw_callback)
-        self.motor_grip_service = self.create_service(SetBool, 'motor_grip', self.motor_grip_callback)
+        self.motor_lift_service = self.create_service(SetBool, 'motor_lift', self.motor_lift_callback)
 
     def motor_claw_callback(self, request, response):
-        self.get_logger().info('Started motor_claw_callback')
+        # self.get_logger().info('Started motor_claw_callback')
         time.sleep(3)
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'
-        self.get_logger().info('Incoming request\n%s' % request.data)
-        self.get_logger().info('Sending response\n%s' % response.success)
+        # self.get_logger().info('Incoming request\n%s' % request.data)
+        self.get_logger().info('response:%s' % response.success)
 
         return response
     
-    def motor_grip_callback(self, request, response):
-        self.get_logger().info('Started motor_grip_callback')
-        time.sleep(3)
+    def motor_lift_callback(self, request, response):
+        # self.get_logger().info('Started motor_lift_callback')
+        time.sleep(3) 
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'
-        self.get_logger().info('Incoming request\n%s' % request.data)
-        self.get_logger().info('Sending response\n%s' % response.success)
+        # self.get_logger().info('Incoming request\n%s' % request.data)
+        self.get_logger().info('response:\n%s' % response.success)
 
         return response
 

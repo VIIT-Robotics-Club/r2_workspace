@@ -9,7 +9,7 @@ class SetBoolClient(Node):
     def __init__(self):
         super().__init__('set_bool_client')
         self.motor_claw_client = self.create_client(SetBool, 'motor_claw')
-        self.motor_grip_client = self.create_client(SetBool, 'motor_grip')
+        self.motor_lift_client = self.create_client(SetBool, 'motor_lift')
 
         self.declare_parameters(
             namespace='',
@@ -23,9 +23,9 @@ class SetBoolClient(Node):
             self.get_logger().info('motor_claw service not available, waiting again...')
         self.get_logger().info('motor_claw service is available')
 
-        while not self.motor_grip_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('motor_grip service not available, waiting again...')
-        self.get_logger().info('motor_grip service is available')
+        while not self.motor_lift_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('motor_lift service not available, waiting again...')
+        self.get_logger().info('motor_lift service is available')
 
         self.get_logger().info('SetBool client has been started')
         self.req = SetBool.Request()
@@ -36,12 +36,12 @@ class SetBoolClient(Node):
         request_data = self.get_parameter('request_data').get_parameter_value().bool_value
 
         self.req.data = request_data
-        self.get_logger().info('Sending request\n%s' % self.req.data)
+        # self.get_logger().info('Sending request\n%s' % self.req.data)
 
         if client_to_call == 'motor_claw':
             future = self.motor_claw_client.call_async(self.req)
-        elif client_to_call == 'motor_grip':
-            future = self.motor_grip_client.call_async(self.req)
+        elif client_to_call == 'motor_lift':
+            future = self.motor_lift_client.call_async(self.req)
         else:
             self.get_logger().info('Invalid client_to_call parameter value')
             return
