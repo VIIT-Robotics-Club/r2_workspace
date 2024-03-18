@@ -75,7 +75,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -226,7 +226,7 @@ class YOLOv5ROS2(Node):
                         # else:
                         #     twist_msg.linear.x = 0.0
                         deviation1=deviation
-                        AngZp = map(deviation1, -230, 230, -4, 4)
+                        AngZp = map(deviation1, -230, 135, -4, 4)
                         LinX=map(area, -40000,100, 0, 4)
                         #  # Assuming area is linear velocity
                         # if float(deviation)>30:
