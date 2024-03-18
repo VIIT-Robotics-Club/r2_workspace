@@ -47,10 +47,11 @@ class SetBoolClient(Node):
             return
 
         rclpy.spin_until_future_complete(self, future)
-        if future.result() is not None:
-            self.get_logger().info('Result received: %s' % future.result().success)
-        else:
-            self.get_logger().info('Service call failed')
+
+        # if future.result() is not None:
+        #     self.get_logger().info('Result received: %s' % future.result().success)
+        # else:
+        #     self.get_logger().info('Service call failed')
 
 def main(args=None):
     rclpy.init(args=args)
@@ -60,8 +61,6 @@ def main(args=None):
     # while rclpy.ok():
     #     set_bool_client.send_request()
     #     time.sleep(7)
-
-    rclpy.spin(set_bool_client)
 
     set_bool_client.destroy_node()
     rclpy.shutdown()
