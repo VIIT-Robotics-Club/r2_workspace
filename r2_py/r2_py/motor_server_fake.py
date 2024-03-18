@@ -8,9 +8,21 @@ import time
 class SetBoolServer(Node):
     def __init__(self):
         super().__init__('set_bool_server')
-        self.srv = self.create_service(SetBool, 'setbool', self.set_bool_callback)
+        self.motor_claw_service = self.create_service(SetBool, 'motor_claw', self.motor_claw_callback)
+        self.motor_grip_service = self.create_service(SetBool, 'motor_grip', self.motor_grip_callback)
 
-    def set_bool_callback(self, request, response):
+    def motor_claw_callback(self, request, response):
+        self.get_logger().info('Started motor_claw_callback')
+        time.sleep(3)
+        response.success = not request.data
+        response.message = 'Successfully inverted input boolean'
+        self.get_logger().info('Incoming request\n%s' % request.data)
+        self.get_logger().info('Sending response\n%s' % response.success)
+
+        return response
+    
+    def motor_grip_callback(self, request, response):
+        self.get_logger().info('Started motor_grip_callback')
         time.sleep(3)
         response.success = not request.data
         response.message = 'Successfully inverted input boolean'
