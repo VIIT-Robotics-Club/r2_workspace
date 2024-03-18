@@ -239,13 +239,17 @@ void service_callback(const void * req, void * res){
 void subscription_callback(const void *msgin) {
   const geometry_msgs__msg__Twist * msg = (const geometry_msgs__msg__Twist *)msgin;
   
-   float x1 = msg->linear.x;
-   float y1 = msg->linear.y;
-   float z1 = msg->angular.z;
+   float x = msg->linear.x;
+   float y = msg->linear.y;
+   float z = msg->angular.z;
 
-  float mapped_leftHatx = map(x1,0,5,0,100);
-  float mapped_leftHaty = map(y1,0,5,0,100);
-  float mapped_rightHatz = map(z1,0,5,0,50);
+  // float mapped_leftHatx = map(x1,0,5,0,100);
+  // float mapped_leftHaty = map(y1,0,5,0,100);
+  // float mapped_rightHatz = map(z1,0,5,0,50);
+
+  float mapped_leftHatx = (100.0/2.0)*x;
+  float mapped_leftHaty = (100.0/2.0)*y;
+  float mapped_rightHatz = (50.0/1.0)*z;
 
     FL_motor = mapped_leftHatx - mapped_rightHatz + mapped_leftHaty;
     BR_motor = mapped_leftHatx + mapped_rightHatz + mapped_leftHaty;
@@ -253,10 +257,10 @@ void subscription_callback(const void *msgin) {
     BL_motor = mapped_leftHatx - mapped_rightHatz - mapped_leftHaty;
     
     // constraining motor variables between -255 to 255
-    FL_motor = constrain(FL_motor, -255, 255);
-    BR_motor = constrain(BR_motor, -255, 255);
-    FR_motor = constrain(FR_motor, -255, 255);
-    BL_motor = constrain(BL_motor, -255, 255);
+    FL_motor = constrain(FL_motor, -255.0, 255.0);
+    BR_motor = constrain(BR_motor, -255.0, 255.0);
+    FR_motor = constrain(FR_motor, -255.0, 255.0);
+    BL_motor = constrain(BL_motor, -255.0, 255.0);
 
     // assigning direction values
     // HIGH - Backward && LOW - Forward

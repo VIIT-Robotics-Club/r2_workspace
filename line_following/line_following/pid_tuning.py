@@ -41,13 +41,13 @@ class PidTuningNode(Node):
         self.window = tk.Tk()
         self.window.title("PID Tuner")
 
-        self.kp_scale = Scale(self.window, from_=0, to=10, resolution=0.1, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
+        self.kp_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
         self.kp_scale.pack()
 
-        self.ki_scale = Scale(self.window, from_=0, to=1, resolution=0.01, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
+        self.ki_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
         self.ki_scale.pack()
 
-        self.kd_scale = Scale(self.window, from_=0, to=10, resolution=0.1, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
+        self.kd_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
         self.kd_scale.pack()
 
         self.pid_params_queue = Queue()        
@@ -103,10 +103,10 @@ class PidTuningNode(Node):
         error_derivative = error - self.last_error
 
         # Calculate the control output
-        output = self.Kp * error + self.Ki * self.error_sum + self.Kd * error_derivative
+        output = (self.Kp * error) + (self.Kd * error_derivative)
 
         # Clamp the turn rate between -5.0 and 5.0
-        angular_z = max(min(output, 1.0), -1.0)  
+        angular_z = max(min(output, 1.0), -1.0)    # max value of z = 0.373 (max turn angle)
 
         return angular_z, error
     
@@ -114,7 +114,19 @@ class PidTuningNode(Node):
         # Calculate the forward speed based on the absolute error
         linear_x = max(min(2.0 - abs(error) / 75.0, 2.0), -2.0)
         return linear_x
-
+    
+    def sweep(self, last_error):
+        error = 255
+        
+        if(last_error < 35):
+            # sweep left
+            z_vel = 1.0
+            
+        else:
+            # sweep right
+            z_vel = -1.0
+        
+        return z_vel, error
         
 
     def listener_callback(self, msg):
@@ -128,34 +140,29 @@ class PidTuningNode(Node):
         # Create a new Twist message
         twist = Twist()
 
-        if current_sensor_reading == 255:
-            self.state = "SWEEPING"
-        else:
-            self.state = "FOLLOWING"
+        # if current_sensor_reading == 255:
+        #     self.state = "SWEEPING"
+        # else:
+        #     self.state = "FOLLOWING"
         
-        if self.state == "FOLLOWING":
-            # Calculate the control output
-            output_angular_z, error = self.calculate_angular_velocity(current_sensor_reading)
-            output_linear_x = self.calculate_linear_velocity(error)
-
-            twist.angular.z = -output_angular_z
-            twist.linear.x = -output_linear_x  
-
-            # Update the last error
-            self.last_error = error
-
-        elif self.state == "SWEEPING":
-            # If the sensor reading is 255, the line is lost
-            # Make the robot sweep towards the last known direction of the black line
-            twist.angular.z = 1.0 if self.last_error < 0 else -1.0
-            twist.linear.x = 0.0  # Stop moving forward
+        z_vel = 0.0
+        x_vel = 2.0
+        error = 0
+        
+        # if no line detected then sweep function
+        if(current_sensor_reading == 255):
+            z_vel, error = self.sweep(self.last_error)
+            x_vel = 0.0
+    
 
         # Calculate the control output
-        output_angular_z,error = self.calculate_angular_velocity(current_sensor_reading)
-        output_linear_x = self.calculate_linear_velocity(error)
+        else:
+            z_vel, error = self.calculate_angular_velocity(current_sensor_reading)
+            # output_linear_x = self.calculate_linear_velocity(error)
 
-        twist.angular.z = -output_angular_z
-        twist.linear.x = -output_linear_x  
+        twist.angular.z = z_vel
+        # twist.linear.x = -output_linear_x  
+        twist.linear.x = -x_vel  # keeing base speed 2 -> 255 PWM val
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
