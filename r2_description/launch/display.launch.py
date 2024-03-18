@@ -29,6 +29,7 @@ def generate_launch_description():
         executable='rviz2',
         arguments=['-d', rviz_cofig_path],
     )
+    # sdmfas;kdfnz;vns;
 
     return LaunchDescription([
         robot_state_publisher_node,
