@@ -44,6 +44,7 @@ class PidTuningNode(Node):
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
         self.state = "FOLLOWING"     # Initial State
+        self.node_counter = 0        # node counter variable (if node counter = 4 then stop)
 
         self.window = tk.Tk()
         self.window.title("PID Tuner")
@@ -70,6 +71,12 @@ class PidTuningNode(Node):
             Int32,
             '/line_lsa',
             self.listener_callback,
+            10)
+        
+        self.node_count_subscriber = self.create_subscription(
+            Int32,
+            "/Junctions_count",
+            self.junctionCallback,
             10)
         
     def run(self):
@@ -100,6 +107,9 @@ class PidTuningNode(Node):
         self.Kd = float(value)
         self.set_parameters([Parameter("Kd", Parameter.Type.DOUBLE, self.Kd)])
         self.pid_params_queue.put((self.Kp, self.Ki, self.Kd))
+        
+    def junctionCallback(self, msg:Int32):
+        self.node_counter = msg.data
    
         
     def calculate_angular_velocity(self, current_sensor_reading):
@@ -158,12 +168,26 @@ class PidTuningNode(Node):
         
         z_vel = 0.0
         x_vel = 1.5
+        y_vel = 0.0
         error = 0
         
+        node_to_stop = 1
+        
         # if no line detected then sweep function
-        if(current_sensor_reading == 255):
-            z_vel, error = self.sweep(self.last_error)
+        if(current_sensor_reading == 255 and self.node_counter < node_to_stop):
+            
+            # sweep
+            # z_vel, error = self.sweep(self.last_error)
+            
+            y_vel = 1.5
             x_vel = 0.0
+            z_vel = 0.0
+            
+        elif(self.node_counter >= node_to_stop):
+            z_vel = 0.0
+            x_vel = 0.0
+            y_vel = 0.0
+            
 
         # Calculate the control output
         # Calculate the control output
@@ -175,6 +199,7 @@ class PidTuningNode(Node):
         # print(z_vel)
         # twist.linear.x = -output_linear_x  
         twist.linear.x = x_vel  # keeing base speed 2 -> 255 PWM val
+        twist.linear.y = y_vel  # for straight right motion
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
