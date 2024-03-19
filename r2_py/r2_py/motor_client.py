@@ -36,7 +36,7 @@ class SetBoolClient(Node):
         request_data = self.get_parameter('request_data').get_parameter_value().bool_value
 
         self.req.data = request_data
-        # self.get_logger().info('Sending request\n%s' % self.req.data)
+        self.get_logger().info('Sending request\n%s' % self.req.data)
 
         if client_to_call == 'motor_claw':
             future = self.motor_claw_client.call_async(self.req)
@@ -48,10 +48,10 @@ class SetBoolClient(Node):
 
         rclpy.spin_until_future_complete(self, future)
 
-        # if future.result() is not None:
-        #     self.get_logger().info('Result received: %s' % future.result().success)
-        # else:
-        #     self.get_logger().info('Service call failed')
+        if future.result() is not None:
+            self.get_logger().info('Result received: %s' % future.result().success)
+        else:
+            self.get_logger().info('Service call failed')
 
 def main(args=None):
     rclpy.init(args=args)

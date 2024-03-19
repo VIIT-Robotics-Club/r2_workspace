@@ -187,7 +187,7 @@ class PidTuningNode(Node):
             z_vel = 0.0
             x_vel = 0.0
             y_vel = 0.0
-            
+            self.destroy_node()
 
         # Calculate the control output
         # Calculate the control output
