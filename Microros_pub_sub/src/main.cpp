@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 #include <Wire.h>
@@ -23,9 +22,9 @@
 
 #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
 #endif
-
-#define en 4
-const int jPulse = 2;
+// Define pins for LSA08 connection 
+#define en 4          
+const int jPulse = 2; // Hardware interrupt pin Due
 int nodeCount = 0;
 byte read=0;
 
@@ -44,15 +43,12 @@ int BR_motor;
 #define dirFR 31
 #define dirBL 27
 #define dirBR 33
-
+// declarings pins for lift and claw 
 #define pwmPin1 13
 #define dir1 3
-// #define pwmPin2 10
-// #define dir2 31
-// #define pwmPin3 8
-// #define dir3 27
-// #define pwmPin4 11
-// #define dir4 33
+#define pwmPin2 10
+#define dir2 31
+
 
 rcl_publisher_t publisher_imu;
 rcl_publisher_t publisher_line;
@@ -79,10 +75,14 @@ rcl_timer_t timer_luna;
 rcl_timer_t timer_junc;
 
 rcl_service_t service;
+rcl_service_t service1;
 rcl_wait_set_t wait_set;
 
 std_srvs__srv__SetBool_Response req;
 std_srvs__srv__SetBool_Response res;
+
+std_srvs__srv__SetBool_Response req1;
+std_srvs__srv__SetBool_Response res1;
 
 Adafruit_MPU6050 mpu;
 
@@ -111,12 +111,9 @@ void pinSetup()
 
   pinMode(dir1, OUTPUT);
   pinMode(pwmPin1, OUTPUT);
-  // pinMode(dir2, OUTPUT);
-  // pinMode(pwmPin2, OUTPUT);
-  // pinMode(dir3, OUTPUT);
-  // pinMode(pwmPin3, OUTPUT);
-  // pinMode(dir4, OUTPUT);
-  // pinMode(pwmPin4, OUTPUT);
+  pinMode(dir2, OUTPUT);
+  pinMode(pwmPin2, OUTPUT);
+ 
 
 }
 // Error handle loop
@@ -125,39 +122,43 @@ void error_loop() {
     delay(100);
   }
 }
+
 void rotate_clockwise(bool &success)
 {
   digitalWrite(dir1, HIGH);
-  // digitalWrite(dir2, HIGH);
-  // digitalWrite(dir3, HIGH);
-  // digitalWrite(dir4, HIGH);
   analogWrite(pwmPin1, 255);
-  // analogWrite(pwmPin2, 255);
-  // analogWrite(pwmPin3, 255);
-  // analogWrite(pwmPin4, 255);
   delay(3000);
   analogWrite(pwmPin1, 0);
-  // analogWrite(pwmPin2, 0);
-  // analogWrite(pwmPin3, 0);
-  // analogWrite(pwmPin4, 0);
+
   success = true;
 }
-
 void rotate_anticlockwise(bool &success)
 {
   digitalWrite(dir1, LOW);
-  // digitalWrite(dir2, LOW);
-  // digitalWrite(dir3, LOW);
-  // digitalWrite(dir4, LOW);
   analogWrite(pwmPin1, 255);
-  // analogWrite(pwmPin2, 255);
-  // analogWrite(pwmPin3, 255);
-  // analogWrite(pwmPin4, 255);
   delay(3000);
   analogWrite(pwmPin1, 0);
-  // analogWrite(pwmPin2, 0);
-  // analogWrite(pwmPin3, 0);
-  // analogWrite(pwmPin4, 0);
+  
+  success = true;
+}
+
+void rotate_clockwise_claw(bool &success)
+{
+ 
+  digitalWrite(dir2, HIGH);
+  analogWrite(pwmPin2, 255);
+  delay(3000);
+  analogWrite(pwmPin1, 0);
+  analogWrite(pwmPin2, 0);
+  success = true;
+}
+void rotate_anticlockwise_claw(bool &success)
+{
+
+  digitalWrite(dir2, LOW);
+  analogWrite(pwmPin2, 255);
+  delay(3000);
+  analogWrite(pwmPin1, 0);
   success = true;
 }
 
@@ -173,6 +174,7 @@ void timer_callback_junc(rcl_timer_t * timer, int64_t last_call_time)
       
   }
 }
+
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
   RCLC_UNUSED(last_call_time);
      
@@ -324,6 +326,7 @@ void subscription_callback(const void *msgin) {
     analogWrite(mPinBR,BR_motor);
 
 }
+
 void service_callback(const void * req, void * res){
   
   
@@ -332,6 +335,35 @@ void service_callback(const void * req, void * res){
 
   //printf("Service request value: %d + %d.\n", (int) req_in->a, (int) req_in->b);
 //  String response_str = "f1";
+  bool success = false;
+
+  if(req_in->data == 1)
+  {
+//    res_in->success = true;
+//    res_in->message = response_str;
+
+      rotate_clockwise(success);
+      res_in->success = success;
+    
+  }
+
+  else
+  {
+//    res_in->success = true;
+//    res_in->message = "f0";
+
+      rotate_anticlockwise(success);
+      res_in->success = success;
+  }
+
+}
+
+void service_callback1(const void * req1, void * res1){
+  
+  
+  std_srvs__srv__SetBool_Request * req_in=(std_srvs__srv__SetBool_Request *) req1;
+  std_srvs__srv__SetBool_Response * res_in=(std_srvs__srv__SetBool_Response *) res1;
+
   bool success = false;
 
   if(req_in->data == 1)
@@ -375,12 +407,19 @@ void setup() {
   // create node 
   RCCHECK(rclc_node_init_default(&node, "r2_vrc", "", &support));
 
-    // create service
+    // create service for lift
    RCCHECK(rclc_service_init_default(
     &service, 
     &node, 
     ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool), 
-    "/setbool"));
+    "/service_lift"));
+
+    // create service for claw
+   RCCHECK(rclc_service_init_default(
+    &service1, 
+    &node, 
+    ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool), 
+    "/service_claw"));
   
   // create publisher for junction
     RCCHECK(rclc_publisher_init_default(
@@ -463,6 +502,7 @@ void setup() {
   RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
 
   RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
+  RCCHECK(rclc_executor_add_service(&executor, &service1, &req1, &res1, service_callback));
 
   mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
   mpu.setGyroRange(MPU6050_RANGE_250_DEG);
