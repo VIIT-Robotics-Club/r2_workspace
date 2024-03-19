@@ -82,7 +82,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=2,  # file/dir/URL/glob/screen/0(webcam)
+        source=3,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold

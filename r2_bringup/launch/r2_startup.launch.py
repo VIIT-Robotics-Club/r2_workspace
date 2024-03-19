@@ -27,7 +27,7 @@ def generate_launch_description():
 
     line_follow = Node(
         package='line_following',
-        executable='pid_tuning',
+        executable='pid_tuning.py',
         name='line_follower'
     )
 
@@ -50,18 +50,18 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        ball_following,
+        line_follow,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=ball_following,
-                on_exit=motor_on
+                target_action=line_follow,
+                on_exit=ball_following
             )
         ),
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=motor_on,
+                target_action=ball_following,
                 on_exit=motor_off
             )
         ),
@@ -69,6 +69,12 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=motor_off,
+                on_exit=motor_on
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=motor_on,
                 on_exit=silo_tracking
             )
         ),

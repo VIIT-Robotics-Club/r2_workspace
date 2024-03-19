@@ -174,16 +174,16 @@ class PidTuningNode(Node):
         node_to_stop = 1
         
         # if no line detected then sweep function
-        if(current_sensor_reading == 255 and self.node_counter < node_to_stop):
+        # if(current_sensor_reading == 255 and self.node_counter < node_to_stop):
             
-            # sweep
-            # z_vel, error = self.sweep(self.last_error)
+        #     # sweep
+        #     # z_vel, error = self.sweep(self.last_error)
             
-            y_vel = 1.5
-            x_vel = 0.0
-            z_vel = 0.0
+        #     y_vel = 1.5
+        #     x_vel = 0.0
+        #     z_vel = 0.0
             
-        elif(self.node_counter >= node_to_stop):
+        if(self.node_counter >= node_to_stop):
             z_vel = 0.0
             x_vel = 0.0
             y_vel = 0.0

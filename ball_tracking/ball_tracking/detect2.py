@@ -265,7 +265,7 @@ class YOLOv5ROS2(Node):
                             twist_msg.linear.x = 0.0
                             twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
-                            self.destroy_node
+                            self.destroy_node()
 
 
 
