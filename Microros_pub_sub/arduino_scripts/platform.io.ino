@@ -29,6 +29,7 @@
 #include <geometry_msgs/msg/twist.h>
 #include <std_msgs/msg/int32.h>
 #include <sensor_msgs/msg/imu.h>
+#include <example_interfaces/srv/add_two_ints.h>
 // #include <std_srvs/srv/set_bool.h>
 
 
@@ -86,6 +87,11 @@ rcl_timer_t timer_imu;
 
 // std_srvs__srv__SetBool_Response req;
 // std_srvs__srv__SetBool_Response res;
+
+// Declare the service, request, and response variables
+rcl_service_t service;
+example_interfaces__srv__AddTwoInts_Response res;
+example_interfaces__srv__AddTwoInts_Request req;
 
 
 Adafruit_MPU6050 mpu;
@@ -322,6 +328,14 @@ void subscription_callback(const void *msgin) {
   
 }
 
+// Implement the service callback function
+void service_callback(const void * req, void * res){
+  example_interfaces__srv__AddTwoInts_Request * req_in = (example_interfaces__srv__AddTwoInts_Request *) req;
+  example_interfaces__srv__AddTwoInts_Response * res_in = (example_interfaces__srv__AddTwoInts_Response *) res;
+
+  res_in->sum = req_in->a + req_in->b;
+}
+
 void setup() {
    
   pinSetup();
@@ -352,6 +366,9 @@ void setup() {
   //   &node, 
   //   ROSIDL_GET_SRV_TYPE_SUPPORT(std_srvs, srv, SetBool), 
   //   "/setbool"));
+
+  // Initialize the service
+  RCCHECK(rclc_service_init_default(&service, &node, ROSIDL_GET_SRV_TYPE_SUPPORT(example_interfaces, srv, AddTwoInts), "/addtwoints"));
 
 
   // create publisher lsa08 data
@@ -397,6 +414,8 @@ void setup() {
   RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_imu));
   RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
+  // Add the service to the executor
+  RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
   // RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
 
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);

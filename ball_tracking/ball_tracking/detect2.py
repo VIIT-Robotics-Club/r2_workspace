@@ -52,7 +52,7 @@ class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
         self.declare_parameter("setupareaball", -30000.0)       # The desired sensor reading
-        self.declare_parameter("setupdev", 135.01)                  # Proportional gain
+        self.declare_parameter("setupdev", 135.01)                  # Proportional gain for camera
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
@@ -60,7 +60,6 @@ class YOLOv5ROS2(Node):
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
-
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
@@ -266,6 +265,7 @@ class YOLOv5ROS2(Node):
                             twist_msg.linear.x = 0.0
                             twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
+                            self.destroy_node
 
 
 
@@ -346,7 +346,6 @@ def main(args=None):
     
     rclpy.spin(yolov5_node)
 
-    yolov5_node.destroy_node()
     rclpy.shutdown()
 
 
