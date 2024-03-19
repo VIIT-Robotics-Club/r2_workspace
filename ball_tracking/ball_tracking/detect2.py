@@ -10,7 +10,7 @@ import os
 import platform
 import sys
 from pathlib import Path
-
+import math
 import torch
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,7 +51,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -50000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -30000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
@@ -73,7 +73,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -259,17 +259,20 @@ class YOLOv5ROS2(Node):
                         #         twist_msg.angular.z = float(AngZpb)
                         # if  label=="":    
                         # twist_msg.angular.z = 1.0
-                        # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
-                        #     twist_msg.linear.x = float(LinXb)
-                        #     twist_msg.angular.z = float(AngZpb)
+                        if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
+                            twist_msg.linear.x = float(LinXb)
+                            twist_msg.angular.z = float(AngZpb)
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
                             twist_msg.linear.x = 0.0
                             twist_msg.angular.z = 0.0
-                        
+                        # r = math.sqrt(area/3.14)
+
+
+
                         
 
 
-                        
+                            
 
                         self.publisher_.publish(twist_msg)
                         # self.get_logger().info("Enter in node of publisher")

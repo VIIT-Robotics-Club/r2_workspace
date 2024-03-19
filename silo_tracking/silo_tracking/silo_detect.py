@@ -10,7 +10,7 @@ import os
 import platform
 import sys
 from pathlib import Path
-
+import math
 import torch
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,8 +51,8 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -5000.0)       # The desired sensor reading
-        self.declare_parameter("setupdev", 150.01)                  # Proportional gain
+        self.declare_parameter("setupareaball", -50000.0)       # The desired sensor reading
+        self.declare_parameter("setupdev", 135.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
@@ -73,10 +73,10 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.25,  # confidence threshold
+        conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
         device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -239,28 +239,40 @@ class YOLOv5ROS2(Node):
                         # deviation1=deviation
                         # self.setupareaball =-40000    
                         deviation=-deviation   
-                        AngZpb = map(deviation, -230,self.setupdev, 2, 0)
-                        LinXb=map(area, self.setupareaball,120, 0, 4)
-                        LinXs=map(area,self.setupareasilo,100, 0, 4)
+                        AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
+                        LinXb=map(area, self.setupareaball,120, 0, 1)
+                        LinXs=map(area,self.setupareasilo,100, 0, 1)
                                                                         
-                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
-                            twist_msg.linear.x = float(LinXb)
+                        if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] >= self.setupareasilo:
+                            twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
 
-                        if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
-                            # Robot holds the ball, move towards the silo
-                            print("hi")
-                            if label=="silo":
-                                print("Moving towards silo while holding the ball")
-                                # Calculate LinXs and AngZpb using your map function based on silo detection
+
+                        # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
+                        #     # Robot holds the ball, move towards the silo
+                        #     print("hi")
+                        #     if label=="silo":
+                        #         print("Moving towards silo while holding the ball")
+                        #         # Calculate LinXs and AngZpb using your map function based on silo detection
                               
-                                twist_msg.linear.x = float(LinXs)
-                                twist_msg.angular.z = float(AngZpb)
-                        # if label=="silo":
-                        #     twist_msg.linear.x = float(LinXs)
+                        #         twist_msg.linear.x = float(LinXs)
+                        #         twist_msg.angular.z = float(AngZpb)
+                        # if  label=="":    
+                        # twist_msg.angular.z = 1.0
+                        # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
+                        #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
+                        if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] <= self.setupareasilo:
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                        # r = math.sqrt(area/3.14)
+
+
 
                         
+
+
+                            
 
                         self.publisher_.publish(twist_msg)
                         # self.get_logger().info("Enter in node of publisher")
@@ -297,7 +309,7 @@ class YOLOv5ROS2(Node):
                 else:
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.0
+                    twist_msg.angular.z = 0.30
                     self.publisher_.publish(twist_msg)        
                 # Stream results
                 im0 = annotator.result()
