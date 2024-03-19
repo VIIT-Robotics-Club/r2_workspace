@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 import math
 import torch
+from std_msgs.msg import String
+from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
@@ -60,7 +62,14 @@ class YOLOv5ROS2(Node):
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+        self.subscription = self.create_subscription(
+          Int16MultiArray, 
+          'drive_topic', 
+          self.listener_callback, 
+          10)
+        self.subscription # prevent unused variable warning
 
+        self.array = Int16MultiArray()
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
@@ -238,15 +247,20 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = 0.0
                         # deviation1=deviation
                         # self.setupareaball =-40000    
+                        a = 0 # IMU given  Angle 
+
+                        y= math.cos(a) * detections_silo[0][1]
+
                         deviation=-deviation   
                         AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
                         LinXb=map(area, self.setupareaball,120, 0, 1)
                         LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        LinZs=map(y,-20000,0,1,0)
                                                                         
                         if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] >= self.setupareasilo:
                             twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
-
+                                                                                                                                                                                                                                                                                                                                                                                    
 
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
@@ -262,6 +276,7 @@ class YOLOv5ROS2(Node):
                         # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
                         #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
+                        
                         if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] <= self.setupareasilo:
                             twist_msg.linear.x = 0.0
                             twist_msg.angular.z = 0.0
@@ -309,7 +324,7 @@ class YOLOv5ROS2(Node):
                 else:
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.30
+                    twist_msg.angular.z = 0.0
                     self.publisher_.publish(twist_msg)        
                 # Stream results
                 im0 = annotator.result()
