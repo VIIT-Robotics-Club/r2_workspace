@@ -8,7 +8,7 @@ from rclpy.parameter import Parameter
 from rclpy.executors import MultiThreadedExecutor
 
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32,Int8
 from geometry_msgs.msg import Twist
 
 import tkinter as tk
@@ -74,8 +74,8 @@ class PidTuningNode(Node):
             10)
         
         self.node_count_subscriber = self.create_subscription(
-            Int32,
-            "/Junctions_count",
+            Int8,
+            "/Junction_count",
             self.junctionCallback,
             10)
         
