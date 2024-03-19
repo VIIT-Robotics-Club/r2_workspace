@@ -174,7 +174,7 @@ class PidTuningNode(Node):
         twist.angular.z = z_vel
         # print(z_vel)
         # twist.linear.x = -output_linear_x  
-        twist.linear.x = -x_vel  # keeing base speed 2 -> 255 PWM val
+        twist.linear.x = x_vel  # keeing base speed 2 -> 255 PWM val
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
