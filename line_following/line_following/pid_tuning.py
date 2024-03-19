@@ -16,6 +16,9 @@ from tkinter import Scale, HORIZONTAL
 import threading
 from queue import Queue
 
+     
+# def map_range(z, in_min, in_max, out_min, out_max):
+#             return (z - in_min) * (out_max - out_min) // (in_max - in_min) + out_min
 
 class PidTuningNode(Node):
     def __init__(self):
@@ -23,15 +26,19 @@ class PidTuningNode(Node):
         self.get_logger().info('Line Follower Node Started')
 
         # Declare and get parameters
-        self.declare_parameter("desired_value", 35.0)       # The desired sensor reading
+        self.declare_parameter("desired_value", 30.0)       # The desired sensor reading
         self.declare_parameter("Kp", 0.01)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
-
+        self.declare_parameter("angular_z_min", -1.0)       # Minimum angular speed
+        self.declare_parameter("angular_z_max", 1.0) 
+        
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
         self.Ki = self.get_parameter("Ki").value
         self.Kd = self.get_parameter("Kd").value
+        self.angular_z_min = self.get_parameter("angular_z_min").value
+        self.angular_z_max = self.get_parameter("angular_z_max").value
 
 
         self.error_sum = 0           # Sum of errors (for integral term)
@@ -41,13 +48,13 @@ class PidTuningNode(Node):
         self.window = tk.Tk()
         self.window.title("PID Tuner")
 
-        self.kp_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
+        self.kp_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
         self.kp_scale.pack()
 
-        self.ki_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
+        self.ki_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
         self.ki_scale.pack()
 
-        self.kd_scale = Scale(self.window, from_=0, to=1, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
+        self.kd_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
         self.kd_scale.pack()
 
         self.pid_params_queue = Queue()        
@@ -93,22 +100,27 @@ class PidTuningNode(Node):
         self.Kd = float(value)
         self.set_parameters([Parameter("Kd", Parameter.Type.DOUBLE, self.Kd)])
         self.pid_params_queue.put((self.Kp, self.Ki, self.Kd))
+   
         
     def calculate_angular_velocity(self, current_sensor_reading):
         # Calculate the error
         error = self.desired_value - current_sensor_reading
-
+        print("Current Sensor Reading")
+        print(current_sensor_reading,"\n")
         # Calculate the integral and derivative terms
         self.error_sum += error
         error_derivative = error - self.last_error
 
         # Calculate the control output
         output = (self.Kp * error) + (self.Kd * error_derivative)
-
         # Clamp the turn rate between -5.0 and 5.0
-        angular_z = max(min(output, 1.0), -1.0)    # max value of z = 0.373 (max turn angle)
+        # angular_z = max(min(output, 1.0), -1.0)    # max value of z = 0.373 (max turn angle)
+        # angular_z = map_range(output,0,self.Kp*75,0,1.0)
 
-        return angular_z, error
+        # angular_z = ((self.angular_z_max-self.angular_z_min)/((self.Kp * 35) + self.Kd) ) * output
+        angular_z = (self.angular_z_max/((self.Kp * 35) + self.Kd)) * output
+        print(angular_z)
+        return angular_z,error
     
     def calculate_linear_velocity(self, error):
         # Calculate the forward speed based on the absolute error
@@ -118,7 +130,7 @@ class PidTuningNode(Node):
     def sweep(self, last_error):
         error = 255
         
-        if(last_error < 35):
+        if(last_error > 35):
             # sweep left
             z_vel = 1.0
             
@@ -127,14 +139,13 @@ class PidTuningNode(Node):
             z_vel = -1.0
         
         return z_vel, error
-        
 
     def listener_callback(self, msg):
         # This method is called when a new message is received on the lsa_08 topic
 
         current_sensor_reading = msg.data
 
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.get_logger().info('LSA08 Data "%s"' % msg.data)
 
 
         # Create a new Twist message
@@ -146,33 +157,32 @@ class PidTuningNode(Node):
         #     self.state = "FOLLOWING"
         
         z_vel = 0.0
-        x_vel = 2.0
+        x_vel = 1.5
         error = 0
         
         # if no line detected then sweep function
         if(current_sensor_reading == 255):
             z_vel, error = self.sweep(self.last_error)
             x_vel = 0.0
-    
 
+        # Calculate the control output
         # Calculate the control output
         else:
             z_vel, error = self.calculate_angular_velocity(current_sensor_reading)
             # output_linear_x = self.calculate_linear_velocity(error)
 
         twist.angular.z = z_vel
+        # print(z_vel)
         # twist.linear.x = -output_linear_x  
         twist.linear.x = -x_vel  # keeing base speed 2 -> 255 PWM val
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
+
         self.get_logger().info('Published cmd_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
         # Update the last error
         self.last_error = error
-    
-
-
 
 def main(args=None):
     rclpy.init(args=args)
