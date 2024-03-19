@@ -14,7 +14,7 @@ import math
 import torch
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from custom_msgs.msg import BoundingBox, BoundingBoxDeviation
+# from custom_msgs.msg import BoundingBox, BoundingBoxDeviation
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -65,7 +65,7 @@ class YOLOv5ROS2(Node):
         # Publisher for publishing area and deviation
         self.publisher_raw_image = self.create_publisher(Image, '/raw_image_topic', 10)
         self.publisher_ml = self.create_publisher(Image, 'ml_image_topic', 10)
-        self.publisher_bbox = self.create_publisher(BoundingBox, 'bbox_topic', 10)
+        # self.publisher_bbox = self.create_publisher(BoundingBox, 'bbox_topic', 10)
 
 
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
