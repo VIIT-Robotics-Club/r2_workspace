@@ -6,7 +6,8 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "/imu_filter_madgwick/include/**"
       ],
       "name": "linux-gcc-x64",
       "intelliSenseMode": "linux-gcc-x64",
