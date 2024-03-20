@@ -49,13 +49,13 @@ class PidTuningNode(Node):
         self.window = tk.Tk()
         self.window.title("PID Tuner")
 
-        self.kp_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
+        self.kp_scale = Scale(self.window, from_=0, to=10, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
         self.kp_scale.pack()
 
         self.ki_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
         self.ki_scale.pack()
 
-        self.kd_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
+        self.kd_scale = Scale(self.window, from_=0, to=10, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
         self.kd_scale.pack()
 
         self.pid_params_queue = Queue()        
@@ -112,7 +112,7 @@ class PidTuningNode(Node):
         self.node_counter = msg.data
         self.get_logger().info("node count = " + str(self.node_counter))
    
-        
+
     def calculate_angular_velocity(self, current_sensor_reading):
         # Calculate the error
         error = self.desired_value - current_sensor_reading
@@ -130,7 +130,7 @@ class PidTuningNode(Node):
 
         # angular_z = ((self.angular_z_max-self.angular_z_min)/((self.Kp * 35) + self.Kd) ) * output
         angular_z = (self.angular_z_max/((self.Kp * 35) + self.Kd)) * output
-        print(angular_z)
+        angular_z = max(min(angular_z, 1.0), -1.0)
         return angular_z,error
     
     def calculate_linear_velocity(self, error):

@@ -256,8 +256,8 @@ void subscription_callback(const void *msgin) {
    float z1 = msg->angular.z;
 
   float mapped_leftHatx =  (127.0/2.0)*x1;
-  float mapped_leftHaty = (127.0/2.0)* y1;
-  float mapped_rightHatz = (95.0/2.0)* z1;
+  float mapped_leftHaty = (127.0/2.0)*y1;
+  float mapped_rightHatz = (95.0/1.0)*z1;
 
     FL_motor = mapped_leftHatx - mapped_rightHatz + mapped_leftHaty;
     BR_motor = mapped_leftHatx + mapped_rightHatz + mapped_leftHaty;
