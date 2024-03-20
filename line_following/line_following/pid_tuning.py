@@ -26,7 +26,7 @@ class PidTuningNode(Node):
         self.get_logger().info('Line Follower Node Started')
 
         # Declare and get parameters
-        self.declare_parameter("desired_value", 30.0)       # The desired sensor reading
+        self.declare_parameter("desired_value", 35)         # The desired sensor reading
         self.declare_parameter("Kp", 0.01)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
@@ -44,7 +44,7 @@ class PidTuningNode(Node):
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
         self.state = "FOLLOWING"     # Initial State
-        self.node_counter = 0        # node counter variable (if node counter = 4 then stop)
+        self.node_counter = 0        # node counter variable (if node counter = 4 then stop => reached third zone)
 
         self.window = tk.Tk()
         self.window.title("PID Tuner")
@@ -110,6 +110,7 @@ class PidTuningNode(Node):
         
     def junctionCallback(self, msg:Int32):
         self.node_counter = msg.data
+        self.get_logger().info("node count = " + str(self.node_counter))
    
         
     def calculate_angular_velocity(self, current_sensor_reading):
@@ -182,8 +183,14 @@ class PidTuningNode(Node):
         #     y_vel = 1.5
         #     x_vel = 0.0
         #     z_vel = 0.0
+
+        if (current_sensor_reading == 255):
+            z_vel = 0.0
+            x_vel = 0.0
+            y_vel = 0.0
+            # self.destroy_node()
             
-        if(self.node_counter >= node_to_stop):
+        elif(self.node_counter >= node_to_stop and current_sensor_reading == 255):
             z_vel = 0.0
             x_vel = 0.0
             y_vel = 0.0

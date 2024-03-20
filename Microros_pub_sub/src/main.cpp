@@ -217,7 +217,7 @@ void timer_callback_imu(rcl_timer_t * timer, int64_t last_call_time) {
     imu_msg.angular_velocity.z = g.gyro.z;
     
       if (timer != NULL) {
-     
+
      RCSOFTCHECK(rcl_publish(&publisher_imu, &imu_msg, NULL));
 
   }
