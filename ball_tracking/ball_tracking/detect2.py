@@ -261,9 +261,9 @@ class YOLOv5ROS2(Node):
                         #         twist_msg.angular.z = float(AngZpb)
                         # if  label=="":    
                         # twist_msg.angular.z = 1.0
-                        if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
-                            twist_msg.linear.x = float(LinXb)
-                            twist_msg.angular.z = float(AngZpb)
+                        # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
+                        #     twist_msg.linear.x = float(LinXb)
+                        #     twist_msg.angular.z = float(AngZpb)
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
                             # twist_msg.linear.x = 0.0
                             # twist_msg.angular.z = 0.0
