@@ -499,7 +499,7 @@ void setup() {
     timer_callback_junc));
 
   // create timer for LSA08,
-    const unsigned int timer_timeout = 200;  // initially 100
+    const unsigned int timer_timeout = 100;  // initially 100
     RCCHECK(rclc_timer_init_default(
     &timer_line,
     &support,
@@ -507,7 +507,7 @@ void setup() {
     timer_callback));
 
  // create timer for mpu6050,2
-  const unsigned int timer_timeout_imu = 300; // initially 500
+  const unsigned int timer_timeout_imu = 500; // initially 500
   RCCHECK(rclc_timer_init_default(
     &timer_imu,
     &support,

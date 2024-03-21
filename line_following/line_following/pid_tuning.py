@@ -30,8 +30,8 @@ class PidTuningNode(Node):
         self.declare_parameter("Kp", 0.01)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
-        self.declare_parameter("angular_z_min", -1.0)       # Minimum angular speed
-        self.declare_parameter("angular_z_max", 1.0) 
+        self.declare_parameter("angular_z_min", -0.290196078)       # Minimum angular speed
+        self.declare_parameter("angular_z_max", 0.290196078) 
         
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
@@ -45,17 +45,21 @@ class PidTuningNode(Node):
         self.last_error = 0          # Last error (for derivative term)
         self.state = "FOLLOWING"     # Initial State
         self.node_counter = 0        # node counter variable (if node counter = 4 then stop => reached third zone)
+        self.node_passed = False
+
+        self.Kp_value = 0.00806100217
+        self.Kd_value = 0.00806100217
 
         self.window = tk.Tk()
         self.window.title("PID Tuner")
 
-        self.kp_scale = Scale(self.window, from_=0, to=10, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
+        self.kp_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kp", command=self.update_kp)
         self.kp_scale.pack()
 
         self.ki_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=400, label="Ki", command=self.update_ki)
         self.ki_scale.pack()
 
-        self.kd_scale = Scale(self.window, from_=0, to=10, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
+        self.kd_scale = Scale(self.window, from_=0, to=5, resolution=0.00001, orient=HORIZONTAL, length=2000, label="Kd", command=self.update_kd)
         self.kd_scale.pack()
 
         self.pid_params_queue = Queue()        
@@ -117,20 +121,21 @@ class PidTuningNode(Node):
         # Calculate the error
         error = self.desired_value - current_sensor_reading
         print("Current Sensor Reading")
-        print(current_sensor_reading,"\n")
+        print(error,"\n")
         # Calculate the integral and derivative terms
         self.error_sum += error
         error_derivative = error - self.last_error
 
         # Calculate the control output
-        output = (self.Kp * error) + (self.Kd * error_derivative)
+        # output = (self.kp_value * error) + (self.kd_value * error_derivative)
+        output = (self.Kp_value * error) + (self.Kd_value * error_derivative)
         # Clamp the turn rate between -5.0 and 5.0
         # angular_z = max(min(output, 1.0), -1.0)    # max value of z = 0.373 (max turn angle)
         # angular_z = map_range(output,0,self.Kp*75,0,1.0)
 
         # angular_z = ((self.angular_z_max-self.angular_z_min)/((self.Kp * 35) + self.Kd) ) * output
-        angular_z = (self.angular_z_max/((self.Kp * 35) + self.Kd)) * output
-        angular_z = max(min(angular_z, 1.0), -1.0)
+        angular_z = (self.angular_z_max/((self.Kp_value * 35) + self.Kd_value)) * output
+        angular_z = float(max(min(output, self.angular_z_max), -self.angular_z_max))
         return angular_z,error
     
     def calculate_linear_velocity(self, error):
@@ -168,11 +173,9 @@ class PidTuningNode(Node):
         #     self.state = "FOLLOWING"
         
         z_vel = 0.0
-        x_vel = 1.5
+        x_vel = 1.57862745  # 1.56862745
         y_vel = 0.0
         error = 0
-        
-        node_to_stop = 1
         
         # if no line detected then sweep function
         # if(current_sensor_reading == 255 and self.node_counter < node_to_stop):
@@ -184,17 +187,28 @@ class PidTuningNode(Node):
         #     x_vel = 0.0
         #     z_vel = 0.0
 
-        if (current_sensor_reading == 255):
-            z_vel = 0.0
-            x_vel = 0.0
-            y_vel = 0.0
+        # if (current_sensor_reading == 255):
+        #     z_vel = 0.0
+        #     x_vel = 0.0
+        #     y_vel = 0.0
+            
+            # z_vel = z_vel*0.90
+            # x_vel = x_vel*0.90
+            # y_vel = y_vel*0.90
             # self.destroy_node()
             
-        elif(self.node_counter >= node_to_stop and current_sensor_reading == 255):
+        if(self.node_counter >= 2): # stop
             z_vel = 0.0
             x_vel = 0.0
             y_vel = 0.0
             self.destroy_node()
+            
+        if(self.node_counter == 1 and current_sensor_reading == 255):
+            z_vel = 0.0
+            x_vel = 0.0
+            y_vel = -1.0
+            # self.destroy_node()
+
 
         # Calculate the control output
         # Calculate the control output
