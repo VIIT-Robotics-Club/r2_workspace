@@ -241,9 +241,9 @@ class YOLOv5ROS2(Node):
                         # deviation1=deviation
                         # self.setupareaball =-40000    
                         deviation=-deviation   
-                        AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
-                        LinXb=map(area, self.setupareaball,120, 0, 1)
-                        LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        AngZpb = map(deviation, -230,self.setupdev, 1, 0)
+                        LinXb=map(area, self.setupareaball,120, 0, 2)
+                        LinXs=map(area,self.setupareasilo,100, 0, 2)
                                                                         
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
                             twist_msg.linear.x = float(LinXb)
