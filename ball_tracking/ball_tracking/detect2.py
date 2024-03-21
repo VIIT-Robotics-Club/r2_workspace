@@ -265,8 +265,8 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
-                            # twist_msg.linear.x = 0.0
-                            # twist_msg.angular.z = 0.0
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
                             self.destroy_node()
 
@@ -331,8 +331,8 @@ class YOLOv5ROS2(Node):
         # Return average area and deviation
         # return area_sum, deviation_sum
 
-        self.largest_ball_area = 0
-        self.largest_ball_id = -1
+        # self.largest_ball_area = 0
+        # self.largest_ball_id = -1
         # Run YOLOv5 inference
         # Use self.area and self.deviation here
         # area = self.area
