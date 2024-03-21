@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <TFLI2C.h>
+// #include <TFLI2C.h>
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
@@ -14,7 +14,7 @@
 #include <std_msgs/msg/int32.h>
 #include <std_msgs/msg/int8.h>
 #include <sensor_msgs/msg/imu.h>
-#include <std_msgs/msg/int32_multi_array.h> 
+// #include <std_msgs/msg/int32_multi_array.h> 
 #include <std_srvs/srv/set_bool.h>
 
 
@@ -27,14 +27,14 @@ const int jPulse = 2; // Hardware interrupt pin Due
 int nodeCount = 0;
 byte read=0;
 
-extern TwoWire Wire1;
-TFLI2C tflI2C;   // create object for tfluna library
-int16_t  tfDist_1;   // distance in centimeters
-int16_t  tfDist_2;  
-int16_t  tfDist_3;   
-int16_t  tfAddr1 = 0x11;  // Use this default I2C address
-int16_t  tfAddr2 = 0x12;
-int16_t  tfAddr3 = 0x13;
+// extern TwoWire Wire1;
+// TFLI2C tflI2C;   // create object for tfluna library
+// int16_t  tfDist_1;   // distance in centimeters
+// int16_t  tfDist_2;  
+// int16_t  tfDist_3;   
+// int16_t  tfAddr1 = 0x11;  // Use this default I2C address
+// int16_t  tfAddr2 = 0x12;
+// int16_t  tfAddr3 = 0x13;
 
 
 // declaring motor pwm variables (these are used for sending pwm signals to motor driver)
@@ -62,12 +62,12 @@ int BR_motor;
 
 rcl_publisher_t publisher_imu;
 rcl_publisher_t publisher_line;
-rcl_publisher_t publisher_luna;
+// rcl_publisher_t publisher_luna;
 rcl_publisher_t publisher_junction;
 
 std_msgs__msg__Int8 junc;
 std_msgs__msg__Int32 lsa08; 
-std_msgs__msg__Int32MultiArray msg_luna;        
+// std_msgs__msg__Int32MultiArray msg_luna;        
 sensor_msgs__msg__Imu imu_msg;
 
 rcl_subscription_t subscriber;       
@@ -81,7 +81,7 @@ rcl_node_t node;
 
 rcl_timer_t timer_line;
 rcl_timer_t timer_imu;
-rcl_timer_t timer_luna;
+// rcl_timer_t timer_luna;
 rcl_timer_t timer_junc;
 
 rcl_service_t service;
@@ -236,39 +236,39 @@ void timer_callback_imu(rcl_timer_t * timer, int64_t last_call_time) {
   }
 }
 
-void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
-{  
-  RCLC_UNUSED(last_call_time);
+// void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
+// {  
+//   RCLC_UNUSED(last_call_time);
 
-    Wire1.begin(); 
-    // Clear previous data
-   msg_luna.data.size = 3;
-   msg_luna.data.capacity = 3;
-   msg_luna.data.data = NULL;
+//     Wire1.begin(); 
+//     // Clear previous data
+//    msg_luna.data.size = 3;
+//    msg_luna.data.capacity = 3;
+//    msg_luna.data.data = NULL;
     
-   // Add new data
-    msg_luna.data.data = (int32_t*)malloc(sizeof(int32_t) * 3); // Assuming you want to publish 3 values
-    if  (msg_luna.data.data != NULL) {
-     msg_luna.data.size = 3;
-     msg_luna.data.capacity = 3;
-    if(tflI2C.getData(tfDist_1, tfAddr1)){
-        msg_luna.data.data[0] = tfDist_1; 
-    }
-    if(tflI2C.getData(tfDist_2, tfAddr2)){
-       msg_luna.data.data[1] = tfDist_2; 
-    }
-        if(tflI2C.getData(tfDist_3, tfAddr3)){
-       msg_luna.data.data[2] = tfDist_3; 
-    }
+//    // Add new data
+//     msg_luna.data.data = (int32_t*)malloc(sizeof(int32_t) * 3); // Assuming you want to publish 3 values
+//     if  (msg_luna.data.data != NULL) {
+//      msg_luna.data.size = 3;
+//      msg_luna.data.capacity = 3;
+//     if(tflI2C.getData(tfDist_1, tfAddr1)){
+//         msg_luna.data.data[0] = tfDist_1; 
+//     }
+//     if(tflI2C.getData(tfDist_2, tfAddr2)){
+//        msg_luna.data.data[1] = tfDist_2; 
+//     }
+//         if(tflI2C.getData(tfDist_3, tfAddr3)){
+//        msg_luna.data.data[2] = tfDist_3; 
+//     }
     
-    delay(50);
-    }
-  if (timer != NULL) {
-      // Publish the message
-      RCSOFTCHECK(rcl_publish(&publisher_luna, &msg_luna, NULL));
-    }
- // }
-}
+//     delay(50);
+//     }
+//   if (timer != NULL) {
+//       // Publish the message
+//       RCSOFTCHECK(rcl_publish(&publisher_luna, &msg_luna, NULL));
+//     }
+//  // }
+// }
 
 void subscription_callback(const void *msgin) {
   const geometry_msgs__msg__Twist * msg = (const geometry_msgs__msg__Twist *)msgin;
@@ -468,11 +468,11 @@ void setup() {
   
   //create publisher for lunar sensor
 
-    RCCHECK(rclc_publisher_init_default(
-    &publisher_luna,
-    &node,
-    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32MultiArray),
-    "luna_data"));
+    // RCCHECK(rclc_publisher_init_default(
+    // &publisher_luna,
+    // &node,
+    // ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32MultiArray),
+    // "luna_data"));
 
   // subscriber for cmd vel
     RCCHECK(rclc_subscription_init_default(
@@ -483,12 +483,12 @@ void setup() {
 
   //create timer for lunar sensor
 
-    const unsigned int timer_timeout_luna = 500;
-    RCCHECK(rclc_timer_init_default(
-    &timer_luna,
-    &support,
-    RCL_MS_TO_NS(timer_timeout_luna),
-    timer_callback_multiarray));
+    // const unsigned int timer_timeout_luna = 500;
+    // RCCHECK(rclc_timer_init_default(
+    // &timer_luna,
+    // &support,
+    // RCL_MS_TO_NS(timer_timeout_luna),
+    // timer_callback_multiarray));
 
   // create timmer for junction
     const unsigned int timer_timeout_junc= 100;
@@ -516,11 +516,11 @@ void setup() {
 
   // create executor
   
-  RCCHECK(rclc_executor_init(&executor, &support.context, 7, &allocator));
+  RCCHECK(rclc_executor_init(&executor, &support.context, 6, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_imu));
   RCCHECK(rclc_executor_add_timer(&executor, &timer_junc));
-  RCCHECK(rclc_executor_add_timer(&executor, &timer_luna));
+  // RCCHECK(rclc_executor_add_timer(&executor, &timer_luna));
 
   RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
 
