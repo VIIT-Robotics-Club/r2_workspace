@@ -26,6 +26,7 @@ setup(
             "motor_client = r2_py.motor_client:main",
             "test_node1 = r2_py.test_node1:main",
             "test_node2 = r2_py.test_node2:main",
+            "force_stop = r2_py.force_stop:main",
         ],
     },
 )

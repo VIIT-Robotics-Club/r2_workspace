@@ -51,7 +51,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -30000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -51000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain for camera
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
