@@ -51,7 +51,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -30000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -51000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain for camera
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
@@ -62,7 +62,8 @@ class YOLOv5ROS2(Node):
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
-
+        self.largest_ball_area = 0
+        self.largest_ball_id = -1
         self.run()
 
         # Initialize YOLOv5 model
@@ -72,7 +73,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=2,  # file/dir/URL/glob/screen/0(webcam)
+        source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -207,6 +208,7 @@ class YOLOv5ROS2(Node):
                         detections_ball = []
                         detections_silo = []
                         area = abs((x2 - x1) * (y2 - y1))
+                        
                         # if label == "Red-ball" or label=="blue-ball":
                         #     detections_ball.append((label, area, deviation, x1, y1, x2, y2))
                         # if label == "silo":
@@ -218,12 +220,13 @@ class YOLOv5ROS2(Node):
                         # Publish area and deviation on cmd_vel topic
                         
                         # if label=="Red-ball":
+
                         # detections_silo[0][1]=69
                         area=-area
                         if label == "Red-ball" or label=="blue-ball":
                             detections_ball.append((label, area, deviation, x1, y1, x2, y2))
                         if label == "silo":
-                            print("hi 2")
+                            # print("hi 2")
                             detections_silo.append((label, area, deviation, x1, y1, x2, y2))
                             # print(detections_silo[0][1])
                         #     twist_msg.linear.x = float(area1)
@@ -246,7 +249,7 @@ class YOLOv5ROS2(Node):
                             twist_msg.linear.x = float(LinXb)
                             twist_msg.angular.z = float(AngZpb)
 
-
+                        
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
                         #     print("hi")
@@ -262,8 +265,8 @@ class YOLOv5ROS2(Node):
                             twist_msg.linear.x = float(LinXb)
                             twist_msg.angular.z = float(AngZpb)
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
+                            # twist_msg.linear.x = 0.0
+                            # twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
                             self.destroy_node()
 
@@ -278,8 +281,13 @@ class YOLOv5ROS2(Node):
                         # self.get_logger().info("Enter in node of publisher")
                         
                         # Print class, area, and deviation
-                        print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
-
+                        print(f"Class: {label}, Area: {area}, Deviation: {deviation} , id : {cls}")
+                        # if area > self.largest_ball_area and label == "Red-ball":  # Check if it's the largest ball
+                        #     self.largest_ball_area = area
+                        #     self.largest_ball_id = cls  # Assign ID of the largest ball
+                        # print(cls)
+                        # Reset largest ball variables for the next frame
+                        
                         if vid_path[i] != save_path:  # new video
                             vid_path[i] = save_path
                             if isinstance(vid_writer[i], cv2.VideoWriter):
@@ -323,7 +331,8 @@ class YOLOv5ROS2(Node):
         # Return average area and deviation
         # return area_sum, deviation_sum
 
-
+        self.largest_ball_area = 0
+        self.largest_ball_id = -1
         # Run YOLOv5 inference
         # Use self.area and self.deviation here
         # area = self.area
@@ -351,3 +360,4 @@ def main(args=None):
 
 if __name__ == "__main__":
     main()
+
