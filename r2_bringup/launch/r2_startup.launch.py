@@ -60,16 +60,16 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        # line_follow,
+        line_follow,
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=line_follow,
-        #         on_exit=ball_following
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=line_follow,
+                on_exit=ball_following
+            )
+        ),
 
-        ball_following,
+        # ball_following,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
