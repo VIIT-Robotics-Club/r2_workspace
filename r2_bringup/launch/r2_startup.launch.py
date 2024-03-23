@@ -38,7 +38,7 @@ def generate_launch_description():
     )
 
     lift_up = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_list', 'std_srvs/srv/SetBool', '{data: False}'],
+        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: False}'],
         output='screen'
     )
 
@@ -68,6 +68,8 @@ def generate_launch_description():
                 on_exit=ball_following
             )
         ),
+
+        # ball_following,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(

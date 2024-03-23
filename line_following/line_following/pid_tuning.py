@@ -6,6 +6,7 @@ from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
 from rclpy.parameter import Parameter
 from rclpy.executors import MultiThreadedExecutor
+import sys
 
 
 from std_msgs.msg import Int32,Int8
@@ -49,6 +50,7 @@ class PidTuningNode(Node):
 
         self.Kp_value = 0.00806100217
         self.Kd_value = 0.00806100217
+        # self.condition_to_destroy = False
 
         self.window = tk.Tk()
         self.window.title("PID Tuner")
@@ -161,6 +163,8 @@ class PidTuningNode(Node):
 
         current_sensor_reading = msg.data
 
+
+
         self.get_logger().info('LSA08 Data "%s"' % msg.data)
 
 
@@ -196,12 +200,16 @@ class PidTuningNode(Node):
             # x_vel = x_vel*0.90
             # y_vel = y_vel*0.90
             # self.destroy_node()
+        
+        condition_to_destroy = False
             
         if(self.node_counter >= 2): # stop
             z_vel = 0.0
             x_vel = 0.0
             y_vel = 0.0
-            self.destroy_node()
+            condition_to_destroy = True
+
+            # self.destroy_node()
             
         if(self.node_counter == 1 and current_sensor_reading == 255):
             z_vel = 0.0
@@ -217,6 +225,8 @@ class PidTuningNode(Node):
             # output_linear_x = self.calculate_linear_velocity(error)
 
         twist.angular.z = z_vel
+        if(condition_to_destroy):
+            twist.angular.z = 0.0
         # print(z_vel)
         # twist.linear.x = -output_linear_x  
         twist.linear.x = x_vel  # keeing base speed 2 -> 255 PWM val
@@ -226,37 +236,45 @@ class PidTuningNode(Node):
         self.publisher_.publish(twist)
 
         self.get_logger().info('Published cmd_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+        print("destroy: " + str(condition_to_destroy))
 
         # Update the last error
         self.last_error = error
+
+        if(condition_to_destroy):
+            print("destroy condition reached")
+            self.destroy_node()
+            sys.exit()
+            return
 
 def main(args=None):
     rclpy.init(args=args)
     line_follower = PidTuningNode()
 
     # Use the multithreaded executor
-    executor = MultiThreadedExecutor()
+    # executor = MultiThreadedExecutor()
 
-    def spin_ros():
-        executor.add_node(line_follower)
-        try:
-            executor.spin()
-        except KeyboardInterrupt:
-            pass
+    # def spin_ros():
+    #     executor.add_node(line_follower)
+    #     try:
+    #         executor.spin()
+    #     except KeyboardInterrupt:
+    #         pass
 
-        # Shutdown and cleanup
-        executor.shutdown()
-        line_follower.destroy_node()
-        rclpy.shutdown()
+    #     # Shutdown and cleanup
+    #     executor.shutdown()
+    #     line_follower.destroy_node()
+    #     rclpy.shutdown()
 
-    # Start the ROS2 node in a separate thread
-    threading.Thread(target=spin_ros).start()
+    # # Start the ROS2 node in a separate thread
+    # # threading.Thread(target=spin_ros).start()
 
-    # Start the Tkinter main loop in the main thread
-    line_follower.run()
+    # # Start the Tkinter main loop in the main thread
+    # # line_follower.run()
 
-    # Shutdown and cleanup
-    executor.shutdown()
+    # # Shutdown and cleanup
+    # executor.shutdown()
+    rclpy.spin(line_follower)
     line_follower.destroy_node()
     rclpy.shutdown()
 
