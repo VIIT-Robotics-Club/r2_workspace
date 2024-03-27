@@ -18,7 +18,6 @@
 #include <std_srvs/srv/set_bool.h>
 
 
-
 #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
 #endif
 // Define pins for LSA08 connection 
@@ -464,7 +463,7 @@ void setup() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu),
     "imu_info_topic"));
   
-//  create publisher for lunar sensor
+//  create publisher for luna sensor
 
     RCCHECK(rclc_publisher_init_default(
     &publisher_luna,
@@ -479,7 +478,7 @@ void setup() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
     "cmd_vel"));
 
-//  create timer for lunar sensor
+//  create timer for luna sensor
 
     const unsigned int timer_timeout_luna = 500;
     RCCHECK(rclc_timer_init_default(
