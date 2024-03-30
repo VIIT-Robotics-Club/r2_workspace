@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
 
 class LunaWallAlignNode(Node):
@@ -12,14 +12,14 @@ class LunaWallAlignNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('linear_x_max', 2.0),
-                ('linear_y_max', 2.0),
+                ('linear_x_max', 0.5),
+                ('linear_y_max', 0.5),
                 ('linear_x_min', -2.0),
                 ('linear_y_min', -2.0),
                 ('angular_z_max', 1.0),
                 ('angular_z_min', -1.0),
-                ('proportional_gain', 0.1),
-                ('x_goal', 1.0),
+                ('proportional_gain', 0.5),
+                ('x_goal', 20.0),
                 ('y_goal', 1.0)                
                 ]
         )
@@ -36,7 +36,7 @@ class LunaWallAlignNode(Node):
 
 
         self.luna_subscriber = self.create_subscription(
-            Int32MultiArray,
+            Int64MultiArray,
             'luna_data',
             self.luna_callback,
             10
@@ -49,17 +49,17 @@ class LunaWallAlignNode(Node):
         )
 
         # Initialize the luna data
-        self.luna_1 = 0.00
-        self.luna_2 = 0.00
-        self.luna_3 = 0.00
-        self.luna_4 = 0.00
+        self.luna_1 = 0.00  
+        self.luna_2 = 0.00  
+        self.luna_3 = 0.00  
+        self.luna_4 = 0.00  
 
 
     def luna_callback(self, msg):
-        self.luna_1 = msg.data[0]
-        self.luna_2 = msg.data[1]
-        self.luna_3 = msg.data[2]
-        self.luna_4 = msg.data[3]
+        self.luna_1 = msg.data[3] - 2  #Front Left -14
+        self.luna_2 = msg.data[1]   #Front right -12
+        self.luna_3 = msg.data[0]   #Side Left - 11
+        self.luna_4 = msg.data[2]   #Side right -13 
         self.get_logger().info('Luna data received')
 
         #All 4 luna readings
@@ -74,27 +74,36 @@ class LunaWallAlignNode(Node):
 
         #create a new Twist message
         twist = Twist()
+        x_avg = (self.luna_1 + self.luna_2) / 2
+        y_avg = (self.luna_3 + self.luna_4) / 2
 
+        if (x_diff > 1) or (y_diff>1):
         #Adjust the angular z velocity based on the difference between the sensor readings
-        twist.angular.z = self.proportional_gain * (x_diff + y_diff)
-        twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
-        self.get_logger().info('Angular z: %f' % twist.angular.z)
+            twist.angular.z = self.proportional_gain * (x_diff + y_diff)
+            twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+            self.get_logger().info('Angular z: %f' % twist.angular.z)
 
-        # If the robot is aligned, adjust the linear velocities
-        if abs(x_diff) < 1 and abs(y_diff) < 1:
+        else:            # If the robot is aligned, adjust the linear velocities
+        # if abs(x_diff) < 1 and abs(y_diff) < 1:
             self.get_logger().info('Robot is aligned it angular z, adjusting linear velocities')
+            
+            if ((x_avg-self.x_goal) < 2) and ((y_avg - self.y_goal) < 2):
+                twist.linear.x = 0.0
+                twist.linear.y = 0.0
+                twist.angular.z = 0.0
+                self.cmd_vel_publisher.publish(twist)                
+            
+            else:
 
-            x_avg = (self.luna_1 + self.luna_2) / 2
-            y_avg = (self.luna_3 + self.luna_4) / 2
+                twist.linear.x = -self.proportional_gain * (self.x_goal - x_avg) * self.linear_x_max
+                twist.linear.y = -self.proportional_gain * (self.y_goal - y_avg) * self.linear_y_max
 
-            twist.linear.x = self.proportional_gain * (self.x_goal - x_avg)
-            twist.linear.y = self.proportional_gain * (self.y_goal - y_avg)
+                twist.linear.x = max(min(twist.linear.x, self.linear_x_max), self.linear_x_min)
+                twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
+                twist.angular.z = 0.0
 
-            twist.linear.x = max(min(twist.linear.x, self.linear_x_max), self.linear_x_min)
-            twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
-
-            self.get_logger().info('Linear x: %f' % twist.linear.x)
-            self.get_logger().info('Linear y: %f' % twist.linear.y)
+                self.get_logger().info('Linear x: %f' % twist.linear.x)
+                self.get_logger().info('Linear y: %f' % twist.linear.y)
 
         #Publish the Twist message
         self.cmd_vel_publisher.publish(twist)
