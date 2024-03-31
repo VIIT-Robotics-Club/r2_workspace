@@ -214,13 +214,15 @@ class YOLOv5ROS2(Node):
                         # Calculate deviation from the center of the image
                         center_x = im0.shape[1] // 2  # Calculate the center x-coordinate of the image
                         deviation = center_x - ((x1 + x2) // 2)  # Calculate deviation from the center
-                        area1=-area
+                        # area1=-area
                         # Publish area and deviation on cmd_vel topic
-                        
+                        deviation=-deviation
                         # if label=="Red-ball":
                         # detections_silo[0][1]=69
                         area=-area
-                        if label == "Red-ball" or label=="blue-ball":
+                        max_ball_area=0
+                        if label == "Red-ball" or label=="blue-ball" and (-area)>(-max_ball_area) :
+                            max_ball_area=area
                             detections_ball.append((label, area, deviation, x1, y1, x2, y2))
                         if label == "silo":
                             print("hi 2")
@@ -237,16 +239,19 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = 0.0
                         # deviation1=deviation
                         # self.setupareaball =-40000    
-                        deviation=-deviation   
-                        AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
-                        LinXb=map(area, self.setupareaball,120, 0, 1)
-                        LinXs=map(area,self.setupareasilo,100, 0, 1)
-                                                                        
-                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
-                            twist_msg.linear.x = float(LinXb)
-                            twist_msg.angular.z = float(AngZpb)
+                          
+                        
+                        # LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        
 
-
+                        if len(detections_ball) > 0:
+                            AngZpb = map(detections_ball[0][2], -230,self.setupdev, 0.5, 0)
+                            LinXb=map(detections_ball[0][1], self.setupareaball,120, 0, 1)
+                           
+                            if  detections_ball[0][0] == "Red-ball" and detections_ball[0][1] >= self.setupareaball:
+                                twist_msg.linear.x = float(LinXb)
+                                twist_msg.angular.z = float(AngZpb)
+                            
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
                         #     print("hi")
@@ -258,14 +263,17 @@ class YOLOv5ROS2(Node):
                         #         twist_msg.angular.z = float(AngZpb)
                         # if  label=="":    
                         # twist_msg.angular.z = 1.0
-                        if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
-                            twist_msg.linear.x = float(LinXb)
-                            twist_msg.angular.z = float(AngZpb)
-                        if len(detections_ball) > 0 and detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
+                        # if label=="Red-ball" and detections_ball[0][1]>=self.setupareaball:
+                        #     twist_msg.linear.x = float(LinXb)
+                        #     twist_msg.angular.z = float(AngZpb)
+                        
+                        
+                        
+                            if detections_ball[0][0] == "Red-ball" and detections_ball[0][1] <= self.setupareaball:
+                                twist_msg.linear.x = 0.0
+                                twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
-                            self.destroy_node()
+                                self.destroy_node()
 
 
 
@@ -278,7 +286,7 @@ class YOLOv5ROS2(Node):
                         # self.get_logger().info("Enter in node of publisher")
                         
                         # Print class, area, and deviation
-                        print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
+                        # print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
 
                         if vid_path[i] != save_path:  # new video
                             vid_path[i] = save_path
