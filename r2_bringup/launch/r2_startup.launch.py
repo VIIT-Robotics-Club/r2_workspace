@@ -87,6 +87,12 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=lift_up,
+                on_exit=silo_tracking
+            )
+        ),
+           RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=silo_tracking,
                 on_exit=claw_open
             )
         ),

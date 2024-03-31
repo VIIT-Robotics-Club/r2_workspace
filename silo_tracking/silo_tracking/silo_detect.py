@@ -249,7 +249,7 @@ class YOLOv5ROS2(Node):
                         # self.setupareaball =-40000    
                         a = 90 # IMU given  Angle 
                         a= a * 0.01745329251
-                        area=40000
+                        # area=40000
                         y= math.cos(a) * area
                         print(y)
 
