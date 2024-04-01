@@ -62,14 +62,14 @@ class YOLOv5ROS2(Node):
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
-        self.subscription = self.create_subscription(
-          Int16MultiArray, 
-          'drive_topic', 
-          self.listener_callback, 
-          10)
-        self.subscription # prevent unused variable warning
+        # self.subscription = self.create_subscription(
+        #   Int16MultiArray, 
+        #   'drive_topic', 
+        #   self.listener_callback, 
+        #   10)
+        # self.subscription # prevent unused variable warning
 
-        self.array = Int16MultiArray()
+        # self.array = Int16MultiArray()
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
@@ -82,7 +82,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=3,  # file/dir/URL/glob/screen/0(webcam)
+        source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -247,19 +247,22 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = 0.0
                         # deviation1=deviation
                         # self.setupareaball =-40000    
-                        a = 0 # IMU given  Angle 
-
-                        y= math.cos(a) * detections_silo[0][1]
+                        a = 90 # IMU given  Angle 
+                        a= a * 0.01745329251
+                        # area=40000
+                        y= math.cos(a) * area
+                        print(y)
 
                         deviation=-deviation   
                         AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
                         LinXb=map(area, self.setupareaball,120, 0, 1)
                         LinXs=map(area,self.setupareasilo,100, 0, 1)
-                        LinZs=map(y,-20000,0,1,0)
+                        LinZsy=map(y,self.setupareasilo,0,1,0)
                                                                         
                         if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] >= self.setupareasilo:
                             twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
+                            twist_msg.linear.y=float(LinZsy)
                                                                                                                                                                                                                                                                                                                                                                                     
 
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
@@ -293,7 +296,7 @@ class YOLOv5ROS2(Node):
                         # self.get_logger().info("Enter in node of publisher")
                         
                         # Print class, area, and deviation
-                        print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
+                        # print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
 
                         if vid_path[i] != save_path:  # new video
                             vid_path[i] = save_path
