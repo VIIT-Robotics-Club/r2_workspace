@@ -9,9 +9,8 @@
                                          *  *           *  *
                                     BL    * * * * * * * * *   BR
                                            *             *
-                                            
 /*****************************************************************************************************************************************/
-//#include <Arduino.h>
+// #include <Arduino.h>
 //#include <micro_ros_platformio.h>
 #include <micro_ros_arduino.h>
 #include <stdio.h>
