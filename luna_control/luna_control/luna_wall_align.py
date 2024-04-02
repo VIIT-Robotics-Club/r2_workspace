@@ -1,3 +1,5 @@
+# /usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int64MultiArray
@@ -14,13 +16,14 @@ class LunaWallAlignNode(Node):
             parameters=[
                 ('linear_x_max', 0.5),
                 ('linear_y_max', 0.5),
-                ('linear_x_min', -2.0),
-                ('linear_y_min', -2.0),
+                ('linear_x_min', -0.5),
+                ('linear_y_min', -0.5),
                 ('angular_z_max', 1.0),
                 ('angular_z_min', -1.0),
-                ('proportional_gain', 0.5),
-                ('x_goal', 20.0),
-                ('y_goal', 1.0)                
+                ('kp_linear', 0.5),
+                ('kp_angular', 0.5),
+                ('x_goal', 40.0),
+                ('y_goal', 50.0)                
                 ]
         )
 
@@ -30,7 +33,8 @@ class LunaWallAlignNode(Node):
         self.linear_y_min = self.get_parameter('linear_y_min').value
         self.angular_z_max = self.get_parameter('angular_z_max').value
         self.angular_z_min = self.get_parameter('angular_z_min').value
-        self.proportional_gain = self.get_parameter('proportional_gain').value
+        self.kp_linear = self.get_parameter('kp_linear').value
+        self.kp_angular = self.get_parameter('kp_angular').value
         self.x_goal = self.get_parameter('x_goal').value
         self.y_goal = self.get_parameter('y_goal').value
 
@@ -56,10 +60,10 @@ class LunaWallAlignNode(Node):
 
 
     def luna_callback(self, msg):
-        self.luna_1 = msg.data[3] - 2  #Front Left -14
-        self.luna_2 = msg.data[1]   #Front right -12
-        self.luna_3 = msg.data[0]   #Side Left - 11
-        self.luna_4 = msg.data[2]   #Side right -13 
+        self.luna_1 = float(msg.data[3]) - 2         #Front Left -14     -  2 is the offset (Luna sensor error correction)
+        self.luna_2 = float(msg.data[1])             #Front right -12
+        self.luna_3 = float(msg.data[0])             #Side Left - 11
+        self.luna_4 = float(msg.data[2])             #Side right -13 
         self.get_logger().info('Luna data received')
 
         #All 4 luna readings
@@ -74,36 +78,45 @@ class LunaWallAlignNode(Node):
 
         #create a new Twist message
         twist = Twist()
+
         x_avg = (self.luna_1 + self.luna_2) / 2
         y_avg = (self.luna_3 + self.luna_4) / 2
+        
 
-        if (x_diff > 1) or (y_diff>1):
+        if (abs(x_diff) > 1):  #Or you can use abs(y_diff) > 1
+
         #Adjust the angular z velocity based on the difference between the sensor readings
-            twist.angular.z = self.proportional_gain * (x_diff + y_diff)
+            twist.angular.z = self.kp_angular * (x_diff)
             twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+
+            if x_diff > 0:   #Lune front left > front right 
+                twist.angular.z = abs(twist.angular.z)    #Rotate Anti-clockwise
+            else:
+                twist.angular.z = -abs(twist.angular.z)     #Rotate clockwise
+
             self.get_logger().info('Angular z: %f' % twist.angular.z)
 
         else:            # If the robot is aligned, adjust the linear velocities
-        # if abs(x_diff) < 1 and abs(y_diff) < 1:
+
             self.get_logger().info('Robot is aligned it angular z, adjusting linear velocities')
             
-            if ((x_avg-self.x_goal) < 2) and ((y_avg - self.y_goal) < 2):
-                twist.linear.x = 0.0
-                twist.linear.y = 0.0
-                twist.angular.z = 0.0
-                self.cmd_vel_publisher.publish(twist)                
-            
-            else:
-
-                twist.linear.x = -self.proportional_gain * (self.x_goal - x_avg) * self.linear_x_max
-                twist.linear.y = -self.proportional_gain * (self.y_goal - y_avg) * self.linear_y_max
-
+            if (abs(x_avg-self.x_goal) >= 2) or (abs(y_avg - self.y_goal) >= 2): 
+                twist.linear.x = self.kp_linear * (x_avg - self.x_goal) * self.linear_x_max
+                twist.linear.y = -self.kp_linear * (y_avg - self.y_goal) * self.linear_y_max
+                
                 twist.linear.x = max(min(twist.linear.x, self.linear_x_max), self.linear_x_min)
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
                 twist.angular.z = 0.0
-
+                
                 self.get_logger().info('Linear x: %f' % twist.linear.x)
                 self.get_logger().info('Linear y: %f' % twist.linear.y)
+
+            else:
+                twist.linear.x = 0.0
+                twist.linear.y = 0.0
+                twist.angular.z = 0.0
+
+                
 
         #Publish the Twist message
         self.cmd_vel_publisher.publish(twist)

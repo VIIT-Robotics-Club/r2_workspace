@@ -4,7 +4,7 @@ imu_filter:
     stateless: false
     use_mag: true
     publish_tf: true
-    reverse_tf: true
+    reverse_tf: false
     fixed_frame: "odom"
     constant_dt: 0.0
     publish_debug_topics: true
