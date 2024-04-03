@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 import math
 import torch
+from std_msgs.msg import String
+from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
@@ -52,7 +54,7 @@ class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
         self.declare_parameter("setupareaball", -48000.0)       # The desired sensor reading
-        self.declare_parameter("setupdev", 160.01)                  # Proportional gain for camera
+        self.declare_parameter("setupdev", 160.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
@@ -60,6 +62,14 @@ class YOLOv5ROS2(Node):
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+        # self.subscription = self.create_subscription(
+        #   Int16MultiArray, 
+        #   'drive_topic', 
+        #   self.listener_callback, 
+        #   10)
+        # self.subscription # prevent unused variable warning
+
+        # self.array = Int16MultiArray()
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
@@ -72,19 +82,19 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=2,  # file/dir/URL/glob/screen/0(webcam)
+        source=1,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.7,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
-        device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
         save_csv=False,  # save results in CSV format
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
-        nosave=True,  # do not save images/videos
+        nosave=False,  # do not save images/videos
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         augment=False,  # augmented inference
@@ -165,7 +175,7 @@ class YOLOv5ROS2(Node):
             twist_msg = Twist()
             # twist_msg.angular.z = 0.0
             # Process predictions
-            max_ball_area=0
+            
             for i, det in enumerate(pred):  # per image
                 seen += 1
                 if webcam:  # batch_size >= 1
@@ -215,15 +225,13 @@ class YOLOv5ROS2(Node):
                         # Calculate deviation from the center of the image
                         center_x = im0.shape[1] // 2  # Calculate the center x-coordinate of the image
                         deviation = center_x - ((x1 + x2) // 2)  # Calculate deviation from the center
-                        # area1=-area
+                        area1=-area
                         # Publish area and deviation on cmd_vel topic
-                        deviation=-deviation
+                        
                         # if label=="Red-ball":
                         # detections_silo[0][1]=69
                         area=-area
-                        
-                        if label == "Redball" or label=="blue-ball" and (-area)>(-max_ball_area) :
-                            max_ball_area=area
+                        if label == "Redball" or label=="blue-ball":
                             detections_ball.append((label, area, deviation, x1, y1, x2, y2))
                         if label == "silo":
                             print("hi 2")
@@ -240,22 +248,25 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = 0.0
                         # deviation1=deviation
                         # self.setupareaball =-40000    
-                          
-                        
-                        # LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        # a = 90 # IMU given  Angle 
+                        # a= a * 0.01745329251
+                        # # area=40000
+                        # y= math.cos(a) * area
+                        # print(y)
 
+                        deviation=-deviation   
+                        AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
+                        LinXb=map(area, self.setupareaball,120, 0, 1)
+                        LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        # LinZsy=map(y,self.setupareasilo,0,1,0)
 
-                        if len(detections_ball) > 0:
-                            AngZpb = map(detections_ball[0][2], -250,self.setupdev, 1, 0)
-                            LinXb=map(detections_ball[0][1], self.setupareaball,120, 0, 2)
-                           
-                            if  detections_ball[0][0] == "Redball" and detections_ball[0][1] >= self.setupareaball:
-                                twist_msg.linear.x = float(LinXb)
-                                twist_msg.angular.z = float(AngZpb)
-                            # else:
-                            #     twist_msg.linear.x = 0.0
-                            #     twist_msg.angular.z = 0.0
-                            #     self.destroy_node()
+                                                                        
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] >= self.setupareaball:
+                            twist_msg.linear.x = float(LinXb)
+                            twist_msg.angular.z = float(AngZpb)
+                            self.publisher_.publish(twist_msg)
+                            # twist_msg.linear.y=float(LinZsy)
+                                                                                                                                                                                                                                                                                                                                                                                    
 
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
@@ -272,31 +283,45 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
                         
-                            # LinXb=0.0
-                            # AngZpb=0.0
-                        
-                            if detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball:
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                self.publisher_.publish(twist_msg)
-                                self.destroy_node()
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball:
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                        #     if  twist_msg.angular.z == 0.0   and twist_msg.linear.x == 0.0:
+                        #         cou
                         # # # r = math.sqrt(area/3.14)
-                        #     if detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball and LinXb == 0.0 and AngZpb == 0.0 :
-                                
-
-
-
-
+                            # count = count +1
+                            # print(count)
+                            # if count > 5:
+                            self.destroy_node()
                         
 
 
                             
 
-                        self.publisher_.publish(twist_msg)
+                        
                         # self.get_logger().info("Enter in node of publisher")
                         
                         # Print class, area, and deviation
-                        print(f"Class: {label}, Area: {area}, Deviation: {deviation} , max area : {max_ball_area} , lin x : {LinXb}, angz : {AngZpb}")
+                        # print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
 
                         if vid_path[i] != save_path:  # new video
                             vid_path[i] = save_path
@@ -327,7 +352,7 @@ class YOLOv5ROS2(Node):
                 else:
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.5
+                    twist_msg.angular.z = 0.2
                     self.publisher_.publish(twist_msg)        
                 # Stream results
                 im0 = annotator.result()
@@ -364,6 +389,7 @@ def main(args=None):
     
     rclpy.spin(yolov5_node)
 
+    yolov5_node.destroy_node()
     rclpy.shutdown()
 
 

@@ -238,7 +238,7 @@ class YOLOv5ROS2(Node):
                         # deviation1=deviation
                         # self.setupareaball =-40000    
                         deviation=-deviation   
-                        AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
+                        AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
                         LinXb=map(area, self.setupareaball,120, 0, 1)
                         LinXs=map(area,self.setupareasilo,100, 0, 1)
                         # max_ball_area=0
@@ -271,7 +271,7 @@ class YOLOv5ROS2(Node):
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
                         # r = math.sqrt(area/3.14)
-                            self.destroy_node()
+                            # self.destroy_node()
 
 
 

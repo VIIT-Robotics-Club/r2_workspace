@@ -33,12 +33,12 @@ def generate_launch_description():
 
     # command to run ros2 service call /setbool std_srvs/srv/SetBool {data: True}
     lift_down = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: True}'],
+        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: False}'],
         output='screen'
     )
 
     lift_up = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: False}'],
+        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: True}'],
         output='screen'
     )
 
@@ -74,26 +74,26 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=ball_following,
-                on_exit=claw_close
+                on_exit=lift_up 
             )
         ),
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=claw_close,
-                on_exit=lift_up
-            )
-        ),
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=lift_up,
-                on_exit=silo_tracking
-            )
-        ),
-           RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=silo_tracking,
-                on_exit=claw_open
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=claw_close,
+        #         on_exit=lift_up
+        #     )
+        # ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=lift_up,
+        #         on_exit=silo_tracking
+        #     )
+        # ),
+        #    RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=silo_tracking,
+        #         on_exit=claw_open
+        #     )
+        # ),
     ])

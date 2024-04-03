@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 import math
 import torch
-from std_msgs.msg import String
+from std_msgs.msg import Float64
 from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -62,14 +62,16 @@ class YOLOv5ROS2(Node):
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
-        # self.subscription = self.create_subscription(
-        #   Int16MultiArray, 
-        #   'drive_topic', 
-        #   self.listener_callback, 
-        #   10)
+        self.subscription = self.create_subscription(
+          Float64, 
+          '/imu/data_yaw', 
+          self.listener_callback, 
+          10)   
         # self.subscription # prevent unused variable warning
 
-        # self.array = Int16MultiArray()
+        # self.yaw = Int64()
+    def listener_callback(self, msg):
+        self.get_logger().info('I heard: "%s"' % msg.data)
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
@@ -82,13 +84,13 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
-        device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
         save_csv=False,  # save results in CSV format
@@ -249,10 +251,10 @@ class YOLOv5ROS2(Node):
                         # self.setupareaball =-40000    
                         a = 90 # IMU given  Angle 
                         a= a * 0.01745329251
-                        # area=40000
+                        area=40000
                         y= math.cos(a) * area
                         print(y)
-
+                        print(self.yaw)
                         deviation=-deviation   
                         AngZpb = map(deviation, -230,self.setupdev, 0.5, 0)
                         LinXb=map(area, self.setupareaball,120, 0, 1)
@@ -262,7 +264,7 @@ class YOLOv5ROS2(Node):
                         if len(detections_silo) > 0 and detections_silo[0][0] == "silo" and detections_silo[0][1] >= self.setupareasilo:
                             twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
-                            twist_msg.linear.y=float(LinZsy)
+                            # twist_msg.linear.y=float(LinZsy)
                                                                                                                                                                                                                                                                                                                                                                                     
 
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":

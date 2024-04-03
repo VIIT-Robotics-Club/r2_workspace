@@ -64,7 +64,7 @@ class YOLOv5ROS2(Node):
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
 
         # Timer to periodically run YOLOv5 inference
-        # self.timer_ = self.create_timer(1.0, self.inference_callback)
+        self.timer_ = self.create_timer(1.0, self.inference_callback)
 
         self.run()
 
@@ -243,8 +243,8 @@ class YOLOv5ROS2(Node):
                         # Assuming deviation is angular velocity
 
                         twist_msg.angular.z = float(AngZp)
-                        if AngZp>=-1 and AngZp<=1 and area <=40000:
-                            twist_msg.linear.x = float(LinX)
+                        # if AngZp>=-1 and AngZp<=1 and area <=40000:
+                        twist_msg.linear.x = float(LinX)
                         
 
                         self.publisher_.publish(twist_msg)
