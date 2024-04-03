@@ -84,6 +84,8 @@ int BR_motor;
 #define pwmPin2 7
 #define dir2 5
 
+int count = 0, last_value = 0;
+
 
 // rcl_publisher_t publisher_imu;
 // rcl_publisher_t publisher_mag; 
@@ -185,6 +187,10 @@ void rotate_clockwise(bool &success)
 {
   digitalWrite(dir1, HIGH);
   analogWrite(pwmPin1, 255);
+    // &timer_line,
+    // &support,
+    // RCL_MS_TO_NS(timer_timeout),
+    // timer_callback));
   delay(3000);
   analogWrite(pwmPin1, 0);
 
@@ -228,8 +234,7 @@ void leftTurn(int PID)
   analogWrite(mPinFR, RightSpeed);
   analogWrite(mPinBL, leftSpeed);
   analogWrite(mPinBR, RightSpeed);
-  
-
+  last_value = leftSpeed;
 }
 
 void rightTurn(int PID)
@@ -242,17 +247,18 @@ void rightTurn(int PID)
   analogWrite(mPinFR, RightSpeed);
   analogWrite(mPinBL, leftSpeed);
   analogWrite(mPinBR, RightSpeed);
+  last_value = leftSpeed;
   
 }
 void pidFunction(byte data)
 {
-         digitalWrite(dirFL,LOW);
-         digitalWrite(dirFR,LOW);
-         digitalWrite(dirBL,LOW);
-         digitalWrite(dirBR,LOW);
+  digitalWrite(dirFL,LOW);
+  digitalWrite(dirFR,LOW);
+  digitalWrite(dirBL,LOW);
+  digitalWrite(dirBR,LOW);
 
-float error = data - midValue;
-//  curr_err = map(error, -35, 35, -maxSteeringValue, maxSteeringValue);
+  float error = data - midValue;
+  // curr_err = map(error, -35, 35, -maxSteeringValue, maxSteeringValue);
   curr_err = error;
 
   // *********** PID code :
@@ -273,38 +279,58 @@ float error = data - midValue;
     rightTurn(int(abs(final_PID)));;   // turning right if sensor's reading greater than 35 (error is +ve) 
   }
 }
+
+void move_little_forward(int last_value)
+{
+  digitalWrite(dirFL,LOW);
+  digitalWrite(dirFR,LOW);
+  digitalWrite(dirBL,LOW);
+  digitalWrite(dirBR,LOW);
+  analogWrite(mPinFL, last_value);
+  analogWrite(mPinFR, last_value);
+  analogWrite(mPinBL, last_value);
+  analogWrite(mPinBR, last_value);
+  delay(100);
+}
+
 void move_to_zone_3()
 {     
-    byte read2;
-     Serial1.begin(115200);
-     digitalWrite(en,LOW);
-     while(Serial1.available()<0);
-     read2=Serial1.read();
-  
 
-     if(nodeCount==1 && read==255)
+     while(Serial1.available() > 0)
      {
-         digitalWrite(dirFL,LOW);
-         digitalWrite(dirFR,HIGH);
-         digitalWrite(dirBL,HIGH);
-         digitalWrite(dirBR,LOW);
-          analogWrite(mPinFL, 150);
-          analogWrite(mPinFR, 150);
-          analogWrite(mPinBL, 150);
-          analogWrite(mPinBR, 150);
-         
-     }
-     else if(nodeCount>=2)
-     {
-            analogWrite(mPinFL, 0);
-            analogWrite(mPinFR, 0);
-            analogWrite(mPinBL, 0);
-            analogWrite(mPinBR, 0);
-            reached_zone_3 = true;
-     }
-     else
-     {
-        pidFunction(read2);
+        int read2=Serial1.read();
+
+        if((nodeCount==1) && (read2==255))
+        {
+            if(count == 0)
+            {
+              move_little_forward(last_value);
+              count++;
+            }
+
+            digitalWrite(dirFL,LOW);
+            digitalWrite(dirFR,HIGH);
+            digitalWrite(dirBL,HIGH);
+            digitalWrite(dirBR,LOW);
+            analogWrite(mPinFL, 150);
+            analogWrite(mPinFR, 150);
+            analogWrite(mPinBL, 150);
+            analogWrite(mPinBR, 150);
+            
+        }
+        else if(nodeCount>=2)
+        {
+                analogWrite(mPinFL, 0);
+                analogWrite(mPinFR, 0);
+                analogWrite(mPinBL, 0);
+                analogWrite(mPinBR, 0);
+                reached_zone_3 = true;
+                break;
+        }
+        else
+        {
+            pidFunction(read2);
+        }
      }
     
 }
@@ -385,25 +411,25 @@ void timer_callback_junc(rcl_timer_t * timer, int64_t last_call_time)
   }
 }
 
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
-  RCLC_UNUSED(last_call_time);
+// void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
+//   RCLC_UNUSED(last_call_time);
      
-      Serial1.begin(115200);
-      digitalWrite(en,LOW);
-      while(Serial1.available()<=0);
-      
-                read=Serial1.read();
-              // Serial.println(read);
-                 lsa08.data=read;
-                 digitalWrite(en,HIGH);
-      
-      
-      if (timer!= NULL){
+//   Serial1.begin(115200);
+//   digitalWrite(en,LOW);
+//   while(Serial1.available()<=0);
+  
+//   read=Serial1.read();
+//   // Serial.println(read);
+//   lsa08.data=read;
+//   digitalWrite(en,HIGH);
+  
+  
+//   if (timer!= NULL){
 
-       RCSOFTCHECK(rcl_publish(&publisher_line, &lsa08, NULL));
+//     RCSOFTCHECK(rcl_publish(&publisher_line, &lsa08, NULL));
       
-  }
-}
+//   }
+// }
 
 // void timer_callback_imu(rcl_timer_t * timer, int64_t last_call_time) {
 
@@ -474,6 +500,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
 //   }
 // }
 
+// luna timer callback
 void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
 {  
   RCLC_UNUSED(last_call_time);
@@ -572,16 +599,6 @@ void subscription_callback(const void *msgin) {
       digitalWrite(dirBL,LOW);
     }
 
-    // printing pwm values
-//    Serial.print("FL : ");
-//    Serial.print(FL_motor);
-//    Serial.print("  FR : ");
-//    Serial.println(FR_motor);
-//    Serial.print("BL : ");
-//    Serial.print(BL_motor);
-//    Serial.print("  BR : ");
-//    Serial.println(BR_motor);
-
     FL_motor = abs(FL_motor);
     BR_motor = abs(BR_motor);
     FR_motor = abs(FR_motor);
@@ -660,7 +677,6 @@ void service_callback_line(const void * req2, void * res2){
   std_srvs__srv__SetBool_Request * req_in2=(std_srvs__srv__SetBool_Request *) req2;
   std_srvs__srv__SetBool_Response * res_in2=(std_srvs__srv__SetBool_Response *) res2;
 
-  bool success = false;
 
   if(req_in2->data == 1)
   {
@@ -688,6 +704,7 @@ void setup() {
   delay(1000);
   
   Serial.begin(115200);
+  Serial1.begin(115200);
 
  // Try to initialize!
 
@@ -782,12 +799,12 @@ void setup() {
     timer_callback_junc));
 
   // create timer for LSA08,
-    const unsigned int timer_timeout = 1;  // initially 100
-    RCCHECK(rclc_timer_init_default(
-    &timer_line,
-    &support,
-    RCL_MS_TO_NS(timer_timeout),
-    timer_callback));
+    // const unsigned int timer_timeout = 1;  // initially 100
+    // RCCHECK(rclc_timer_init_default(
+    // &timer_line,
+    // &support,
+    // RCL_MS_TO_NS(timer_timeout),
+    // timer_callback));
 
 //  // create timer for ICM
 //   const unsigned int timer_timeout_imu = 10; // initially 500
@@ -808,11 +825,11 @@ void setup() {
   
 RCCHECK(rclc_executor_init(&executor, &support.context,6, &allocator));
 
-RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
+// RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
 //  RCCHECK(rclc_executor_add_timer(&executor, &timer_imu));
 //  RCCHECK(rclc_executor_add_timer(&executor, &timer_mag));
 RCCHECK(rclc_executor_add_timer(&executor, &timer_junc));
-//RCCHECK(rclc_executor_add_timer(&executor, &timer_luna));
+RCCHECK(rclc_executor_add_timer(&executor, &timer_luna));
 
 RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
 

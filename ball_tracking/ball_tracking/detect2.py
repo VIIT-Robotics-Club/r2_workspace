@@ -294,30 +294,14 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
                         
-                        if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball:
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                            twist_msg.linear.x = 0.0
-                            twist_msg.angular.z = 0.0
-                            self.publisher_.publish(twist_msg)
-                        #     if  twist_msg.angular.z == 0.0   and twist_msg.linear.x == 0.0:
-                        #         cou
+                            # LinXb=0.0
+                            # AngZpb=0.0
+                        
+                            if detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball:
+                                twist_msg.linear.x = 0.0
+                                twist_msg.angular.z = 0.0
+                                self.publisher_.publish(twist_msg)
+                                self.destroy_node()
                         # # # r = math.sqrt(area/3.14)
                             # count = count +1
                             # print(count)
