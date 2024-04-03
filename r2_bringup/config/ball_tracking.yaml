@@ -1,5 +1,5 @@
 ball_tracker2:
   ros__parameters:
-    setupareaball: -51000.0
-    setupdev: 140.01
+    setupareaball: -48000.0
+    setupdev: 160.01
     setupareasilo: -90000.00
