@@ -51,9 +51,10 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 
 class YOLOv5ROS2(Node):
+    
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -36000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -35000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
@@ -85,9 +86,9 @@ class YOLOv5ROS2(Node):
         source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.7,  # confidence threshold
+        conf_thres=0.35,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=1000,  # maximum detections per image
+        max_det=2,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
@@ -109,7 +110,7 @@ class YOLOv5ROS2(Node):
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
-    ):
+    ):  
         source = str(source)
         save_img = not nosave and not source.endswith(".txt")  # save inference images
         is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -146,6 +147,9 @@ class YOLOv5ROS2(Node):
         seen, windows, dt = 0, [], (Profile(device=device), Profile(device=device), Profile(device=device))
         area_sum = 0
         deviation_sum = 0
+        ballfound = False
+        LinXb=0
+        AngZpb=0
         for path, im, im0s, vid_cap, s in dataset:
             with dt[0]:
                 im = torch.from_numpy(im).to(model.device)
@@ -256,22 +260,28 @@ class YOLOv5ROS2(Node):
 
                         deviation=-deviation   
                         AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
-                        LinXb=map(area, self.setupareaball,100, 0, 2)
+                        LinXb=map(area, -50000,100, 0, 2)
                         LinXs=map(area,self.setupareasilo,100, 0, 1)
                         # LinZsy=map(y,self.setupareasilo,0,1,0)
-
-                                                                        
+                        ballfound=True
+                                                                         
                         if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] >= self.setupareaball:
-                            twist_msg.linear.x = float(LinXb)
-                            twist_msg.angular.z = float(AngZpb)
-                            self.publisher_.publish(twist_msg)
+                            # twist_msg.linear.x = float(LinXb)
+                            # twist_msg.angular.z = float(AngZpb)
+                            # self.publisher_.publish(twist_msg)
+                            if deviation >=-200 and deviation <=200:
+                                twist_msg.linear.x = float(LinXb)
+                                twist_msg.angular.z = float(AngZpb)
+                                self.publisher_.publish(twist_msg)
                             # twist_msg.linear.y=float(LinZsy)
-                                                                                                                                                                                                                                                                                                                                           
-
+                            if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
+                                twist_msg.linear.x = float(LinXb/2)
+                                twist_msg.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
+                                self.publisher_.publish(twist_msg)
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
                         #     print("hi")
-                        
+
                         #     if label=="silo":
                         #         print("Moving towards silo while holding the ball")
                         #         # Calculate LinXs and AngZpb using your map function based on silo detection
@@ -323,6 +333,7 @@ class YOLOv5ROS2(Node):
                         
                         # Print class, area, and deviation
                         print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
+                        print(ballfound)
 
                         if vid_path[i] != save_path:  # new video
                             vid_path[i] = save_path
@@ -350,12 +361,18 @@ class YOLOv5ROS2(Node):
                             annotator.box_label(xyxy, label, color=colors(c, True))
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
-                else:
+                elif ballfound == False :
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
                     twist_msg.angular.z = 0.5
+                    print(ballfound)
                     self.publisher_.publish(twist_msg)        
                 # Stream results
+                elif ballfound == True:
+                    print(ballfound)
+                    # twist_msg.linear.x = float(LinXb)
+                    twist_msg.angular.z = float(AngZpb *2)
+                    self.publisher_.publish(twist_msg)
                 im0 = annotator.result()
                 if view_img:
                     if platform.system() == "Linux" and p not in windows:
@@ -372,7 +389,7 @@ class YOLOv5ROS2(Node):
         # Use self.area and self.deviation here
         # area = self.area
         # deviation = self.deviation
-
+        
         # Publish area and deviation on cmd_vel topic
 
 
