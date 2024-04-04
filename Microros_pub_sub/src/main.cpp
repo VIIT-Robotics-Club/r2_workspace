@@ -283,7 +283,7 @@ void subscription_callback(const void *msgin) {
 
   float mapped_leftHatx =  (255.0/2.0)*x1;
   float mapped_leftHaty = (255.0/2.0)* y1;
-  float mapped_rightHatz = (150.0/1.0)* z1;
+  float mapped_rightHatz = (255.0/1.0)* z1;
 
     FL_motor = mapped_leftHatx - mapped_rightHatz + mapped_leftHaty;
     BR_motor = mapped_leftHatx + mapped_rightHatz + mapped_leftHaty;
