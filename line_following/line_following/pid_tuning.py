@@ -31,8 +31,12 @@ class PidTuningNode(Node):
         self.declare_parameter("Kp", 0.01)                  # Proportional gain
         self.declare_parameter("Ki", 0.00)                  # Integral gain
         self.declare_parameter("Kd", 0.00)                  # Derivative gain
-        self.declare_parameter("angular_z_min", -0.290196078)       # Minimum angular speed
-        self.declare_parameter("angular_z_max", 0.290196078) 
+        # self.declare_parameter("angular_z_min", -0.290196078)       # Minimum angular speed
+        # self.declare_parameter("angular_z_max", 0.290196078) 
+        # self.declare_parameter("angular_z_min", -0.698039216)       # Minimum angular speed
+        # self.declare_parameter("angular_z_max", 0.698039216) 
+        self.declare_parameter("angular_z_min", -1.0)       # Minimum angular speed
+        self.declare_parameter("angular_z_max", 1.0) 
         
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
@@ -50,6 +54,10 @@ class PidTuningNode(Node):
 
         self.Kp_value = 0.00806100217
         self.Kd_value = 0.00806100217
+        # self.Kp_value = 0.00392156863
+        # self.Kd_value = 0.00392156863
+        # self.Kp_value = 0.01
+        # self.Kd_value = 0.005
         # self.condition_to_destroy = False
 
         self.window = tk.Tk()
@@ -144,62 +152,22 @@ class PidTuningNode(Node):
         # Calculate the forward speed based on the absolute error
         linear_x = max(min(2.0 - abs(error) / 75.0, 2.0), -2.0)
         return linear_x
-    
-    def sweep(self, last_error):
-        error = 255
-        
-        if(last_error > 35):
-            # sweep left
-            z_vel = 1.0
-            
-        else:
-            # sweep right
-            z_vel = -1.0
-        
-        return z_vel, error
 
     def listener_callback(self, msg):
         # This method is called when a new message is received on the lsa_08 topic
 
         current_sensor_reading = msg.data
-
-
-
         self.get_logger().info('LSA08 Data "%s"' % msg.data)
 
 
         # Create a new Twist message
         twist = Twist()
-
-        # if current_sensor_reading == 255:
-        #     self.state = "SWEEPING"
-        # else:
-        #     self.state = "FOLLOWING"
         
         z_vel = 0.0
-        x_vel = 1.57862745  # 1.56862745
+        # x_vel = 1.56862745  # 1.56862745
+        x_vel = 1.0  # 1.56862745
         y_vel = 0.0
         error = 0
-        
-        # if no line detected then sweep function
-        # if(current_sensor_reading == 255 and self.node_counter < node_to_stop):
-            
-        #     # sweep
-        #     # z_vel, error = self.sweep(self.last_error)
-            
-        #     y_vel = 1.5
-        #     x_vel = 0.0
-        #     z_vel = 0.0
-
-        # if (current_sensor_reading == 255):
-        #     z_vel = 0.0
-        #     x_vel = 0.0
-        #     y_vel = 0.0
-            
-            # z_vel = z_vel*0.90
-            # x_vel = x_vel*0.90
-            # y_vel = y_vel*0.90
-            # self.destroy_node()
         
         condition_to_destroy = False
             
@@ -211,10 +179,10 @@ class PidTuningNode(Node):
 
             # self.destroy_node()
             
-        if(self.node_counter == 1 and current_sensor_reading == 255):
+        elif(self.node_counter == 1 and current_sensor_reading == 255):
             z_vel = 0.0
             x_vel = 0.0
-            y_vel = -1.0
+            y_vel = 1.0
             # self.destroy_node()
 
 
@@ -224,11 +192,12 @@ class PidTuningNode(Node):
             z_vel, error = self.calculate_angular_velocity(current_sensor_reading)
             # output_linear_x = self.calculate_linear_velocity(error)
 
-        twist.angular.z = z_vel
+        twist.angular.z = 0.0
         if(condition_to_destroy):
-            twist.angular.z = 0.0
+            z_vel = 0.0
         # print(z_vel)
         # twist.linear.x = -output_linear_x  
+        twist.angular.z = z_vel
         twist.linear.x = x_vel  # keeing base speed 2 -> 255 PWM val
         twist.linear.y = y_vel  # for straight right motion
 
@@ -240,10 +209,12 @@ class PidTuningNode(Node):
 
         # Update the last error
         self.last_error = error
+        # time.sleep(1.0)
 
         if(condition_to_destroy):
             print("destroy condition reached")
             self.destroy_node()
+            # rclpy.shutdown()
             sys.exit()
             return
 
@@ -275,7 +246,7 @@ def main(args=None):
     # # Shutdown and cleanup
     # executor.shutdown()
     rclpy.spin(line_follower)
-    line_follower.destroy_node()
+    # line_follower.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
