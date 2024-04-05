@@ -10,9 +10,17 @@ import os
 import platform
 import sys
 from pathlib import Path
-
+import math
 import torch
+from std_msgs.msg import String
+from std_msgs.msg import Int16MultiArray
+current_directory = os.path.dirname(os.path.abspath(__file__))
 
+# Define the relative path to the model file
+MODEL_RELATIVE_PATH = "weights/redballbest.pt"
+
+# Combine the current directory and the relative path to get the absolute path
+redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -20,8 +28,6 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from ultralytics.utils.plotting import Annotator, colors, save_one_box
-
-from ament_index_python.packages import get_package_share_directory
 
 from models.common import DetectMultiBackend
 from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
@@ -44,47 +50,35 @@ from utils.general import (
 from utils.torch_utils import select_device, smart_inference_mode
 
 
-
-# Get the directory path of the current script
-current_directory = os.path.dirname(os.path.abspath(__file__))
-
-# Define the relative path to the model file
-MODEL_RELATIVE_PATH = "weights/redbluesilo.pt"
-
-# Combine the current directory and the relative path to get the absolute path
-redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
-
-# Now you can use redblue_model_path from anywhere in your project
-
 class YOLOv5ROS2(Node):
+    
     def __init__(self):
         super().__init__('yolov5_ros2_node')
+        self.declare_parameter("setupareaball", -35000.0)       # The desired sensor reading
+        self.declare_parameter("setupdev", 135.01)                  # Proportional gain
+        self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
+        self.setupareaball = self.get_parameter("setupareaball").value
+        self.setupdev = self.get_parameter("setupdev").value
+        self.setupareasilo = self.get_parameter("setupareasilo").value
 
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
 
-        # Timer to periodically run YOLOv5 inference
-        self.timer_ = self.create_timer(1.0, self.inference_callback)
-
         self.run()
-
-        # Initialize YOLOv5 model
-        # self.initialize_yolov5_model()    
 
     @smart_inference_mode()
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=2,  # file/dir/URL/glob/screen/0(webcam)
+        source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.5,  # confidence threshold
+        conf_thres=0.35,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=1000,  # maximum detections per image
-        device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        max_det=2,  # maximum detections per image
+        device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
-        save_csv=False,  # save results in CSV format
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
         nosave=False,  # do not save images/videos
@@ -102,7 +96,7 @@ class YOLOv5ROS2(Node):
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
-    ):
+    ):  
         source = str(source)
         save_img = not nosave and not source.endswith(".txt")  # save inference images
         is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -139,6 +133,9 @@ class YOLOv5ROS2(Node):
         seen, windows, dt = 0, [], (Profile(device=device), Profile(device=device), Profile(device=device))
         area_sum = 0
         deviation_sum = 0
+        ballfound = False
+        LinXb=0
+        AngZpb=0
         for path, im, im0s, vid_cap, s in dataset:
             with dt[0]:
                 im = torch.from_numpy(im).to(model.device)
@@ -166,8 +163,7 @@ class YOLOv5ROS2(Node):
             with dt[2]:
                 pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
             twist_msg = Twist()
-            # twist_msg.angular.z = 0.0
-            # Process predictions
+            
             for i, det in enumerate(pred):  # per image
                 seen += 1
                 if webcam:  # batch_size >= 1
@@ -207,7 +203,13 @@ class YOLOv5ROS2(Node):
                         # AngZp = map(deviation, -230, 230, -6, 6)
                         # Calculate area and deviation
                         x1, y1, x2, y2 = xyxy
+                        detections_ball = []
+                        detections_silo = []
                         area = abs((x2 - x1) * (y2 - y1))
+                        # if label == "Red-ball" or label=="blue-ball":
+                        #     detections_ball.append((label, area, deviation, x1, y1, x2, y2))
+                        # if label == "silo":
+                        #     detections_silo.append((label, area, deviation, x1, y1, x2, y2))
                         # Calculate deviation from the center of the image
                         center_x = im0.shape[1] // 2  # Calculate the center x-coordinate of the image
                         deviation = center_x - ((x1 + x2) // 2)  # Calculate deviation from the center
@@ -215,7 +217,14 @@ class YOLOv5ROS2(Node):
                         # Publish area and deviation on cmd_vel topic
                         
                         # if label=="Red-ball":
+                        # detections_silo[0][1]=69
                         area=-area
+                        if label == "Redball" or label=="blue-ball":
+                            detections_ball.append((label, area, deviation, x1, y1, x2, y2))
+                        if label == "silo":
+                            print("hi 2")
+                            detections_silo.append((label, area, deviation, x1, y1, x2, y2))
+                            # print(detections_silo[0][1])
                         #     twist_msg.linear.x = float(area1)
                         #     twist_msg.angular.z = float(deviation)
                         # else:
@@ -225,53 +234,76 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = 1.0
                         # else:
                         #     twist_msg.linear.x = 0.0
-                        deviation1=deviation
-                        AngZp = map(deviation1, -230, 135, -4, 4)
-                        LinX=map(area, -40000,100, 0, 4)
-                        #  # Assuming area is linear velocity
-                        # if float(deviation)>30:
-                        #     twist_msg.angular.z = float(AngZp)
+                        # deviation1=deviation
+                        # self.setupareaball =-40000    
+                        # a = 90 # IMU given  Angle 
+                        # a= a * 0.01745329251
+                        # # area=40000
+                        # y= math.cos(a) * area
+                        # print(y)
 
-                        # elif float(deviation)  <-30:
-                        #     twist_msg.angular.z = float(AngZp)
-                        # elif float(deviation)<=30 and float(deviation)>=-30:
-                        #     twist_msg.angular.z = 0.0
+                        deviation=-deviation   
+                        AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
+                        LinXb=map(area, -50000,100, 0, 2)
+                        LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        # LinZsy=map(y,self.setupareasilo,0,1,0)
+                        ballfound=True
+                                                                         
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] >= self.setupareaball:
+                            if deviation >=-200 and deviation <=200:
+                                twist_msg.linear.x = float(LinXb)
+                                twist_msg.angular.z = float(AngZpb)
+                                self.publisher_.publish(twist_msg)
+                            if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
+                                twist_msg.linear.x = float(LinXb/2)
+                                twist_msg.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
+                                self.publisher_.publish(twist_msg)
 
-                        #  Assuming deviation is angular velocity
-                        # self.publisher_.publish(twist_msg)
+                        if len(detections_ball) > 0 and detections_ball[0][0] == "Redball" and detections_ball[0][1] <= self.setupareaball:
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
+                            twist_msg.linear.x = 0.0
+                            twist_msg.angular.z = 0.0
+                            self.publisher_.publish(twist_msg)
 
-                        # Assuming deviation is angular velocity
-
-                        twist_msg.angular.z = float(AngZp)
-                        # if AngZp>=-1 and AngZp<=1 and area <=40000:
-                        twist_msg.linear.x = float(LinX)
-                        
-
-                        self.publisher_.publish(twist_msg)
-                        # self.get_logger().info("Enter in node of publisher")
-                        
-                        # Print class, area, and deviation
                         print(f"Class: {label}, Area: {area}, Deviation: {deviation}")
+                        print(ballfound)
 
-                        if vid_path[i] != save_path:  # new video
-                            vid_path[i] = save_path
-                            if isinstance(vid_writer[i], cv2.VideoWriter):
-                                vid_writer[i].release()  # release previous video writer
-                            if vid_cap:  # video
-                                fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                                w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                                h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                            else:  # stream
-                                fps, w, h = 30, im0.shape[1], im0.shape[0]
-                            save_path = str(Path(save_path).with_suffix(".mp4"))  # force *.mp4 suffix on results videos
-                            vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
-                        vid_writer[i].write(im0)
+                        # if vid_path[i] != save_path:  # new video
+                        #     vid_path[i] = save_path
+                        #     if isinstance(vid_writer[i], cv2.VideoWriter):
+                        #         vid_writer[i].release()  # release previous video writer
+                        #     if vid_cap:  # video
+                        #         fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                        #         w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                        #         h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        #     else:  # stream
+                        #         fps, w, h = 30, im0.shape[1], im0.shape[0]
+                        #     save_path = str(Path(save_path).with_suffix(".mp4"))  # force *.mp4 suffix on results videos
+                        #     vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+                        # vid_writer[i].write(im0)
 
-                        if save_txt:  # Write to file
-                            xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                            line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                            with open(f"{txt_path}.txt", "a") as f:
-                                f.write(("%g " * len(line)).rstrip() % line + "\n")
+                        # if save_txt:  # Write to file
+                        #     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                        #     line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
+                        #     with open(f"{txt_path}.txt", "a") as f:
+                        #         f.write(("%g " * len(line)).rstrip() % line + "\n")
 
                         if save_img or save_crop or view_img:  # Add bbox to image
                             c = int(cls)  # integer class
@@ -279,12 +311,18 @@ class YOLOv5ROS2(Node):
                             annotator.box_label(xyxy, label, color=colors(c, True))
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
-                else:
+                elif ballfound == False :
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.0
+                    twist_msg.angular.z = 0.5
+                    print(ballfound)
                     self.publisher_.publish(twist_msg)        
                 # Stream results
+                elif ballfound == True:
+                    print(ballfound)
+                    # twist_msg.linear.x = float(LinXb)
+                    twist_msg.angular.z = float(AngZpb *2)
+                    self.publisher_.publish(twist_msg)
                 im0 = annotator.result()
                 if view_img:
                     if platform.system() == "Linux" and p not in windows:
@@ -293,21 +331,9 @@ class YOLOv5ROS2(Node):
                         cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                     cv2.imshow(str(p), im0)
                     cv2.waitKey(1)  # 1 millisecond 
+
         # Return average area and deviation
         # return area_sum, deviation_sum
-
-
-        # Run YOLOv5 inference
-        # Use self.area and self.deviation here
-        # area = self.area
-        # deviation = self.deviation
-
-        # Publish area and deviation on cmd_vel topic
-
-
-
-
-
 
 def main(args=None):
     """Executes YOLOv5 model inference with manually specified options."""
