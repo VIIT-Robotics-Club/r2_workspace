@@ -61,7 +61,7 @@ class LunaWallAlignNode(Node):
 
     def luna_callback(self, msg):
         self.luna_1 = float(msg.data[3]) - 2         #Front Left -14     -  2 is the offset (Luna sensor error correction)
-        self.luna_2 = float(msg.data[1])             #Front right -12
+        self.luna_2 = float(msg.data[1]) - 2         #Front right -12
         self.luna_3 = float(msg.data[0])             #Side Left - 11
         self.luna_4 = float(msg.data[2])             #Side right -13 
         self.get_logger().info('Luna data received')
@@ -89,7 +89,7 @@ class LunaWallAlignNode(Node):
             twist.angular.z = self.kp_angular * (x_diff)
             twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
 
-            if x_diff > 0:   #Lune front left > front right 
+            if x_diff < 0:   #Lune front left > front right 
                 twist.angular.z = abs(twist.angular.z)    #Rotate Anti-clockwise
             else:
                 twist.angular.z = -abs(twist.angular.z)     #Rotate clockwise
