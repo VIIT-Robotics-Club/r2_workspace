@@ -25,10 +25,15 @@ def generate_launch_description():
     )
 
 
-    line_follow = Node(
-        package='line_following',
-        executable='pid_tuning.py',
-        name='line_follower'
+    # line_follow = Node(
+    #     package='line_following',
+    #     executable='pid_tuning.py',
+    #     name='line_follower'
+    # )
+
+    line_following_client = ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/service_line_follow', 'std_srvs/srv/SetBool', '{data: True}'],
+        output='screen'
     )
 
     # command to run ros2 service call /setbool std_srvs/srv/SetBool {data: True}
@@ -58,16 +63,19 @@ def generate_launch_description():
         name='silo_tracking'
     )
 
+    
+
 
     return LaunchDescription([
-        line_follow,
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=line_follow,
-                on_exit=ball_following
-            )
-        ),
+        line_following_client,
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=line_follow,
+        #         on_exit=ball_following
+        #     )
+        # ),
 
         # ball_following,
 
