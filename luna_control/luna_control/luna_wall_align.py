@@ -83,7 +83,7 @@ class LunaWallAlignNode(Node):
         y_avg = (self.luna_3 + self.luna_4) / 2
         
 
-        if (abs(x_diff) > 1):  #Or you can use abs(y_diff) > 1
+        if (abs(x_diff) > 3):  #Or you can use abs(y_diff) > 1
 
         #Adjust the angular z velocity based on the difference between the sensor readings
             twist.angular.z = self.kp_angular * (x_diff)
@@ -100,9 +100,9 @@ class LunaWallAlignNode(Node):
 
             self.get_logger().info('Robot is aligned it angular z, adjusting linear velocities')
             
-            if (abs(x_avg-self.x_goal) >= 2) or (abs(y_avg - self.y_goal) >= 2): 
+            if (abs(x_avg-self.x_goal) >= 3) or (abs(y_avg - self.y_goal) >= 3): 
                 twist.linear.x = self.kp_linear * (x_avg - self.x_goal) * self.linear_x_max
-                twist.linear.y = -self.kp_linear * (y_avg - self.y_goal) * self.linear_y_max
+                twist.linear.y = self.kp_linear * (y_avg - self.y_goal) * self.linear_y_max
                 
                 twist.linear.x = max(min(twist.linear.x, self.linear_x_max), self.linear_x_min)
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
@@ -115,6 +115,7 @@ class LunaWallAlignNode(Node):
                 twist.linear.x = 0.0
                 twist.linear.y = 0.0
                 twist.angular.z = 0.0
+                rclpy.shutdown()
 
                 
 

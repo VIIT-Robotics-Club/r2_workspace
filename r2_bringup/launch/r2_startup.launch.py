@@ -19,9 +19,9 @@ def generate_launch_description():
 
     ball_following = Node(
         package='ball_tracking',
-        executable='ball_tracker2',
-        name='ball_tracker2',
-        parameters=[ball_tracking_params]
+        executable='testnode',
+        name='testnode',
+        # parameters=[ball_tracking_params]
     )
 
 
@@ -48,12 +48,12 @@ def generate_launch_description():
     )
 
     claw_open = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: True}'],
+        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: False}'],
         output='screen'
     )
 
     claw_close = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: False}'],
+        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: True}'],
         output='screen'
     )
 
@@ -70,38 +70,38 @@ def generate_launch_description():
 
         line_following_client,
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=line_follow,
-        #         on_exit=ball_following
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=line_following_client,
+                on_exit=ball_following
+            )
+        ),
 
         # ball_following,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=ball_following,
-                on_exit=lift_up 
+                on_exit=claw_close
             )
         ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=claw_close,
-        #         on_exit=lift_up
-        #     )
-        # ),
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=lift_up,
-        #         on_exit=silo_tracking
-        #     )
-        # ),
-        #    RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=silo_tracking,
-        #         on_exit=claw_open
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=claw_close,
+                on_exit=lift_up
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=lift_up,
+                on_exit=silo_tracking
+            )
+        ),
+           RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=silo_tracking,
+                on_exit=claw_open
+            )
+        ),
     ])

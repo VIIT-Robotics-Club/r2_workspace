@@ -62,7 +62,7 @@ class YOLOv5ROS2(Node):
         self.setupareasilo = self.get_parameter("setupareasilo").value
 
         # Publisher for publishing area and deviation
-        self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+        self.publisher_ = self.create_publisher(Twist,'/ball_data',10)
 
         self.run()
 

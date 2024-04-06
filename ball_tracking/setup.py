@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
         "ball_tracker = ball_tracking.detect:main",
         "ball_tracker2=ball_tracking.detect2:main",
-        "ball_tracker3=ball_tracking.detect3:main"
+        "ball_tracker3=ball_tracking.detect3:main",
+        "testnode=ball_tracking.testnode:main"
         ],
     },
 )
