@@ -1,5 +1,8 @@
 # /usr/bin/env python3
 
+# How to run this code:
+# ros2 run luna_control luna_wall_align --ros-args -p x_goal:=40.0 -p y_goal:=50.0 -p kp_linear:=0.5 -p ki_linear:=0.01 -p kd_linear:=0.01 -p kp_angular:=0.5 -p ki_angular:=0.01 -p kd_angular:=0.01 
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int64MultiArray
@@ -21,7 +24,11 @@ class LunaWallAlignNode(Node):
                 ('angular_z_max', 1.0),
                 ('angular_z_min', -1.0),
                 ('kp_linear', 0.5),
+                ('ki_linear', 0.01),
+                ('kd_linear', 0.01),
                 ('kp_angular', 0.5),
+                ('ki_angular', 0.01),
+                ('kd_angular', 0.01),         
                 ('x_goal', 40.0),
                 ('y_goal', 50.0)                
                 ]
@@ -43,7 +50,7 @@ class LunaWallAlignNode(Node):
             Int64MultiArray,
             'luna_data',
             self.luna_callback,
-            10
+            10,
         )
 
         self.cmd_vel_publisher = self.create_publisher(
@@ -59,9 +66,22 @@ class LunaWallAlignNode(Node):
         self.luna_4 = 0.00  
 
 
+        #State Management Variable 
+        self.correct_angle = True
+
+        # Set initial integrals to zero
+        self.int_error_linear_x = 0.0
+        self.int_error_linear_y = 0.0
+        self.int_error_angular_z = 0.0
+
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
+        control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
+        return control_action
+
+
     def luna_callback(self, msg):
         self.luna_1 = float(msg.data[3]) - 2         #Front Left -14     -  2 is the offset (Luna sensor error correction)
-        self.luna_2 = float(msg.data[1]) - 2         #Front right -12
+        self.luna_2 = float(msg.data[1]) - 2         #Front right -12   -  2 is the offset (Luna sensor error correction)- 
         self.luna_3 = float(msg.data[0])             #Side Left - 11
         self.luna_4 = float(msg.data[2])             #Side right -13 
         self.get_logger().info('Luna data received')
@@ -83,31 +103,56 @@ class LunaWallAlignNode(Node):
         y_avg = (self.luna_3 + self.luna_4) / 2
         
 
-        if (abs(x_diff) > 3):  #Or you can use abs(y_diff) > 1
+        if self.correct_angle:
+            
+            #Calculate the time difference
+            dt = 0.1  # Assuming fixed sample rate of 10 Hz
 
-        #Adjust the angular z velocity based on the difference between the sensor readings
-            twist.angular.z = self.kp_angular * (x_diff)
-            twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+            # Check if angular z correction is required
+            if abs(x_diff) <= 3:                                 #Or you can use abs(y_diff) <= 3
+                self.correct_angle = False
+                self.get_logger().info('Robot is aligned, adjusting linear velocities')
+            
+            # #Adjust the angular z velocity based on the difference between the sensor readings
+            # twist.angular.z = self.kp_angular * (x_diff)
+            # twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
 
-            if x_diff < 0:   #Lune front left > front right 
+            # Apply PID controller for angular z
+            ang_error = self.luna_1 - self.luna_2
+            self.int_error_angular_z += ang_error
+            twist.angular.z = self.pid_controller(ang_error, prev_ang_error, self.int_error_angular_z, self.ki_angular, self.kd_angular, dt)
+            prev_ang_error = ang_error
+
+            if x_diff < 0:   #Lune front left < front right -> left side is closer to the wall
                 twist.angular.z = abs(twist.angular.z)    #Rotate Anti-clockwise
             else:
-                twist.angular.z = -abs(twist.angular.z)     #Rotate clockwise
+                twist.angular.z = -abs(twist.angular.z) 
 
             self.get_logger().info('Angular z: %f' % twist.angular.z)
+        
+        else:
+            self.get_logger().info('Entered linear velocity adjustment')
 
-        else:            # If the robot is aligned, adjust the linear velocities
+            if (abs(x_avg - self.x_goal) >= 3) or (abs(y_avg - self.y_goal) >= 3):
 
-            self.get_logger().info('Robot is aligned it angular z, adjusting linear velocities')
-            
-            if (abs(x_avg-self.x_goal) >= 3) or (abs(y_avg - self.y_goal) >= 3): 
-                twist.linear.x = self.kp_linear * (x_avg - self.x_goal) * self.linear_x_max
-                twist.linear.y = self.kp_linear * (y_avg - self.y_goal) * self.linear_y_max
                 
+                lin_error_x = self.x_goal - x_avg               
+                lin_error_y = self.y_goal - y_avg
+                self.int_error_linear_x += lin_error_x
+                self.int_error_linear_y += lin_error_y
+
+                twist.linear.x = self.pid_controller(lin_error_x, prev_lin_error_x, self.int_error_linear_x, self.ki_linear, self.kd_linear, dt)
+                twist.linear.y = self.pid_controller(lin_error_y, prev_lin_error_y, self.int_error_linear_y, self.ki_linear, self.kd_linear, dt)
+                prev_lin_error_x, prev_lin_error_y = lin_error_x, lin_error_y
+
+                #Witout PID
+                # twist.linear.x = self.kp_linear * (x_avg - self.x_goal) * self.linear_x_max
+                # twist.linear.y = self.kp_linear * (y_avg - self.y_goal) * self.linear_y_max
+
                 twist.linear.x = max(min(twist.linear.x, self.linear_x_max), self.linear_x_min)
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
                 twist.angular.z = 0.0
-                
+
                 self.get_logger().info('Linear x: %f' % twist.linear.x)
                 self.get_logger().info('Linear y: %f' % twist.linear.y)
 
@@ -115,10 +160,9 @@ class LunaWallAlignNode(Node):
                 twist.linear.x = 0.0
                 twist.linear.y = 0.0
                 twist.angular.z = 0.0
+                self.get_logger().info('Robot is aligned to the goal')
                 rclpy.shutdown()
-
-                
-
+        
         #Publish the Twist message
         self.cmd_vel_publisher.publish(twist)
 
