@@ -8,6 +8,7 @@ from rclpy.node import Node
 from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
 import sys
+import os
 
 class LunaWallAlignNode(Node):
     def __init__(self):
@@ -32,7 +33,8 @@ class LunaWallAlignNode(Node):
                 ('ki_angular', 0.01),
                 ('kd_angular', 0.01),         
                 ('x_goal', 40.0),
-                ('y_goal', 50.0)                
+                ('y_goal', 50.0),
+                ('silo_number', 1),                
                 ]
         )
 
@@ -52,6 +54,7 @@ class LunaWallAlignNode(Node):
 
         self.x_goal = self.get_parameter('x_goal').value
         self.y_goal = self.get_parameter('y_goal').value
+        self.silo_number = self.get_parameter('silo_number').value
 
 
         self.luna_subscriber = self.create_subscription(
@@ -81,6 +84,22 @@ class LunaWallAlignNode(Node):
         self.int_error_linear_x = 0.0
         self.int_error_linear_y = 0.0
         self.int_error_angular_z = 0.0
+
+
+        self.positions = {
+            '1': {'x': 40.0, 'y': 50.0},
+            '2': {'x': 40.0, 'y': 100.0},
+            '3': {'x': 40.0, 'y': 150.0},
+            '4': {'x': 40.0, 'y': 200.0},
+            '5': {'x': 40.0, 'y': 250.0},
+        }
+
+        # Get the position from the environment variable
+
+
+        # Get the x and y goals from the selected position
+        self.x_goal = self.positions[self.silo_number]['x']
+        self.y_goal = self.positions[self.silo_number]['y']
 
     def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
         control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)

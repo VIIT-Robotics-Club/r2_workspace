@@ -84,19 +84,19 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        motor_server_fake,
-        RegisterEventHandler(
-            OnProcessStart(
-                target_action=motor_server_fake,
-                on_start=[motor_claw_open_client],
-            )
-        ),
-        RegisterEventHandler(
-            OnProcessIO(
-                target_action=motor_claw_open_client,
-                on_stdout= motor_lift_close_client
-            )
-        ),
+        # motor_server_fake,
+        # RegisterEventHandler(
+        #     OnProcessStart(
+        #         target_action=motor_server_fake,
+        #         on_start=[motor_claw_open_client],
+        #     )
+        # ),
+        # RegisterEventHandler(
+        #     OnProcessIO(
+        #         target_action=motor_claw_open_client,
+        #         on_stdout= motor_lift_close_client
+        #     )
+        # ),
 
         # RegisterEventHandler(
         #     OnProcessExit(
@@ -118,4 +118,13 @@ def generate_launch_description():
         #         on_exit=test_node1
             # )
         # ),
+
+        test_node1,
+
+        RegisterEventHandler(
+            OnProcessExit(
+                target_action=test_node1,
+                on_exit=test_node2
+            )
+        )
     ])
