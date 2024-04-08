@@ -1,0 +1,12 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from r2_interfaces/msg/LedStateArray.msg
+// generated code does not contain a copyright notice
+
+
+module r2_interfaces {
+  module msg {
+    struct LedStateArray {
+      sequence<int64> led_states;
+    };
+  };
+};

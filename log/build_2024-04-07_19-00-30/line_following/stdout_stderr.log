@@ -1,0 +1,43 @@
+[100%] Built target line_following_cpp
+[100%] Built target ament_cmake_python_symlink_line_following
+running egg_info
+writing line_following.egg-info/PKG-INFO
+writing dependency_links to line_following.egg-info/dependency_links.txt
+writing top-level names to line_following.egg-info/top_level.txt
+reading manifest file 'line_following.egg-info/SOURCES.txt'
+writing manifest file 'line_following.egg-info/SOURCES.txt'
+[100%] Built target ament_cmake_python_build_line_following_egg
+-- Install configuration: ""
+-- Execute custom install script
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/line_following_cpp
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/pythonpath.sh
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/pythonpath.dsv
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/PKG-INFO
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/SOURCES.txt
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/dependency_links.txt
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/top_level.txt
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/__init__.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/line_following.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/lsa08_due_fake.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/pid_tuning.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/line_following.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/lsa08_due_fake.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/pid_tuning.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/launch/fake_line_follower.launch.py
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/config/line_follower.yaml
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/package_run_dependencies/line_following
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/parent_prefix_path/line_following
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/path.sh
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/path.dsv
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.bash
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.sh
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.zsh
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.dsv
+-- Symlinking: /home/himaj/r2_ws/src/install/line_following/share/line_following/package.dsv
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/packages/line_following
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/cmake/line_followingConfig.cmake
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/cmake/line_followingConfig-version.cmake
+-- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/package.xml
+Listing '/home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following'...

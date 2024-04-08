@@ -1,0 +1,3 @@
+[console_scripts]
+silo_tracking = silo_tracking.silo_detect:main
+

@@ -1,0 +1,3 @@
+[console_scripts]
+luna_wall_align = luna_control.luna_wall_align:main
+

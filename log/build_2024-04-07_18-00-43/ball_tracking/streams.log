@@ -1,0 +1,27 @@
+[1.013s] Invoking command in '/home/himaj/r2_ws/src/build/ball_tracking': PYTHONPATH=/home/himaj/r2_ws/src/build/ball_tracking/prefix_override:/home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/ball_tracking/build --no-deps symlink_data
+[1.306s] running develop
+[1.482s] running egg_info
+[1.482s] creating ball_tracking.egg-info
+[1.482s] writing ball_tracking.egg-info/PKG-INFO
+[1.482s] writing dependency_links to ball_tracking.egg-info/dependency_links.txt
+[1.482s] writing entry points to ball_tracking.egg-info/entry_points.txt
+[1.482s] writing requirements to ball_tracking.egg-info/requires.txt
+[1.483s] writing top-level names to ball_tracking.egg-info/top_level.txt
+[1.483s] writing manifest file 'ball_tracking.egg-info/SOURCES.txt'
+[1.485s] reading manifest file 'ball_tracking.egg-info/SOURCES.txt'
+[1.486s] writing manifest file 'ball_tracking.egg-info/SOURCES.txt'
+[1.487s] running build_ext
+[1.488s] Creating /home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages/ball-tracking.egg-link (link to .)
+[1.488s] Installing ball_tracker script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+[1.488s] Installing ball_tracker2 script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+[1.488s] Installing ball_tracker3 script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+[1.489s] Installing testnode script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+[1.489s] 
+[1.489s] Installed /home/himaj/r2_ws/src/build/ball_tracking
+[1.489s] running symlink_data
+[1.489s] creating /home/himaj/r2_ws/src/install/ball_tracking/share/ament_index
+[1.489s] creating /home/himaj/r2_ws/src/install/ball_tracking/share/ament_index/resource_index
+[1.489s] creating /home/himaj/r2_ws/src/install/ball_tracking/share/ament_index/resource_index/packages
+[1.489s] symbolically linking /home/himaj/r2_ws/src/build/ball_tracking/resource/ball_tracking -> /home/himaj/r2_ws/src/install/ball_tracking/share/ament_index/resource_index/packages
+[1.489s] symbolically linking /home/himaj/r2_ws/src/build/ball_tracking/package.xml -> /home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking
+[1.538s] Invoked command in '/home/himaj/r2_ws/src/build/ball_tracking' returned '0': PYTHONPATH=/home/himaj/r2_ws/src/build/ball_tracking/prefix_override:/home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/ball_tracking/build --no-deps symlink_data

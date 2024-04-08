@@ -1,0 +1,9 @@
+[console_scripts]
+force_stop = r2_py.force_stop:main
+motor_client = r2_py.motor_client:main
+motor_server_fake = r2_py.motor_server_fake:main
+number_counter = r2_py.number_counter:main
+number_publisher = r2_py.number_publisher:main
+test_node1 = r2_py.test_node1:main
+test_node2 = r2_py.test_node2:main
+

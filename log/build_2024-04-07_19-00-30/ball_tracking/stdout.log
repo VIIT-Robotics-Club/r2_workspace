@@ -1,0 +1,18 @@
+running develop
+running egg_info
+writing ball_tracking.egg-info/PKG-INFO
+writing dependency_links to ball_tracking.egg-info/dependency_links.txt
+writing entry points to ball_tracking.egg-info/entry_points.txt
+writing requirements to ball_tracking.egg-info/requires.txt
+writing top-level names to ball_tracking.egg-info/top_level.txt
+reading manifest file 'ball_tracking.egg-info/SOURCES.txt'
+writing manifest file 'ball_tracking.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages/ball-tracking.egg-link (link to .)
+Installing ball_tracker script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+Installing ball_tracker2 script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+Installing ball_tracker3 script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+Installing testnode script to /home/himaj/r2_ws/src/install/ball_tracking/lib/ball_tracking
+
+Installed /home/himaj/r2_ws/src/build/ball_tracking
+running symlink_data

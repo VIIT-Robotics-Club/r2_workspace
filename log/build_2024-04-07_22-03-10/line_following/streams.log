@@ -1,0 +1,47 @@
+[0.450s] Invoking command in '/home/himaj/r2_ws/src/build/line_following': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/line_following -- -j12 -l12
+[0.563s] [  0%] Built target ament_cmake_python_symlink_line_following
+[0.563s] [100%] Built target line_following_cpp
+[0.937s] running egg_info
+[0.938s] writing line_following.egg-info/PKG-INFO
+[0.938s] writing dependency_links to line_following.egg-info/dependency_links.txt
+[0.938s] writing top-level names to line_following.egg-info/top_level.txt
+[0.941s] reading manifest file 'line_following.egg-info/SOURCES.txt'
+[0.942s] writing manifest file 'line_following.egg-info/SOURCES.txt'
+[1.002s] [100%] Built target ament_cmake_python_build_line_following_egg
+[1.020s] Invoked command in '/home/himaj/r2_ws/src/build/line_following' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/line_following -- -j12 -l12
+[1.069s] Invoking command in '/home/himaj/r2_ws/src/build/line_following': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/line_following
+[1.081s] -- Install configuration: ""
+[1.081s] -- Execute custom install script
+[1.082s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/line_following_cpp
+[1.082s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/pythonpath.sh
+[1.082s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/pythonpath.dsv
+[1.083s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/PKG-INFO
+[1.083s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/SOURCES.txt
+[1.083s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/dependency_links.txt
+[1.083s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following-0.0.0-py3.10.egg-info/top_level.txt
+[1.084s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/__init__.py
+[1.084s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/line_following.py
+[1.084s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/lsa08_due_fake.py
+[1.084s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following/pid_tuning.py
+[1.084s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/line_following.py
+[1.085s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/lsa08_due_fake.py
+[1.085s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/lib/line_following/pid_tuning.py
+[1.085s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/launch/fake_line_follower.launch.py
+[1.086s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/config/line_follower.yaml
+[1.086s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/package_run_dependencies/line_following
+[1.086s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/parent_prefix_path/line_following
+[1.087s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/ament_prefix_path.sh
+[1.087s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/ament_prefix_path.dsv
+[1.087s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/path.sh
+[1.087s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/environment/path.dsv
+[1.088s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.bash
+[1.088s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.sh
+[1.088s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.zsh
+[1.088s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/local_setup.dsv
+[1.089s] -- Symlinking: /home/himaj/r2_ws/src/install/line_following/share/line_following/package.dsv
+[1.104s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/ament_index/resource_index/packages/line_following
+[1.104s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/cmake/line_followingConfig.cmake
+[1.104s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/cmake/line_followingConfig-version.cmake
+[1.105s] -- Up-to-date symlink: /home/himaj/r2_ws/src/install/line_following/share/line_following/package.xml
+[1.157s] Listing '/home/himaj/r2_ws/src/install/line_following/local/lib/python3.10/dist-packages/line_following'...
+[1.168s] Invoked command in '/home/himaj/r2_ws/src/build/line_following' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/line_following

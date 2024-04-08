@@ -1,0 +1,1 @@
+/home/himaj/r2_ws/src/build/r2_interfaces/ament_cmake_core/r2_interfacesConfig-version.cmake

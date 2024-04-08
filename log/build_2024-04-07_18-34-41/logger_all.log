@@ -1,0 +1,551 @@
+[0.101s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--symlink-install']
+[0.101s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=True, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=12, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x72839ef33f40>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x72839ef33940>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x72839ef33940>>)
+[0.266s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.266s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.266s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.266s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.267s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.267s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.267s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/himaj/r2_ws/src'
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.267s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.276s] Level 1:colcon.colcon_core.package_identification:_identify(Microros_pub_sub) by extensions ['ignore', 'ignore_ament_install']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(Microros_pub_sub) by extension 'ignore'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(Microros_pub_sub) ignored
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extensions ['ignore', 'ignore_ament_install']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extension 'ignore'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extension 'ignore_ament_install'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extensions ['colcon_pkg']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extension 'colcon_pkg'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extensions ['colcon_meta']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extension 'colcon_meta'
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extensions ['ros']
+[0.277s] Level 1:colcon.colcon_core.package_identification:_identify(ball_tracking) by extension 'ros'
+[0.291s] DEBUG:colcon.colcon_core.package_identification:Package 'ball_tracking' with type 'ros.ament_python' and name 'ball_tracking'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extensions ['ignore', 'ignore_ament_install']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extension 'ignore'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extension 'ignore_ament_install'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extensions ['colcon_pkg']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extension 'colcon_pkg'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extensions ['colcon_meta']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extension 'colcon_meta'
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extensions ['ros']
+[0.291s] Level 1:colcon.colcon_core.package_identification:_identify(line_following) by extension 'ros'
+[0.292s] DEBUG:colcon.colcon_core.package_identification:Package 'line_following' with type 'ros.ament_cmake' and name 'line_following'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extensions ['ignore', 'ignore_ament_install']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extension 'ignore'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extension 'ignore_ament_install'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extensions ['colcon_pkg']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extension 'colcon_pkg'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extensions ['colcon_meta']
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extension 'colcon_meta'
+[0.292s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extensions ['ros']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(luna_control) by extension 'ros'
+[0.293s] DEBUG:colcon.colcon_core.package_identification:Package 'luna_control' with type 'ros.ament_python' and name 'luna_control'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extensions ['ignore', 'ignore_ament_install']
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extension 'ignore'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extension 'ignore_ament_install'
+[0.293s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extensions ['colcon_pkg']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extension 'colcon_pkg'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extensions ['colcon_meta']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extension 'colcon_meta'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extensions ['ros']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_bringup) by extension 'ros'
+[0.294s] DEBUG:colcon.colcon_core.package_identification:Package 'r2_bringup' with type 'ros.ament_cmake' and name 'r2_bringup'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extensions ['ignore', 'ignore_ament_install']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extension 'ignore'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extension 'ignore_ament_install'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extensions ['colcon_pkg']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extension 'colcon_pkg'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extensions ['colcon_meta']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extension 'colcon_meta'
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extensions ['ros']
+[0.294s] Level 1:colcon.colcon_core.package_identification:_identify(r2_description) by extension 'ros'
+[0.295s] DEBUG:colcon.colcon_core.package_identification:Package 'r2_description' with type 'ros.ament_cmake' and name 'r2_description'
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extensions ['ignore', 'ignore_ament_install']
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extension 'ignore'
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extension 'ignore_ament_install'
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extensions ['colcon_pkg']
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extension 'colcon_pkg'
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extensions ['colcon_meta']
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extension 'colcon_meta'
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extensions ['ros']
+[0.295s] Level 1:colcon.colcon_core.package_identification:_identify(r2_interfaces) by extension 'ros'
+[0.296s] DEBUG:colcon.colcon_core.package_identification:Package 'r2_interfaces' with type 'ros.ament_cmake' and name 'r2_interfaces'
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extensions ['ignore', 'ignore_ament_install']
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extension 'ignore'
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extension 'ignore_ament_install'
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extensions ['colcon_pkg']
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extension 'colcon_pkg'
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extensions ['colcon_meta']
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extension 'colcon_meta'
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extensions ['ros']
+[0.296s] Level 1:colcon.colcon_core.package_identification:_identify(r2_py) by extension 'ros'
+[0.297s] DEBUG:colcon.colcon_core.package_identification:Package 'r2_py' with type 'ros.ament_python' and name 'r2_py'
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extensions ['ignore', 'ignore_ament_install']
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extension 'ignore'
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extension 'ignore_ament_install'
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extensions ['colcon_pkg']
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extension 'colcon_pkg'
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extensions ['colcon_meta']
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extension 'colcon_meta'
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extensions ['ros']
+[0.297s] Level 1:colcon.colcon_core.package_identification:_identify(silo_tracking) by extension 'ros'
+[0.297s] DEBUG:colcon.colcon_core.package_identification:Package 'silo_tracking' with type 'ros.ament_python' and name 'silo_tracking'
+[0.297s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.297s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.298s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.298s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.298s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.321s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.321s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.327s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 4 installed packages in /home/himaj/test_ws/install
+[0.327s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 9 installed packages in /home/himaj/r2_ws/install
+[0.328s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 2 installed packages in /home/himaj/arm_rover/install
+[0.328s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/himaj/test_arm_meshes_ws/install
+[0.328s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/himaj/xbox_ros_ws/install
+[0.329s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 2 installed packages in /home/himaj/bot_alignment/install
+[0.329s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 4 installed packages in /home/himaj/arm_ros_ws/install
+[0.329s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 5 installed packages in /home/himaj/install
+[0.330s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 3 installed packages in /home/himaj/ros2_ws/install
+[0.330s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/himaj/control_ws/install
+[0.332s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 394 installed packages in /opt/ros/humble
+[0.334s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.395s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_target' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_clean_cache' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_clean_first' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'cmake_force_configure' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'ament_cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'catkin_cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'ball_tracking' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.396s] DEBUG:colcon.colcon_core.verb:Building package 'ball_tracking' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/ball_tracking', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/ball_tracking', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/ball_tracking', 'symlink_install': True, 'test_result_base': None}
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_target' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_clean_cache' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_clean_first' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'cmake_force_configure' from command line to 'False'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'ament_cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'catkin_cmake_args' from command line to 'None'
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'line_following' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.396s] DEBUG:colcon.colcon_core.verb:Building package 'line_following' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/line_following', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/line_following', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/line_following', 'symlink_install': True, 'test_result_base': None}
+[0.396s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_target' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_clean_cache' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_clean_first' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'cmake_force_configure' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'ament_cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'catkin_cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_description' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.397s] DEBUG:colcon.colcon_core.verb:Building package 'r2_description' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/r2_description', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/r2_description', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/r2_description', 'symlink_install': True, 'test_result_base': None}
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_target' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_clean_cache' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_clean_first' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'cmake_force_configure' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'ament_cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'catkin_cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'r2_interfaces' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.397s] DEBUG:colcon.colcon_core.verb:Building package 'r2_interfaces' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/r2_interfaces', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/r2_interfaces', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/r2_interfaces', 'symlink_install': True, 'test_result_base': None}
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_args' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_target' from command line to 'None'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_clean_cache' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_clean_first' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'cmake_force_configure' from command line to 'False'
+[0.397s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'ament_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'catkin_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'silo_tracking' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.398s] DEBUG:colcon.colcon_core.verb:Building package 'silo_tracking' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/silo_tracking', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/silo_tracking', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/silo_tracking', 'symlink_install': True, 'test_result_base': None}
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_target' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_clean_cache' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_clean_first' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'cmake_force_configure' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'ament_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'catkin_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'luna_control' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.398s] DEBUG:colcon.colcon_core.verb:Building package 'luna_control' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/luna_control', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/luna_control', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/luna_control', 'symlink_install': True, 'test_result_base': None}
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_target' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_clean_cache' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_clean_first' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'cmake_force_configure' from command line to 'False'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'ament_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'catkin_cmake_args' from command line to 'None'
+[0.398s] Level 5:colcon.colcon_core.verb:set package 'r2_py' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.398s] DEBUG:colcon.colcon_core.verb:Building package 'r2_py' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/r2_py', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/r2_py', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/r2_py', 'symlink_install': True, 'test_result_base': None}
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_args' from command line to 'None'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_target' from command line to 'None'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_clean_cache' from command line to 'False'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_clean_first' from command line to 'False'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'cmake_force_configure' from command line to 'False'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'ament_cmake_args' from command line to 'None'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'catkin_cmake_args' from command line to 'None'
+[0.399s] Level 5:colcon.colcon_core.verb:set package 'r2_bringup' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.399s] DEBUG:colcon.colcon_core.verb:Building package 'r2_bringup' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/himaj/r2_ws/src/build/r2_bringup', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/himaj/r2_ws/src/install/r2_bringup', 'merge_install': False, 'path': '/home/himaj/r2_ws/src/r2_bringup', 'symlink_install': True, 'test_result_base': None}
+[0.399s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.400s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.400s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/himaj/r2_ws/src/r2_description' with build type 'ament_cmake'
+[0.400s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/himaj/r2_ws/src/r2_description'
+[0.404s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.404s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.404s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.411s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/himaj/r2_ws/src/r2_interfaces' with build type 'ament_cmake'
+[0.411s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/himaj/r2_ws/src/r2_interfaces'
+[0.412s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.412s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.418s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/himaj/r2_ws/src/ball_tracking' with build type 'ament_python'
+[0.419s] Level 1:colcon.colcon_core.shell:create_environment_hook('ball_tracking', 'ament_prefix_path')
+[0.419s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/ament_prefix_path.ps1'
+[0.420s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/ament_prefix_path.dsv'
+[0.420s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/ament_prefix_path.sh'
+[0.421s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.421s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.427s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/himaj/r2_ws/src/line_following' with build type 'ament_cmake'
+[0.427s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/himaj/r2_ws/src/line_following'
+[0.428s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.428s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.435s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/himaj/r2_ws/src/silo_tracking' with build type 'ament_python'
+[0.435s] Level 1:colcon.colcon_core.shell:create_environment_hook('silo_tracking', 'ament_prefix_path')
+[0.435s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/ament_prefix_path.ps1'
+[0.436s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/ament_prefix_path.dsv'
+[0.436s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/ament_prefix_path.sh'
+[0.437s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.437s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.449s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_description -- -j12 -l12
+[0.454s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_interfaces -- -j12 -l12
+[0.748s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/himaj/r2_ws/src/ball_tracking'
+[0.749s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.749s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.759s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/line_following': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/line_following -- -j12 -l12
+[1.029s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/himaj/r2_ws/src/silo_tracking'
+[1.030s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.030s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.045s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_description -- -j12 -l12
+[1.047s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_interfaces -- -j12 -l12
+[1.089s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_description
+[1.120s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_description)
+[1.122s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_description
+[1.126s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description' for CMake module files
+[1.127s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description' for CMake config files
+[1.128s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_description', 'cmake_prefix_path')
+[1.128s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.ps1'
+[1.129s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.dsv'
+[1.129s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.sh'
+[1.130s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/bin'
+[1.130s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/lib/pkgconfig/r2_description.pc'
+[1.130s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/lib/python3.10/site-packages'
+[1.131s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/bin'
+[1.131s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.ps1'
+[1.133s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.dsv'
+[1.134s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.sh'
+[1.135s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.bash'
+[1.136s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.zsh'
+[1.138s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_description/share/colcon-core/packages/r2_description)
+[1.168s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_description)
+[1.168s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description' for CMake module files
+[1.169s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description' for CMake config files
+[1.169s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_description', 'cmake_prefix_path')
+[1.169s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.ps1'
+[1.170s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.dsv'
+[1.170s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/hook/cmake_prefix_path.sh'
+[1.171s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/bin'
+[1.171s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/lib/pkgconfig/r2_description.pc'
+[1.171s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/lib/python3.10/site-packages'
+[1.171s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_description/bin'
+[1.171s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.ps1'
+[1.172s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.dsv'
+[1.172s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.sh'
+[1.173s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.bash'
+[1.174s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_description/share/r2_description/package.zsh'
+[1.174s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_description/share/colcon-core/packages/r2_description)
+[1.177s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_interfaces
+[1.202s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/line_following' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --build /home/himaj/r2_ws/src/build/line_following -- -j12 -l12
+[1.239s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/line_following': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/line_following
+[1.281s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_interfaces)
+[1.282s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces' for CMake module files
+[1.282s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_interfaces
+[1.283s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces' for CMake config files
+[1.284s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_interfaces', 'cmake_prefix_path')
+[1.284s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.ps1'
+[1.284s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.dsv'
+[1.285s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.sh'
+[1.285s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib'
+[1.285s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_interfaces', 'ld_library_path_lib')
+[1.286s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.ps1'
+[1.286s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.dsv'
+[1.286s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.sh'
+[1.287s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/bin'
+[1.287s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib/pkgconfig/r2_interfaces.pc'
+[1.287s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib/python3.10/site-packages'
+[1.287s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/bin'
+[1.287s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.ps1'
+[1.288s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.dsv'
+[1.288s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.sh'
+[1.289s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.bash'
+[1.289s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.zsh'
+[1.289s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_interfaces/share/colcon-core/packages/r2_interfaces)
+[1.318s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(line_following)
+[1.319s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following' for CMake module files
+[1.319s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/line_following' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble /usr/bin/cmake --install /home/himaj/r2_ws/src/build/line_following
+[1.320s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following' for CMake config files
+[1.320s] Level 1:colcon.colcon_core.shell:create_environment_hook('line_following', 'cmake_prefix_path')
+[1.321s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.ps1'
+[1.321s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.dsv'
+[1.321s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.sh'
+[1.322s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib'
+[1.322s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/bin'
+[1.322s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib/pkgconfig/line_following.pc'
+[1.322s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib/python3.10/site-packages'
+[1.322s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/bin'
+[1.323s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.ps1'
+[1.323s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.dsv'
+[1.323s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.sh'
+[1.324s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.bash'
+[1.324s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.zsh'
+[1.325s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/line_following/share/colcon-core/packages/line_following)
+[1.360s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(line_following)
+[1.361s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following' for CMake module files
+[1.361s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following' for CMake config files
+[1.362s] Level 1:colcon.colcon_core.shell:create_environment_hook('line_following', 'cmake_prefix_path')
+[1.362s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.ps1'
+[1.362s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.dsv'
+[1.363s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/line_following/share/line_following/hook/cmake_prefix_path.sh'
+[1.363s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib'
+[1.363s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/bin'
+[1.363s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib/pkgconfig/line_following.pc'
+[1.363s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/lib/python3.10/site-packages'
+[1.364s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/line_following/bin'
+[1.364s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.ps1'
+[1.364s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.dsv'
+[1.365s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.sh'
+[1.365s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.bash'
+[1.366s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/line_following/share/line_following/package.zsh'
+[1.366s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/line_following/share/colcon-core/packages/line_following)
+[1.418s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_interfaces)
+[1.418s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces' for CMake module files
+[1.419s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces' for CMake config files
+[1.420s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_interfaces', 'cmake_prefix_path')
+[1.421s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.ps1'
+[1.421s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.dsv'
+[1.422s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/cmake_prefix_path.sh'
+[1.422s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib'
+[1.422s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_interfaces', 'ld_library_path_lib')
+[1.423s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.ps1'
+[1.423s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.dsv'
+[1.424s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/hook/ld_library_path_lib.sh'
+[1.424s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/bin'
+[1.424s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib/pkgconfig/r2_interfaces.pc'
+[1.424s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/lib/python3.10/site-packages'
+[1.425s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_interfaces/bin'
+[1.425s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.ps1'
+[1.426s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.dsv'
+[1.427s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.sh'
+[1.427s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.bash'
+[1.428s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_interfaces/share/r2_interfaces/package.zsh'
+[1.429s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_interfaces/share/colcon-core/packages/r2_interfaces)
+[1.429s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/himaj/r2_ws/src/r2_py' with build type 'ament_python'
+[1.429s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_py', 'ament_prefix_path')
+[1.430s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/ament_prefix_path.ps1'
+[1.430s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/ament_prefix_path.dsv'
+[1.431s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/ament_prefix_path.sh'
+[1.432s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.432s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.444s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/himaj/r2_ws/src/luna_control' with build type 'ament_python'
+[1.444s] Level 1:colcon.colcon_core.shell:create_environment_hook('luna_control', 'ament_prefix_path')
+[1.445s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/ament_prefix_path.ps1'
+[1.445s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/ament_prefix_path.dsv'
+[1.446s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/ament_prefix_path.sh'
+[1.446s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.446s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.783s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/himaj/r2_ws/src/r2_py'
+[1.784s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.784s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.794s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/ball_tracking': PYTHONPATH=/home/himaj/r2_ws/src/build/ball_tracking/prefix_override:/home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/ball_tracking/build --no-deps symlink_data
+[2.082s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/himaj/r2_ws/src/luna_control'
+[2.082s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[2.082s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[2.093s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/silo_tracking': PYTHONPATH=/home/himaj/r2_ws/src/build/silo_tracking/prefix_override:/home/himaj/r2_ws/src/install/silo_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/silo_tracking/build --no-deps symlink_data
+[2.394s] Level 1:colcon.colcon_core.shell:create_environment_hook('ball_tracking', 'pythonpath_develop')
+[2.394s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/ball_tracking/share/ball_tracking/hook/pythonpath_develop.ps1'
+[2.395s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/ball_tracking' returned '0': PYTHONPATH=/home/himaj/r2_ws/src/build/ball_tracking/prefix_override:/home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/ball_tracking/build --no-deps symlink_data
+[2.395s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/build/ball_tracking/share/ball_tracking/hook/pythonpath_develop.dsv'
+[2.396s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/ball_tracking/share/ball_tracking/hook/pythonpath_develop.sh'
+[2.396s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking' for CMake module files
+[2.397s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking' for CMake config files
+[2.398s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking/lib'
+[2.398s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking/bin'
+[2.398s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking/lib/pkgconfig/ball_tracking.pc'
+[2.398s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking/lib/python3.10/site-packages'
+[2.398s] Level 1:colcon.colcon_core.shell:create_environment_hook('ball_tracking', 'pythonpath')
+[2.398s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/pythonpath.ps1'
+[2.399s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/pythonpath.dsv'
+[2.399s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/hook/pythonpath.sh'
+[2.400s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/ball_tracking/bin'
+[2.400s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(ball_tracking)
+[2.400s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/package.ps1'
+[2.401s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/package.dsv'
+[2.402s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/package.sh'
+[2.402s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/package.bash'
+[2.403s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/ball_tracking/share/ball_tracking/package.zsh'
+[2.403s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/ball_tracking/share/colcon-core/packages/ball_tracking)
+[2.488s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_py': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py/prefix_override:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/r2_py/build --no-deps symlink_data
+[2.498s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/luna_control': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/luna_control/prefix_override:/home/himaj/r2_ws/src/install/luna_control/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/luna_control/build --no-deps symlink_data
+[2.642s] Level 1:colcon.colcon_core.shell:create_environment_hook('silo_tracking', 'pythonpath_develop')
+[2.642s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/silo_tracking/share/silo_tracking/hook/pythonpath_develop.ps1'
+[2.643s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/silo_tracking' returned '0': PYTHONPATH=/home/himaj/r2_ws/src/build/silo_tracking/prefix_override:/home/himaj/r2_ws/src/install/silo_tracking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/silo_tracking/build --no-deps symlink_data
+[2.643s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/build/silo_tracking/share/silo_tracking/hook/pythonpath_develop.dsv'
+[2.644s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/silo_tracking/share/silo_tracking/hook/pythonpath_develop.sh'
+[2.644s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking' for CMake module files
+[2.645s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking' for CMake config files
+[2.645s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking/lib'
+[2.645s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking/bin'
+[2.645s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking/lib/pkgconfig/silo_tracking.pc'
+[2.646s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking/lib/python3.10/site-packages'
+[2.646s] Level 1:colcon.colcon_core.shell:create_environment_hook('silo_tracking', 'pythonpath')
+[2.646s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/pythonpath.ps1'
+[2.646s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/pythonpath.dsv'
+[2.646s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/hook/pythonpath.sh'
+[2.647s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/silo_tracking/bin'
+[2.647s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(silo_tracking)
+[2.647s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/package.ps1'
+[2.648s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/package.dsv'
+[2.648s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/package.sh'
+[2.649s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/package.bash'
+[2.649s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/silo_tracking/share/silo_tracking/package.zsh'
+[2.650s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/silo_tracking/share/colcon-core/packages/silo_tracking)
+[3.012s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_py', 'pythonpath_develop')
+[3.012s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/r2_py/share/r2_py/hook/pythonpath_develop.ps1'
+[3.013s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_py' returned '0': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py/prefix_override:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/r2_py/build --no-deps symlink_data
+[3.013s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/build/r2_py/share/r2_py/hook/pythonpath_develop.dsv'
+[3.013s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/r2_py/share/r2_py/hook/pythonpath_develop.sh'
+[3.014s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py' for CMake module files
+[3.015s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py' for CMake config files
+[3.015s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py/lib'
+[3.015s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py/bin'
+[3.015s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py/lib/pkgconfig/r2_py.pc'
+[3.016s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages'
+[3.016s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_py', 'pythonpath')
+[3.016s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/pythonpath.ps1'
+[3.017s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/pythonpath.dsv'
+[3.017s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/hook/pythonpath.sh'
+[3.017s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_py/bin'
+[3.018s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_py)
+[3.018s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/package.ps1'
+[3.019s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/package.dsv'
+[3.019s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/package.sh'
+[3.020s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/package.bash'
+[3.020s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_py/share/r2_py/package.zsh'
+[3.020s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_py/share/colcon-core/packages/r2_py)
+[3.021s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/himaj/r2_ws/src/r2_bringup' with build type 'ament_cmake'
+[3.021s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/himaj/r2_ws/src/r2_bringup'
+[3.021s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[3.021s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[3.046s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_bringup': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_py:/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:/home/himaj/r2_ws/install/r2_bringup:/home/himaj/r2_ws/install/r2_interfaces:/home/himaj/r2_ws/install/r2_description:/home/himaj/r2_ws/install/line_following:/home/himaj/r2_ws/install/imu_filter_madgwick:/home/himaj/test_ws/install/test_bringup:/home/himaj/test_ws/install/my_robot_interfaces:/home/himaj/arm_rover/install/arm_urdf:/home/himaj/arm_rover/install/arm_rover_bringup:/home/himaj/test_arm_meshes_ws/install/arm_description:/home/himaj/control_ws/install/ros2_control_demo_example_2:/home/himaj/arm_ros_ws/install/robot_bringup:/home/himaj/arm_ros_ws/install/robot_description:/home/himaj/arm_ros_ws/install/my_robot_description:/home/himaj/install/robot_bringup:/home/himaj/install/robot_description:/home/himaj/install/my_robot_bringup:/home/himaj/install/my_robot_description:/home/himaj/ros2_ws/install/my_robot_bringup:/home/himaj/ros2_ws/install/my_robot_description:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_bringup -- -j12 -l12
+[3.060s] Level 1:colcon.colcon_core.shell:create_environment_hook('luna_control', 'pythonpath_develop')
+[3.060s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/luna_control/share/luna_control/hook/pythonpath_develop.ps1'
+[3.061s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/luna_control' returned '0': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${CMAKE_PREFIX_PATH} LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/luna_control/prefix_override:/home/himaj/r2_ws/src/install/luna_control/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py develop --editable --build-directory /home/himaj/r2_ws/src/build/luna_control/build --no-deps symlink_data
+[3.061s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/build/luna_control/share/luna_control/hook/pythonpath_develop.dsv'
+[3.061s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/build/luna_control/share/luna_control/hook/pythonpath_develop.sh'
+[3.062s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control' for CMake module files
+[3.062s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control' for CMake config files
+[3.063s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control/lib'
+[3.063s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control/bin'
+[3.063s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control/lib/pkgconfig/luna_control.pc'
+[3.063s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control/lib/python3.10/site-packages'
+[3.063s] Level 1:colcon.colcon_core.shell:create_environment_hook('luna_control', 'pythonpath')
+[3.064s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/pythonpath.ps1'
+[3.064s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/pythonpath.dsv'
+[3.064s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/hook/pythonpath.sh'
+[3.065s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/luna_control/bin'
+[3.065s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(luna_control)
+[3.065s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/package.ps1'
+[3.065s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/package.dsv'
+[3.066s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/package.sh'
+[3.066s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/package.bash'
+[3.066s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/luna_control/share/luna_control/package.zsh'
+[3.067s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/luna_control/share/colcon-core/packages/luna_control)
+[3.090s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_bringup' returned '0': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_py:/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:/home/himaj/r2_ws/install/r2_bringup:/home/himaj/r2_ws/install/r2_interfaces:/home/himaj/r2_ws/install/r2_description:/home/himaj/r2_ws/install/line_following:/home/himaj/r2_ws/install/imu_filter_madgwick:/home/himaj/test_ws/install/test_bringup:/home/himaj/test_ws/install/my_robot_interfaces:/home/himaj/arm_rover/install/arm_urdf:/home/himaj/arm_rover/install/arm_rover_bringup:/home/himaj/test_arm_meshes_ws/install/arm_description:/home/himaj/control_ws/install/ros2_control_demo_example_2:/home/himaj/arm_ros_ws/install/robot_bringup:/home/himaj/arm_ros_ws/install/robot_description:/home/himaj/arm_ros_ws/install/my_robot_description:/home/himaj/install/robot_bringup:/home/himaj/install/robot_description:/home/himaj/install/my_robot_bringup:/home/himaj/install/my_robot_description:/home/himaj/ros2_ws/install/my_robot_bringup:/home/himaj/ros2_ws/install/my_robot_description:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --build /home/himaj/r2_ws/src/build/r2_bringup -- -j12 -l12
+[3.118s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/himaj/r2_ws/src/build/r2_bringup': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_py:/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:/home/himaj/r2_ws/install/r2_bringup:/home/himaj/r2_ws/install/r2_interfaces:/home/himaj/r2_ws/install/r2_description:/home/himaj/r2_ws/install/line_following:/home/himaj/r2_ws/install/imu_filter_madgwick:/home/himaj/test_ws/install/test_bringup:/home/himaj/test_ws/install/my_robot_interfaces:/home/himaj/arm_rover/install/arm_urdf:/home/himaj/arm_rover/install/arm_rover_bringup:/home/himaj/test_arm_meshes_ws/install/arm_description:/home/himaj/control_ws/install/ros2_control_demo_example_2:/home/himaj/arm_ros_ws/install/robot_bringup:/home/himaj/arm_ros_ws/install/robot_description:/home/himaj/arm_ros_ws/install/my_robot_description:/home/himaj/install/robot_bringup:/home/himaj/install/robot_description:/home/himaj/install/my_robot_bringup:/home/himaj/install/my_robot_description:/home/himaj/ros2_ws/install/my_robot_bringup:/home/himaj/ros2_ws/install/my_robot_description:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_bringup
+[3.147s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_bringup)
+[3.147s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup' for CMake module files
+[3.147s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/himaj/r2_ws/src/build/r2_bringup' returned '0': AMENT_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_py:/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/himaj/r2_ws/src/install/r2_interfaces:/home/himaj/r2_ws/src/install/r2_description:/home/himaj/r2_ws/install/r2_bringup:/home/himaj/r2_ws/install/r2_interfaces:/home/himaj/r2_ws/install/r2_description:/home/himaj/r2_ws/install/line_following:/home/himaj/r2_ws/install/imu_filter_madgwick:/home/himaj/test_ws/install/test_bringup:/home/himaj/test_ws/install/my_robot_interfaces:/home/himaj/arm_rover/install/arm_urdf:/home/himaj/arm_rover/install/arm_rover_bringup:/home/himaj/test_arm_meshes_ws/install/arm_description:/home/himaj/control_ws/install/ros2_control_demo_example_2:/home/himaj/arm_ros_ws/install/robot_bringup:/home/himaj/arm_ros_ws/install/robot_description:/home/himaj/arm_ros_ws/install/my_robot_description:/home/himaj/install/robot_bringup:/home/himaj/install/robot_description:/home/himaj/install/my_robot_bringup:/home/himaj/install/my_robot_description:/home/himaj/ros2_ws/install/my_robot_bringup:/home/himaj/ros2_ws/install/my_robot_description:/home/himaj/r2_ws/install/silo_tracking:/home/himaj/r2_ws/install/r2_py:/home/himaj/r2_ws/install/luna_control:/home/himaj/r2_ws/install/ball_tracking:/home/himaj/test_ws/install/test_py_pkg:/home/himaj/test_ws/install/action_py:/home/himaj/xbox_ros_ws/install/xbox_turtle_controller:/home/himaj/bot_alignment/install/ball_detection:/home/himaj/bot_alignment/install/SerialCom:/home/himaj/arm_ros_ws/install/control_joint_states:/home/himaj/install/my_py_pkg:/home/himaj/ros2_ws/install/my_py_pkg:/opt/ros/humble LD_LIBRARY_PATH=/home/himaj/r2_ws/src/install/r2_interfaces/lib:/home/himaj/r2_ws/install/r2_interfaces/lib:/home/himaj/r2_ws/install/imu_filter_madgwick/lib:/home/himaj/test_ws/install/my_robot_interfaces/lib:/home/himaj/control_ws/install/ros2_control_demo_example_2/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib:/usr/share/gazebo-11/../../lib/x86_64-linux-gnu/gazebo-11/plugins PYTHONPATH=/home/himaj/r2_ws/src/build/r2_py:/home/himaj/r2_ws/src/install/r2_py/lib/python3.10/site-packages:/home/himaj/r2_ws/src/install/r2_interfaces/local/lib/python3.10/dist-packages:${PYTHONPATH} /usr/bin/cmake --install /home/himaj/r2_ws/src/build/r2_bringup
+[3.148s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup' for CMake config files
+[3.148s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_bringup', 'cmake_prefix_path')
+[3.148s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.ps1'
+[3.149s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.dsv'
+[3.149s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.sh'
+[3.149s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/bin'
+[3.149s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/lib/pkgconfig/r2_bringup.pc'
+[3.150s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/lib/python3.10/site-packages'
+[3.150s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/bin'
+[3.150s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.ps1'
+[3.150s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.dsv'
+[3.151s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.sh'
+[3.151s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.bash'
+[3.151s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.zsh'
+[3.152s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_bringup/share/colcon-core/packages/r2_bringup)
+[3.179s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(r2_bringup)
+[3.179s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup' for CMake module files
+[3.179s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup' for CMake config files
+[3.180s] Level 1:colcon.colcon_core.shell:create_environment_hook('r2_bringup', 'cmake_prefix_path')
+[3.180s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.ps1'
+[3.180s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.dsv'
+[3.181s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/hook/cmake_prefix_path.sh'
+[3.181s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/bin'
+[3.181s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/lib/pkgconfig/r2_bringup.pc'
+[3.181s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/lib/python3.10/site-packages'
+[3.181s] Level 1:colcon.colcon_core.environment:checking '/home/himaj/r2_ws/src/install/r2_bringup/bin'
+[3.182s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.ps1'
+[3.182s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.dsv'
+[3.182s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.sh'
+[3.183s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.bash'
+[3.183s] INFO:colcon.colcon_core.shell:Creating package script '/home/himaj/r2_ws/src/install/r2_bringup/share/r2_bringup/package.zsh'
+[3.183s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/himaj/r2_ws/src/install/r2_bringup/share/colcon-core/packages/r2_bringup)
+[3.183s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[3.184s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[3.184s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[3.184s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[3.190s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[3.190s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[3.190s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[3.202s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[3.203s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/himaj/r2_ws/src/install/local_setup.ps1'
+[3.204s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/himaj/r2_ws/src/install/_local_setup_util_ps1.py'
+[3.205s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/himaj/r2_ws/src/install/setup.ps1'
+[3.207s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/himaj/r2_ws/src/install/local_setup.sh'
+[3.208s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/himaj/r2_ws/src/install/_local_setup_util_sh.py'
+[3.208s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/himaj/r2_ws/src/install/setup.sh'
+[3.210s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/himaj/r2_ws/src/install/local_setup.bash'
+[3.211s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/himaj/r2_ws/src/install/setup.bash'
+[3.213s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/himaj/r2_ws/src/install/local_setup.zsh'
+[3.213s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/himaj/r2_ws/src/install/setup.zsh'

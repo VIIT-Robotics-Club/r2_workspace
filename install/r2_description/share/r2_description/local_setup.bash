@@ -1,0 +1,1 @@
+/home/himaj/r2_ws/src/build/r2_description/ament_cmake_environment_hooks/local_setup.bash
