@@ -14,6 +14,7 @@ import os
 def generate_launch_description():
 
     ball_tracking_params = os.path.join(get_package_share_directory('r2_bringup'),'config','ball_tracking.yaml')
+    silo_luna_params = os.path.join(get_package_share_directory('r2_bringup'),'config','luna_allign.yaml')
 
 
 
@@ -61,6 +62,56 @@ def generate_launch_description():
         package='ball_tracking',
         executable='testnode2',
         name='testnode2'
+    )
+
+    go_to_silo_1_luna = Node(
+        package='luna_control',
+        executable='luna_wall_align',
+        name='luna_wall_align',
+        parameters=[
+            {'silo_number': 1},
+            silo_luna_params
+        ]
+    )
+
+    go_to_silo_2_luna = Node(
+        package='luna_control',
+        executable='luna_wall_align',
+        name='luna_wall_align',
+        parameters=[
+            {'silo_number': 2},
+            silo_luna_params
+        ]
+    )
+
+    go_to_silo_3_luna = Node(
+        package='luna_control',
+        executable='luna_wall_align',
+        name='luna_wall_align',
+        parameters=[
+            {'silo_number': 3},
+            silo_luna_params
+        ]
+    )
+
+    go_to_silo_4_luna = Node(
+        package='luna_control',
+        executable='luna_wall_align',
+        name='luna_wall_align',
+        parameters=[
+            {'silo_number': 4},
+            silo_luna_params
+        ]
+    )
+
+    go_to_silo_5_luna = Node(
+        package='luna_control',
+        executable='luna_wall_align',
+        name='luna_wall_align',
+        parameters=[
+            {'silo_number': 5},
+            silo_luna_params
+        ]
     )
 
     
