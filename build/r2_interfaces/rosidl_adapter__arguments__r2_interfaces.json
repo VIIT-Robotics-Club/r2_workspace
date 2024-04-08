@@ -1,8 +1,0 @@
-{
-  "package_name": "r2_interfaces",
-  "non_idl_tuples": [
-    "/home/himaj/r2_ws/src/r2_interfaces:msg/LedStateArray.msg",
-    "/home/himaj/r2_ws/src/r2_interfaces:srv/SetLed.srv",
-    "/home/himaj/r2_ws/src/r2_interfaces:action/CountUntil.action"
-  ]
-}

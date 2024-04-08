@@ -1,1 +1,0 @@
-/home/himaj/r2_ws/src/line_following/launch/fake_line_follower.launch.py

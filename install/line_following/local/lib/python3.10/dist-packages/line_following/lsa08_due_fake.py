@@ -1,1 +1,0 @@
-/home/himaj/r2_ws/src/line_following/line_following/lsa08_due_fake.py

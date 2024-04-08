@@ -1,1 +1,0 @@
-/home/himaj/r2_ws/src/build/line_following/ament_cmake_python/line_following/line_following.egg-info/top_level.txt
