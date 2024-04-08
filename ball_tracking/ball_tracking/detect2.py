@@ -14,6 +14,11 @@ import math
 import torch
 from std_msgs.msg import String
 from std_msgs.msg import Int16MultiArray
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+
+
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
@@ -62,7 +67,17 @@ class YOLOv5ROS2(Node):
         self.setupareasilo = self.get_parameter("setupareasilo").value
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
+        self.subscription = self.create_subscription(Image, 'video_frames', self.callback, 10)
+        self.subscription  # prevent unused variable warning
+        self.bridge = CvBridge()
         self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+    def callback(self, msg):
+        try:
+            frame1 = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            # cv2.imshow("Video Stream", frame)
+            # cv2.waitKey(1)
+        except Exception as e:
+            self.get_logger().error("Error converting image: %s" % str(e))    
         # self.subscription = self.create_subscription(
         #   Int16MultiArray, 
         #   'drive_topic', 
@@ -74,7 +89,7 @@ class YOLOv5ROS2(Node):
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
-        self.run()
+        self.run(weights=redblue_model_path, source=frame1)
 
         # Initialize YOLOv5 model
         # self.initialize_yolov5_model()    
@@ -272,6 +287,7 @@ class YOLOv5ROS2(Node):
                             # if deviation >=-200 and deviation <=200:
                             twist_msg.linear.x = float(LinXs)
                             twist_msg.angular.z = float(AngZpb)
+                            twist_msg.angular.z = 1.0
                             self.publisher_.publish(twist_msg)
                             # twist_msg.linear.y=float(LinZsy)
                             # if (deviation >=-250 and deviation <-200) or (deviation <=250 and deviation >=200)   :

@@ -17,7 +17,7 @@ from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
-MODEL_RELATIVE_PATH = "weights/redballbest.pt"
+MODEL_RELATIVE_PATH = "weights/redbluesilo2.pt"
 
 # Combine the current directory and the relative path to get the absolute path
 redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)

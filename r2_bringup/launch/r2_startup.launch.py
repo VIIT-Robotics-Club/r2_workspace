@@ -58,9 +58,9 @@ def generate_launch_description():
     )
 
     silo_tracking = Node(
-        package='silo_tracking',
-        executable='silo_tracking',
-        name='silo_tracking'
+        package='ball_tracking',
+        executable='testnode2',
+        name='testnode2'
     )
 
     
