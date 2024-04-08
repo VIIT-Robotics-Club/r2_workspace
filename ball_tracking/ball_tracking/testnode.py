@@ -15,13 +15,13 @@ class NumberSubscriberNode(Node):
     # Create a new Twist message
         count =0
         cmd_msg = Twist()
-        if new_msg.linear.z == 0.0:
+        if new_msg.linear.z == 2.0:
     # Assign the desired values to the Twist message
             cmd_msg.linear.x = new_msg.linear.x
             cmd_msg.angular.z = new_msg.angular.z
         if new_msg.linear.x ==0.0 and new_msg.angular.z ==0.0:
-            count = count +1
-        if count > 5 :
+        #     count = count +1
+        # if count > 5 :
             self.destroy_node()
     # Publish the Twist message on the "/cmd_vel" topic
         self.number_count_publisher_.publish(cmd_msg)

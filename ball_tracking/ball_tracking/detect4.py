@@ -54,15 +54,16 @@ class YOLOv5ROS2(Node):
     
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -35000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -41000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain
-        self.declare_parameter("setupareasilo", -105000.00)                  # Integral gain
+        self.declare_parameter("setupareasilo", -70000.00)                  # Integral gain
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
         self.setupareasilo = self.get_parameter("setupareasilo").value
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
-        self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+        self.publisher_ = self.create_publisher(Twist,'/ball_data',10)
+        self.publisher2_ = self.create_publisher(Twist,'/silo_data',10)
         # self.subscription = self.create_subscription(
         #   Int16MultiArray, 
         #   'drive_topic', 
@@ -86,9 +87,9 @@ class YOLOv5ROS2(Node):
         source=0,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.35,  # confidence threshold
+        conf_thres=0.5,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=4,  # maximum detections per image
+        max_det=1,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
@@ -155,6 +156,8 @@ class YOLOv5ROS2(Node):
         silofound=False
         LinXb=0
         AngZpb=0
+        silo_count = 0
+        silo_positions = {}
         for path, im, im0s, vid_cap, s in dataset:
             with dt[0]:
                 im = torch.from_numpy(im).to(model.device)
@@ -182,6 +185,7 @@ class YOLOv5ROS2(Node):
             with dt[2]:
                 pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
             twist_msg = Twist()
+            twist_msg2= Twist()
             # twist_msg.angular.z = 0.0
             # Process predictions
             
@@ -208,7 +212,7 @@ class YOLOv5ROS2(Node):
                     for c in det[:, 5].unique():
                         n = (det[:, 5] == c).sum()  # detections per class
                         s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-
+                
                     # Print class, area, and deviation
                     for *xyxy, conf, cls in reversed(det):
                         c = int(cls)  # integer class
@@ -239,17 +243,30 @@ class YOLOv5ROS2(Node):
                         area=-area
                         # # if label=="Red-ball":
                         # # detections_silo[0][1]=69
-                        if (-area)> -(max_ball):
-                            max_ball=area
-                            if label == "Redball":
+                        # if (-area)> -(max_ball):
+                        #     max_ball=area
+                        if label == "Red-ball":
                                 detections_ball.append((label, area, deviation, x1, y1, x2, y2))
-                        else:
-                            area=max_ball
+                        # else:
+                        #     area=max_ball
                             
                             
                         if label == "silo":
-                            print("hi 2")
+                            # print("hi 2")
                             detections_silo.append((label, area, deviation, x1, y1, x2, y2))
+                        #     center_x = (xyxy[0] + xyxy[2]) / 2
+                        #     center_y = (xyxy[1] + xyxy[3]) / 2
+        
+                        # # Track the position of the detected silo
+                        #     silo_positions[center_x] = (center_x, center_y)
+                        #     silo_count += 1
+                        # sorted_silos = sorted(silo_positions.items(), reverse=True)
+
+                        # # Assign numbers to each silo based on its position (from right to left)
+                        # silo_numbers = {}
+                        # for i, (center_x, _) in enumerate(sorted_silos, start=1):
+                        #     silo_numbers[i] = silo_positions[center_x]
+                        # print(silo_count)
                             # print(detections_silo[0][1])
                         #     twist_msg.linear.x = float(area1)
                         #     twist_msg.angular.z = float(deviation)
@@ -271,25 +288,27 @@ class YOLOv5ROS2(Node):
                         deviation=-deviation   
                         AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
                         LinXb=map(area, -50000,100, 0, 2)
-                        LinXs=map(area,self.setupareasilo,100, 0, 1)
+                        LinXs=map(area,-105000,100, 0, 1)
                         # LinZsy=map(y,self.setupareasilo,0,1,0)
                         
                                                                          
                         if len(detections_ball) > 0 :
                             ballfound=True
                             count_i=len(detections_ball)-1
-                            if  detections_ball[count_i][0] == "Redball" and detections_ball[count_i][1] >= self.setupareaball:
+                            if  detections_ball[count_i][0] == "Red-ball" and detections_ball[count_i][1] >= self.setupareaball:
                             # twist_msg.linear.x = float(LinXb)
                             # twist_msg.angular.z = float(AngZpb)
                             # self.publisher_.publish(twist_msg)
                                 if deviation >=-200 and deviation <=200:
                                     twist_msg.linear.x = float(LinXb)
                                     twist_msg.angular.z = float(AngZpb)
+                                    twist_msg.linear.z=2.0
                                     self.publisher_.publish(twist_msg)
                                 # twist_msg.linear.y=float(LinZsy)
                                 if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
                                     twist_msg.linear.x = float(LinXb/2)
-                                    twist_msg.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
+                                    twist_msg.angular.z = float(AngZpb *2)      
+                                    twist_msg.linear.z=2.0                                                                                                                                                                                                                                                 
                                     self.publisher_.publish(twist_msg)
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
@@ -307,27 +326,34 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.linear.x = float(LinXb)
                         #     twist_msg.angular.z = float(AngZpb)
                         
-                            if  detections_ball[count_i][0] == "Redball" and detections_ball[count_i][1] <= self.setupareaball:
+                            if  detections_ball[count_i][0] == "Red-ball" and detections_ball[count_i][1] <= self.setupareaball:
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                                 twist_msg.linear.x = 0.0
                                 twist_msg.angular.z = 0.0
+                                twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
                             #     if  twist_msg.angular.z == 0.0   and twist_msg.linear.x == 0.0:
                             #         cou
@@ -347,16 +373,16 @@ class YOLOv5ROS2(Node):
                             # twist_msg.angular.z = float(AngZpb)
                             # self.publisher_.publish(twist_msg)
                                 if deviation >=-200 and deviation <=200:
-                                    twist_msg.linear.x = float(LinXs)
-                                    twist_msg.angular.z = float(AngZpb)
-                                    twist_msg.linear.z=1.0
-                                    self.publisher_.publish(twist_msg)
+                                    twist_msg2.linear.x = float(LinXs)
+                                    twist_msg2.angular.z = float(AngZpb)
+                                    twist_msg2.linear.z=1.0
+                                    self.publisher2_.publish(twist_msg2)
                                 # twist_msg.linear.y=float(LinZsy)
                                 if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
-                                    twist_msg.linear.x = float(LinXs/2)
-                                    twist_msg.linear.z=1.0
-                                    twist_msg.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
-                                    self.publisher_.publish(twist_msg)
+                                    twist_msg2.linear.x = float(LinXs/2)
+                                    twist_msg2.linear.z=1.0
+                                    twist_msg2.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
+                                    self.publisher2_.publish(twist_msg2)
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
                         #     print("hi")
@@ -374,34 +400,34 @@ class YOLOv5ROS2(Node):
                         #     twist_msg.angular.z = float(AngZpb)
                         
                             if  detections_silo[count_i][0] == "silo" and detections_silo[count_i][1] <= self.setupareasilo:
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=1.0
-                                self.publisher_.publish(twist_msg)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
+                                twist_msg2.linear.x = 0.0
+                                twist_msg2.angular.z = 0.0
+                                twist_msg2.linear.z=1.0
+                                self.publisher2_.publish(twist_msg2)
                             #     if  twist_msg.angular.z == 0.0   and twist_msg.linear.x == 0.0:
                             #         cou
                             # # # r = math.sqrt(area/3.14)
@@ -412,7 +438,7 @@ class YOLOv5ROS2(Node):
                                 # self.get_logger().info("Enter in node of publisher")
                                 
                                 # Print class, area, and deviation
-                                print(f"Class: {label}, Area: {detections_ball[count_i][1]}, Deviation: {detections_ball[count_i][2]} ")
+                        print(f"Class: {label}, Area: {area}, Deviation: {deviation} ")
                                 # print(seen)
                                 # print(len(detections_ball))
                             # print(detections_ball[count_i][0])    
@@ -446,32 +472,40 @@ class YOLOv5ROS2(Node):
                             annotator.box_label(xyxy, label, color=colors(c, True))
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
-                elif ballfound == False :
+                elif ballfound == False  or silofound == False :
+                    twist_msg.linear.z=2.0
                     # No objects detected, set linear and angular velocities to zero
                     twist_msg.linear.x = 0.0
                     twist_msg.angular.z = 0.5
                     print(ballfound)
-                    self.publisher_.publish(twist_msg)        
-                # Stream results
-                elif ballfound == True:
+                    self.publisher_.publish(twist_msg)  
+                    twist_msg2.linear.z=1.0
+                    twist_msg2.linear.x = 0.0
+                    twist_msg2.angular.z = 0.2
                     # print(ballfound)
+                    self.publisher2_.publish(twist_msg2)         
+                # Stream results
+                elif ballfound == True and silofound == True:
+                    # print(ballfound)
+                    twist_msg.linear.z=2.0
                     # twist_msg.linear.x = float(LinXb)
                     twist_msg.angular.z = float(AngZpb *2)
                     self.publisher_.publish(twist_msg)
-                elif silofound == False :
-                    # No objects detected, set linear and angular velocities to zero
-                    twist_msg.linear.z=1.0
-                    twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.5
-                    # print(ballfound)
-                    self.publisher_.publish(twist_msg)        
-                # Stream results
-                elif silofound == True:
-                    # print(ballfound)
-                    # twist_msg.linear.x = float(LinXb)
                     twist_msg.linear.z=1.0
                     twist_msg.angular.z = float(AngZpb *2)
-                    self.publisher_.publish(twist_msg)    
+                    self.publisher_.publish(twist_msg)  
+                # elif :
+                #     # No objects detected, set linear and angular velocities to zero
+                #     twist_msg.linear.z=1.0
+                #     twist_msg.linear.x = 0.0
+                #     twist_msg.angular.z = 0.5
+                #     # print(ballfound)
+                #     self.publisher_.publish(twist_msg)        
+                # Stream results
+                # elif :
+                    # print(ballfound)
+                    # twist_msg.linear.x = float(LinXb)
+                     
                 im0 = annotator.result()
                 if view_img:
                     if platform.system() == "Linux" and p not in windows:

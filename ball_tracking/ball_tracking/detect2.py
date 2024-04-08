@@ -70,7 +70,7 @@ class YOLOv5ROS2(Node):
         self.subscription = self.create_subscription(Image, 'video_frames', self.callback, 10)
         self.subscription  # prevent unused variable warning
         self.bridge = CvBridge()
-        self.publisher_ = self.create_publisher(Twist,'/cmd_vel',10)
+        self.publisher_ = self.create_publisher(Twist,'/ball_data',10)
     def callback(self, msg):
         try:
             frame1 = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
