@@ -301,12 +301,12 @@ class YOLOv5ROS2(Node):
                         # # if label=="Red-ball":
                         # # detections_silo[0][1]=69
                         if label == "Red-ball":
-                            if (-area)> -(max_ball):
-                                max_ball=area
+                            # if (-area)> -(max_ball):
+                                # max_ball=area
                                 
                                 detections_ball.append((label, area, deviation, x1, y1, x2, y2))
-                            else:
-                                area=max_ball
+                         
+                                # area=max_ball
                             
                             
                         if label == "silo":
@@ -336,8 +336,8 @@ class YOLOv5ROS2(Node):
                             print(f"deviation of silo :  + {sdeviation}")
                             if label == "silo":
                                 x1, y1, x2, y2 = xyxy  # Extract bounding box coordinates
-                            area = abs((x2 - x1) * (y2 - y1))  # Calculate area
-                            leftmost_silo_area = -area
+                                area = abs((x2 - x1) * (y2 - y1))  # Calculate area
+                                leftmost_silo_area = -area
                         # # Assign numbers to each silo based on its position (from right to left)
                         # silo_numbers = {}
                         # for i, (center_x, _) in enumerate(sorted_silos, start=1):
@@ -409,30 +409,30 @@ class YOLOv5ROS2(Node):
                                 twist_msg.angular.z = 0.0
                                 twist_msg.linear.z=2.0
                                 self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
-                                twist_msg.linear.x = 0.0
-                                twist_msg.angular.z = 0.0
-                                twist_msg.linear.z=2.0
-                                self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
+                                # twist_msg.linear.x = 0.0
+                                # twist_msg.angular.z = 0.0
+                                # twist_msg.linear.z=2.0
+                                # self.publisher_.publish(twist_msg)
                             #     if  twist_msg.angular.z == 0.0   and twist_msg.linear.x == 0.0:
                             #         cou
                             # # # r = math.sqrt(area/3.14)
