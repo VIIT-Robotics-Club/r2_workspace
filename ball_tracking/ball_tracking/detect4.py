@@ -56,10 +56,44 @@ class YOLOv5ROS2(Node):
         super().__init__('yolov5_ros2_node')
         self.declare_parameter("setupareaball", -41000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 135.01)                  # Proportional gain
-        self.declare_parameter("setupareasilo", -70000.00)                  # Integral gain
+        self.declare_parameter("setupareasilo", -15000.00)                  # Integral gain
+
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('linear_x_max', 2.0),
+                ('linear_y_max', 2.0),
+                ('linear_x_min', -2.0),
+                ('linear_y_min', -2.0),
+                ('angular_z_max', 1.0),
+                ('angular_z_min', -1.0),
+                ('kp_linear', 0.05),
+                ('ki_linear', 0.0),
+                ('kd_linear', 0.0),
+                ('kp_angular', 0.08),
+                ('ki_angular', 0.0),
+                ('kd_angular', 0.0),                       
+                ]
+        )
+
         self.setupareaball = self.get_parameter("setupareaball").value
         self.setupdev = self.get_parameter("setupdev").value
         self.setupareasilo = self.get_parameter("setupareasilo").value
+
+        self. linear_x_max = self.get_parameter('linear_x_max').value
+        self.linear_y_max = self.get_parameter('linear_y_max').value
+        self.linear_x_min = self.get_parameter('linear_x_min').value
+        self.linear_y_min = self.get_parameter('linear_y_min').value
+        self.angular_z_max = self.get_parameter('angular_z_max').value
+        self.angular_z_min = self.get_parameter('angular_z_min').value
+
+        self.kp_linear = self.get_parameter('kp_linear').value
+        self.kp_angular = self.get_parameter('kp_angular').value
+        self.kd_linear = self.get_parameter('kd_linear').value
+        self.ki_angular = self.get_parameter('kd_angular').value
+        self.kd_angular = self.get_parameter('ki_linear').value
+        self.ki_linear = self.get_parameter('ki_angular').value
+
         # self.declare_parameter("Kd", 0.00)
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/ball_data',10)
@@ -75,21 +109,26 @@ class YOLOv5ROS2(Node):
         # Timer to periodically run YOLOv5 inference
         # self.timer_ = self.create_timer(1.0, self.inference_callback)
 
+        
         self.run()
 
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
+        control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
+        return control_action
+        
         # Initialize YOLOv5 model
         # self.initialize_yolov5_model()    
-
+    
     @smart_inference_mode()
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
+        source=1,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.7,  # confidence threshold
+        conf_thres=0.35,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=1,  # maximum detections per image
+        max_det=2,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
@@ -204,6 +243,21 @@ class YOLOv5ROS2(Node):
                 gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
                 imc = im0.copy() if save_crop else im0  # for save_crop
                 annotator = Annotator(im0, line_width=line_thickness, example=str(names))
+                if ballfound == False   :
+                    twist_msg.linear.z=2.0
+                    # No objects detected, set linear and angular velocities to zero
+                    twist_msg.linear.x = 0.0
+                    twist_msg.angular.z = 0.5
+                    print(ballfound)
+                    self.publisher_.publish(twist_msg)  
+                   
+                if  silofound == False :
+                  
+                    twist_msg2.linear.z=1.0
+                    twist_msg2.linear.x = 0.0
+                    twist_msg2.angular.z = 0.5
+                    # print(ballfound)
+                    self.publisher2_.publish(twist_msg2)   
                 if len(det):
                     # Rescale boxes from img_size to im0 size
                     det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
@@ -285,10 +339,11 @@ class YOLOv5ROS2(Node):
                         # y= math.cos(a) * area
                         # print(y)
                         # print(det)
-                        deviation=-deviation   
-                        AngZpb = map(deviation, -250,self.setupdev, 0.5, 0)
-                        LinXb=map(area, -50000,100, 0, 2)
-                        LinXs=map(area,-105000,100, 0, 1)
+                        deviation=-deviation -50
+                        AngZpb = map(deviation, -250,self.setupdev, 1, 0)
+                        AngZpbl = map(deviation, -250,50, 1, 0)
+                        LinXb=map(area, -50000,-1000, 0, 2)
+                        LinXs=map(area,-10000,-1000, 0, 2)
                         # LinZsy=map(y,self.setupareasilo,0,1,0)
                         
                                                                          
@@ -303,6 +358,10 @@ class YOLOv5ROS2(Node):
                                     twist_msg.linear.x = float(LinXb)
                                     twist_msg.angular.z = float(AngZpb)
                                     twist_msg.linear.z=2.0
+
+                                    # twist_msg.linear.x = self.pid_controller(deviation, 0, 0, 0, 0, 0.1)
+                                    # twist_msg.angular.z = self.pid_controller(deviation, 0, 0, 0, 0, 0.1)
+                                    # twist_msg.linear.z=2.0
                                     self.publisher_.publish(twist_msg)
                                 # twist_msg.linear.y=float(LinZsy)
                                 if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
@@ -372,17 +431,39 @@ class YOLOv5ROS2(Node):
                             # twist_msg.linear.x = float(LinXb)
                             # twist_msg.angular.z = float(AngZpb)
                             # self.publisher_.publish(twist_msg)
-                                if deviation >=-200 and deviation <=200:
-                                    twist_msg2.linear.x = float(LinXs)
-                                    twist_msg2.angular.z = float(AngZpb)
+                                # if deviation >=-200 and deviation <=200:
+                                    print("positive area before = " + str(float(area)))
+                                    area = (15000 + float(area))/200
+                                    # twist_msg2.linear.x = float(LinXs)
+                                    # twist_msg2.angular.z = float(AngZpbl)
+                                    # twist_msg2.linear.z=1.0
+
+                                    # twist_msg2.linear.x = float(LinXs)
+                                    # twist_msg2.angular.z = float(AngZpbl)
+                                    # print(f"positive area =  {float(self.pid_controller(area,0,0,0,0,0.1))} \n")
+                                    print("positive area after = " + str(float(area)))
+                                    print("deviation 2 = " + str(deviation/100))
+                                    deviation = float(deviation)
+
+                                    twist_msg2.linear.x = float(self.pid_controller(area,0,0,0,0,0.1))
+                                    twist_msg2.linear.y = -float(self.pid_controller((deviation/20),0,0,0,0,0.1))
+                                    twist_msg2.angular.z = -float(self.pid_controller((deviation/20),0,0,0,0,0.1))
+
+                                    twist_msg2.linear.x = max(min(twist_msg2.linear.x, self.linear_x_max), self.linear_x_min)
+                                    twist_msg2.linear.y = max(min(twist_msg2.linear.y, self.linear_y_max), self.linear_y_min)
+                                    twist_msg2.angular.z = max(min(twist_msg2.angular.z, self.angular_z_max), self.angular_z_min)
                                     twist_msg2.linear.z=1.0
+
+                                    if(area == 50000):
+                                        twist_msg2.linear.x = 0.0
+
                                     self.publisher2_.publish(twist_msg2)
                                 # twist_msg.linear.y=float(LinZsy)
-                                if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
-                                    twist_msg2.linear.x = float(LinXs/2)
-                                    twist_msg2.linear.z=1.0
-                                    twist_msg2.angular.z = float(AngZpb *2)                                                                                                                                                                                                                                                       
-                                    self.publisher2_.publish(twist_msg2)
+                                # if (deviation >=-250 and deviation <=-200) or (deviation <=250 and deviation >=200)   :
+                                #     twist_msg2.linear.x = float(LinXs/2)
+                                #     twist_msg2.linear.z=1.0
+                                #     twist_msg2.angular.z = float(AngZpbl *2)                                                                                                                                                                                                                                                       
+                                #     self.publisher2_.publish(twist_msg2)
                         # if len(detections_ball) > 0 and detections_ball[0][1] <= self.setupareaball and detections_ball[0][0] == "Red-ball":
                         #     # Robot holds the ball, move towards the silo
                         #     print("hi")
@@ -472,28 +553,19 @@ class YOLOv5ROS2(Node):
                             annotator.box_label(xyxy, label, color=colors(c, True))
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
-                elif ballfound == False  or silofound == False :
-                    twist_msg.linear.z=2.0
-                    # No objects detected, set linear and angular velocities to zero
-                    twist_msg.linear.x = 0.0
-                    twist_msg.angular.z = 0.5
-                    print(ballfound)
-                    self.publisher_.publish(twist_msg)  
-                    twist_msg2.linear.z=1.0
-                    twist_msg2.linear.x = 0.0
-                    twist_msg2.angular.z = 0.2
-                    # print(ballfound)
-                    self.publisher2_.publish(twist_msg2)         
-                # Stream results
-                elif ballfound == True and silofound == True:
-                    # print(ballfound)
-                    twist_msg.linear.z=2.0
-                    # twist_msg.linear.x = float(LinXb)
-                    twist_msg.angular.z = float(AngZpb *2)
-                    self.publisher_.publish(twist_msg)
-                    twist_msg.linear.z=1.0
-                    twist_msg.angular.z = float(AngZpb *2)
-                    self.publisher_.publish(twist_msg)  
+                else:
+                    
+                    if ballfound == True :
+                        # print(ballfound)
+                        twist_msg.linear.z=2.0
+                        # twist_msg.linear.x = float(LinXb)
+                        twist_msg.angular.z = float(AngZpb *2)
+                        self.publisher_.publish(twist_msg)
+                    if silofound==True:
+                        twist_msg2.linear.z=1.0
+                        twist_msg2.angular.z = float(AngZpbl *2)
+                        self.publisher_.publish(twist_msg2)   
+               
                 # elif :
                 #     # No objects detected, set linear and angular velocities to zero
                 #     twist_msg.linear.z=1.0

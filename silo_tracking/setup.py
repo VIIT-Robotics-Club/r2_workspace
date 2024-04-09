@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "silo_tracking=silo_tracking.silo_detect:main"
+            "silo_tracking=silo_tracking.silo_detect:main",
+            "silo_tracking2=silo_tracking.silo_tracking2:main",
         ],
     },
 )
