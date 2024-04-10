@@ -26,15 +26,15 @@ class LunaWallAlignNode(Node):
                 ('linear_y_min', -2.0),
                 ('angular_z_max', 1.0),
                 ('angular_z_min', -1.0),
-                ('kp_linear', 0.5),
-                ('ki_linear', 0.01),
-                ('kd_linear', 0.01),
-                ('kp_angular', 0.5),
-                ('ki_angular', 0.01),
-                ('kd_angular', 0.01),         
-                ('x_goal', 25.0),
-                ('y_goal', 250.0),
-                ('silo_number', 1),                
+                ('kp_linear', 0.08),
+                ('ki_linear', 0.0),
+                ('kd_linear', 0.0),
+                ('kp_angular', 0.08),
+                ('ki_angular', 0.0),
+                ('kd_angular', 0.0),         
+                # ('x_goal', 13.0),
+                # ('y_goal', 250.0),
+                ('silo_number', 1),         
                 ]
         )
 
@@ -54,7 +54,7 @@ class LunaWallAlignNode(Node):
 
         self.x_goal = self.get_parameter('x_goal').value
         self.y_goal = self.get_parameter('y_goal').value
-        # self.silo_number = self.get_parameter('silo_number').value
+        self.silo_number = self.get_parameter('silo_number').value
 
 
         self.luna_subscriber = self.create_subscription(
@@ -87,11 +87,11 @@ class LunaWallAlignNode(Node):
 
 
         self.positions = {
-            '1': {'x': 40.0, 'y': 50.0},
-            '2': {'x': 40.0, 'y': 100.0},
-            '3': {'x': 40.0, 'y': 150.0},
-            '4': {'x': 40.0, 'y': 200.0},
-            '5': {'x': 40.0, 'y': 250.0},
+            1: {'x': 25.0, 'y': 200.0},
+            2: {'x': 13.0, 'y': 250.0},
+            3: {'x': 32.0, 'y': 21.0},
+            4: {'x': 25.0, 'y': 300.0},
+            5: {'x': 25.0, 'y': 340.0},
         }
 
         # Get the position from the environment variable
@@ -112,6 +112,9 @@ class LunaWallAlignNode(Node):
         self.luna_3 = float(msg.data[0])             #Side Left - 11
         self.luna_4 = float(msg.data[2])             #Side right -13 
         self.get_logger().info('Luna data received')
+        self.get_logger().info('x: %d' % self.x_goal)
+        self.get_logger().info('y: %d' % self.y_goal)
+
 
         #All 4 luna readings
         self.get_logger().info('Luna 1: %d' % self.luna_1)
@@ -158,9 +161,10 @@ class LunaWallAlignNode(Node):
         else:
             self.get_logger().info('Entered linear velocity adjustment')
 
-            if (abs(x_avg - self.x_goal) >= 3) or (abs(y_avg - self.y_goal) >= 3):
+            if (abs(x_avg - self.x_goal) >= 2) or (abs(y_avg - self.y_goal) >= 2):
                 self.get_logger().info("x_avg - self.x_goal = " + str(abs(x_avg - self.x_goal)))
-
+                self.get_logger().info("x_goal : " + str(self.x_goal))
+                self.get_logger().info("y_goal : " + str(self.y_goal))
                 dt = 0.1
                 prev_lin_error_x = 0
                 prev_lin_error_y = 0
@@ -189,9 +193,9 @@ class LunaWallAlignNode(Node):
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min)
                 twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
 
-                if(abs(y_avg - self.y_goal) <= 3):
+                if(abs(y_avg - self.y_goal) <= 2):
                     twist.linear.y  = 0.0
-                if(abs(x_avg - self.x_goal) <= 3):
+                if(abs(x_avg - self.x_goal) <= 2):
                     twist.linear.x = 0.0
                     twist.angular.z = 0.0
 
@@ -204,6 +208,7 @@ class LunaWallAlignNode(Node):
                 twist.angular.z = 0.0
                 self.get_logger().info('Robot is aligned to the goal')
                 self.cmd_vel_publisher.publish(twist)
+                self.destroy_node()
                 rclpy.shutdown()
                 sys.exit()
             

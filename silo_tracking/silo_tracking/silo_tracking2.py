@@ -61,12 +61,12 @@ class YOLOv5ROS2(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('linear_x_max', 2.0),
-                ('linear_y_max', 2.0),
-                ('linear_x_min', -2.0),
-                ('linear_y_min', -2.0),
-                ('angular_z_max', 1.0),
-                ('angular_z_min', -1.0),
+                ('linear_x_max', 1.0),
+                ('linear_y_max', 1.0),
+                ('linear_x_min', -1.0),
+                ('linear_y_min', -1.0),
+                ('angular_z_max', 0.50),
+                ('angular_z_min', -0.50),
                 ('kp_linear', 0.05),
                 ('ki_linear', 0.0),
                 ('kd_linear', 0.0),
@@ -123,6 +123,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
+        source=2,  # file/dir/URL/glob/screen/0(webcam)
         source=2,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
@@ -612,23 +613,20 @@ class YOLOv5ROS2(Node):
                                     print(f"left most silo area :{leftmost_silo_area}")
                                     
                                     # count_i=len(detections_silo)-1
-                                    if  label== self.setupballname and leftmost_silo_area < self.setupareasilo:
+                                    if  label== "silo" and leftmost_silo_area<= self.setupareasilo:
                                         print("hi")
                                         twist_msg2.linear.x = 0.0
                                         twist_msg2.angular.z = 0.0
                                         twist_msg2.linear.y = 0.0
 
-                                        twist_msg2.linear.z=1.0
+                                       
                                         self.publisher2_.publish(twist_msg2)
-                                        self.destroy_node()
-                                        # rclpy.shutdown()
+                                        twist_msg2.linear.x = 0.0
+                                        twist_msg2.angular.z = 0.0
+                                        twist_msg2.linear.z=1.0
+                                        twist_msg2.linear.y = 0.0
 
-                                        # twist_msg2.linear.x = 0.0
-                                        # twist_msg2.angular.z = 0.0
-                                        # twist_msg2.linear.y = 0.0
-    
-                                        # twist_msg2.linear.z=1.0
-                                        # self.publisher2_.publish(twist_msg2)
+                                        self.publisher2_.publish(twist_msg2)
                                         # twist_msg2.linear.x = 0.0
                                         # twist_msg2.angular.z = 0.0
                                         # twist_msg2.linear.y = 0.0
@@ -649,6 +647,12 @@ class YOLOv5ROS2(Node):
                                         # self.publisher2_.publish(twist_msg2)
                                         # twist_msg2.linear.x = 0.0
                                         # twist_msg2.angular.z = 0.0
+                                        # twist_msg2.linear.y = 0.0
+
+                                        # twist_msg2.linear.z=1.0
+                                        # self.publisher2_.publish(twist_msg2)
+                                        # twist_msg2.linear.x = 0.0
+                                        # twist_msg2.angular.z = 0.0
                                         # twist_msg2.linear.z=1.0
                                         # twist_msg2.linear.y = 0.0
 
@@ -659,10 +663,10 @@ class YOLOv5ROS2(Node):
                                         # twist_msg2.linear.y = 0.0
 
                                         # self.publisher2_.publish(twist_msg2)
-                                    elif   leftmost_silo_area>= self.setupareasilo:
+                                    if   leftmost_silo_area>= self.setupareasilo:
                                         print("positive area before = " + str(float(leftmost_silo_area)))
-                                        # area=leftmost_silo_area
-                                        leftmost_silo_area = (-15000 + float(leftmost_silo_area))/200
+                                        area=leftmost_silo_area
+                                        leftmost_silo_area = (15000 + float(leftmost_silo_area))/200
                                         # twist_msg2.linear.x = float(LinXs)
                                         # twist_msg2.angular.z = float(AngZpbl)
                                         # twist_msg2.linear.z=1.0
@@ -678,8 +682,8 @@ class YOLOv5ROS2(Node):
                                     # twist_msg.angular.z = float(AngZpb)
                                     # self.publisher_.publish(twist_msg)
                                         twist_msg2.linear.x = float(self.pid_controller(leftmost_silo_area,0,0,0,0,0.1))
-                                        twist_msg2.linear.y =- float(self.pid_controller((leftmost_silo_deviation/30),0,0,0,0,0.1))
-                                        twist_msg2.angular.z = -float(self.pid_controller((leftmost_silo_deviation/30),0,0,0,0,0.1))
+                                        twist_msg2.linear.y =- float(self.pid_controller((leftmost_silo_deviation/20),0,0,0,0,0.1))
+                                        twist_msg2.angular.z = -float(self.pid_controller((leftmost_silo_deviation/20),0,0,0,0,0.1))
 
                                         twist_msg2.linear.x = max(min(twist_msg2.linear.x, self.linear_x_max), self.linear_x_min)
                                         twist_msg2.linear.y = max(min(twist_msg2.linear.y, self.linear_y_max), self.linear_y_min)
