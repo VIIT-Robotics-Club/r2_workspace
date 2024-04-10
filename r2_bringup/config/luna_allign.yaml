@@ -1,17 +1,17 @@
 luna_wall_align:
   ros__parameters:
-    linear_x_max: 0.5
-    linear_y_max: 0.5
-    linear_x_min: -0.5
-    linear_y_min: -0.5
+    linear_x_max: 2.0
+    linear_y_max: 2.0
+    linear_x_min: -2.0
+    linear_y_min: -2.0
     angular_z_max: 1.0
     angular_z_min: -1.0
-    kp_linear: 0.5
-    ki_linear: 0.01
-    kd_linear: 0.01
-    kp_angular: 0.5
-    ki_angular: 0.01
-    kd_angular: 0.01
-    x_goal: 40.0
-    y_goal: 50.0
+    kp_linear: 0.05
+    ki_linear: 0.0
+    kd_linear: 0.0
+    kp_angular: 0.08
+    ki_angular: 0.0
+    kd_angular: 0.0
+    # x_goal: 40.0
+    # y_goal: 50.0
 

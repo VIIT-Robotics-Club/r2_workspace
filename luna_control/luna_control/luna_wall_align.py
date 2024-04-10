@@ -32,8 +32,8 @@ class LunaWallAlignNode(Node):
                 ('kp_angular', 0.08),
                 ('ki_angular', 0.0),
                 ('kd_angular', 0.0),         
-                ('x_goal', 13.0),
-                ('y_goal', 250.0),
+                # ('x_goal', 13.0),
+                # ('y_goal', 250.0),
                 ('silo_number', 1),         
                 ]
         )
@@ -52,8 +52,8 @@ class LunaWallAlignNode(Node):
         self.kd_angular = self.get_parameter('ki_linear').value
         self.ki_linear = self.get_parameter('ki_angular').value
 
-        self.x_goal = self.get_parameter('x_goal').value
-        self.y_goal = self.get_parameter('y_goal').value
+        # self.x_goal = self.get_parameter('x_goal').value
+        # self.y_goal = self.get_parameter('y_goal').value
         self.silo_number = int(self.get_parameter('silo_number').value)
 
 
