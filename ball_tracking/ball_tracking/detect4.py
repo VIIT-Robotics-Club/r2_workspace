@@ -123,16 +123,12 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-<<<<<<< HEAD
-        source=0,  # file/dir/URL/glob/screen/0(webcam)
-=======
         source=2,  # file/dir/URL/glob/screen/0(webcam)
->>>>>>> ff1c6b9 (luna done)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.5,  # conidence threshold
+        conf_thres=0.35,  # conidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=3,  # maximum detections per image
+        max_det=1,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt

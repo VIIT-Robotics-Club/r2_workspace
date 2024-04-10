@@ -119,40 +119,43 @@ def generate_launch_description():
 
     return LaunchDescription([
 
-        line_following_client,
+        # line_following_client,
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=line_following_client,
-                on_exit=ball_following
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=line_following_client,
+        #         on_exit=ball_following
+        #     )
+        # ),
 
         # ball_following,
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=ball_following,
-                on_exit=claw_close
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=ball_following,
+        #         on_exit=claw_close
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=claw_close,
+        #         on_exit=lift_up
+        #     )
+        # ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=lift_up,
+        #         on_exit=silo_tracking
+        #     )
+        # ),
+
+        silo_tracking,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=claw_close,
-                on_exit=lift_up
-            )
-        ),
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=lift_up,
-                on_exit=silo_tracking
-            )
-        ),
-           RegisterEventHandler(
-            event_handler=OnProcessExit(
                 target_action=silo_tracking,
-                on_exit=claw_open
+                on_exit=go_to_silo_2_luna
             )
         ),
     ])

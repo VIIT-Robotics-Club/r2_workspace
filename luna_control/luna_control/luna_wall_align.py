@@ -26,7 +26,7 @@ class LunaWallAlignNode(Node):
                 ('linear_y_min', -2.0),
                 ('angular_z_max', 1.0),
                 ('angular_z_min', -1.0),
-                ('kp_linear', 0.05),
+                ('kp_linear', 0.08),
                 ('ki_linear', 0.0),
                 ('kd_linear', 0.0),
                 ('kp_angular', 0.08),
