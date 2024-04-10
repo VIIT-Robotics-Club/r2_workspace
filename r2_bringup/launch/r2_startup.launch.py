@@ -20,9 +20,16 @@ def generate_launch_description():
 
     ball_following = Node(
         package='ball_tracking',
-        executable='testnode',
-        name='testnode',
-        # parameters=[ball_tracking_params]
+        executable='ball_tracker4',
+        name='detect4',
+        parameters=[
+            {'Ball_Name': "Red-ball"},
+            {'setupareasilo': -33000.00},
+             {'setupdev': 180.00},
+            #  {'weights': "weights/redballbest.pt"},
+
+            
+        ]
     )
 
 
@@ -59,9 +66,15 @@ def generate_launch_description():
     )
 
     silo_tracking = Node(
-        package='ball_tracking',
-        executable='testnode2',
-        name='testnode2'
+        package='silo_tracking',
+        executable='silo_tracking2',
+        name='silotracking2',
+        parameters=[
+            {'Ball_Name': "silo"},
+            {'setupareasilo': -15000.00},
+            # {'weights': "weights/redbluesilo3.pt"},
+            
+        ]
     )
 
     go_to_silo_1_luna = Node(
@@ -119,16 +132,16 @@ def generate_launch_description():
 
     return LaunchDescription([
 
-        line_following_client,
+        # line_following_client,
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=line_following_client,
-                on_exit=ball_following
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=line_following_client,
+        #         on_exit=ball_following
+        #     )
+        # ),
 
-        # ball_following,
+        ball_following,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(

@@ -17,21 +17,31 @@ class NumberSubscriberNode(Node):
         if new_msg.linear.z == 2.0:
     # Assign the desired values to the Twist message
             cmd_msg.linear.x = new_msg.linear.x
+            cmd_msg.linear.y = new_msg.linear.y
             cmd_msg.angular.z = new_msg.angular.z
 
         
-            if new_msg.linear.x ==0.0 and new_msg.angular.z ==0.0:
+            if new_msg.linear.x ==0.0 and new_msg.angular.z ==0.0 and new_msg.linear.y ==0.0:
                 cmd_msg.linear.x = 0.0
+                cmd_msg.linear.y = 0.0
+
                 cmd_msg.angular.z = 0.0
+
                 self.number_count_publisher_.publish(cmd_msg)
                 cmd_msg.linear.x = 0.0
                 cmd_msg.angular.z = 0.0
+                cmd_msg.linear.y = 0.0
+
                 self.number_count_publisher_.publish(cmd_msg)
                 cmd_msg.linear.x = 0.0
                 cmd_msg.angular.z = 0.0
+                cmd_msg.linear.y = 0.0
+
                 self.number_count_publisher_.publish(cmd_msg)
                 cmd_msg.linear.x = 0.0
                 cmd_msg.angular.z = 0.0
+                cmd_msg.linear.y = 0.0
+
                 self.number_count_publisher_.publish(cmd_msg)
             #     count = count +1
             # if count > 5 :
