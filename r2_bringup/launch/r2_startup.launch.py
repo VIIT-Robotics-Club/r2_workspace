@@ -1,5 +1,6 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+import launch_ros.actions
 from launch.actions import RegisterEventHandler, EmitEvent, ExecuteProcess
 from launch.event_handlers import OnProcessExit, OnProcessStart, OnProcessIO
 from launch.events import Shutdown
@@ -18,17 +19,25 @@ def generate_launch_description():
 
 
 
-    ball_following = Node(
+    ball_following_purple = Node(
         package='ball_tracking',
         executable='ball_tracker4',
         name='detect4',
         parameters=[
             {'Ball_Name': "Red-ball"},
-            {'setupareasilo': -48000.00},
+            {'setupareasilo': -33000.00},
              {'setupdev': 180.00},
-            #  {'weights': "weights/redballbest.pt"},
+        ]
+    )
 
-            
+    ball_following_blue = Node(
+        package='ball_tracking',
+        executable='ball_tracker4',
+        name='detect4',
+        parameters=[
+            {'Ball_Name': "blue-ball"},
+            {'setupareasilo': -33000.00},
+            {'setupdev': 180.00},
         ]
     )
 
@@ -71,9 +80,7 @@ def generate_launch_description():
         name='silotracking2',
         parameters=[
             {'Ball_Name': "silo"},
-            {'setupareasilo': -15000.00},
-            # {'weights': "weights/redbluesilo3.pt"},
-            
+            {'setupareasilo': -15000.00},            
         ]
     )
 
@@ -127,25 +134,13 @@ def generate_launch_description():
         ]
     )
 
-    
-
 
     return LaunchDescription([
-
-        # line_following_client,
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=line_following_client,
-        #         on_exit=ball_following
-        #     )
-        # ),
-
-        ball_following,
+        ball_following_blue,
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=ball_following,
+                target_action=ball_following_blue,
                 on_exit=claw_close
             )
         ),
@@ -156,6 +151,7 @@ def generate_launch_description():
                 on_exit=lift_up
             )
         ),
+
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=lift_up,
@@ -163,12 +159,97 @@ def generate_launch_description():
             )
         ),
 
-        # silo_tracking,
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=silo_tracking,
+                on_exit=go_to_silo_1_luna
+            )
+        ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=silo_tracking,
-        #         on_exit=go_to_silo_2_luna
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=go_to_silo_1_luna,
+                on_exit=claw_open
+            )
+        ),
+
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=claw_open,
+                on_exit=ball_following_purple 
+            )
+        ),
+
+        RegisterEventHandler(
+            event_handler=OnProcessStart(
+                target_action=ball_following_purple,
+                on_start=claw_close
+            )
+        ),
+
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=claw_close,
+                on_exit=lift_down
+            )
+        ),
+
+        
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ball_following_purple,
+                on_exit=claw_close
+            )
+        ),
+
+        
+
+
     ])
+
+    # def create_sequence(ball_following_colour, silo_number):
+    #     return [
+    #         ball_following_{ball_following_colour},
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=ball_following_{ball_following_colour},
+    #                 on_exit=claw_close
+    #             )
+    #         ),
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=claw_close,
+    #                 on_exit=lift_up
+    #             )
+    #         ),
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=lift_up,
+    #                 on_exit=silo_tracking
+    #             )
+    #         ),
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=silo_tracking,
+    #                 on_exit=go_to_silo_{silo_number}_luna
+    #             )
+    #         ),
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=go_to_silo_{silo_number}_luna,
+    #                 on_exit=claw_open
+    #             )
+    #         ),
+
+    #         RegisterEventHandler(
+    #             event_handler=OnProcessExit(
+    #                 target_action=claw_open,
+    #                 on_exit=ball_following_purple
+    #             )
+    #         ),
+    #     ]

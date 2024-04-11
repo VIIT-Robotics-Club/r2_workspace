@@ -34,7 +34,17 @@ class LunaWallAlignNode(Node):
                 ('kd_angular', 0.0),         
                 # ('x_goal', 13.0),
                 # ('y_goal', 250.0),
-                ('silo_number', 1),         
+                ('silo_number', 1),    
+                ('silo_1_x', 25.0),
+                ('silo_1_y', 200.0),
+                ('silo_2_x', 13.0),
+                ('silo_2_y', 250.0),
+                ('silo_3_x', 32.0),
+                ('silo_3_y', 21.0),
+                ('silo_4_x', 25.0),
+                ('silo_4_y', 300.0),
+                ('silo_5_x', 25.0),
+                ('silo_5_y', 340.0),     
                 ]
         )
 
@@ -52,11 +62,22 @@ class LunaWallAlignNode(Node):
         self.kd_angular = self.get_parameter('ki_linear').value
         self.ki_linear = self.get_parameter('ki_angular').value
 
-        self.x_goal = self.get_parameter('x_goal').value
-        self.y_goal = self.get_parameter('y_goal').value
+        # self.x_goal = self.get_parameter('x_goal').value
+        # self.y_goal = self.get_parameter('y_goal').value
         self.silo_number = self.get_parameter('silo_number').value
 
+        self.silo_1_x = self.get_parameter('silo_1_x').value
+        self.silo_1_y = self.get_parameter('silo_1_y').value
+        self.silo_2_x = self.get_parameter('silo_2_x').value
+        self.silo_2_y = self.get_parameter('silo_2_y').value
+        self.silo_3_x = self.get_parameter('silo_3_x').value
+        self.silo_3_y = self.get_parameter('silo_3_y').value
+        self.silo_4_x = self.get_parameter('silo_4_x').value
+        self.silo_4_y = self.get_parameter('silo_4_y').value
+        self.silo_5_x = self.get_parameter('silo_5_x').value
+        self.silo_5_y = self.get_parameter('silo_5_y').value
 
+        
         self.luna_subscriber = self.create_subscription(
             Int64MultiArray,
             'luna_data',
@@ -86,20 +107,28 @@ class LunaWallAlignNode(Node):
         self.int_error_angular_z = 0.0
 
 
+        # self.positions = {
+        #     1: {'x': 25.0, 'y': 200.0},
+        #     2: {'x': 13.0, 'y': 250.0},
+        #     3: {'x': 32.0, 'y': 21.0},
+        #     4: {'x': 25.0, 'y': 300.0},
+        #     5: {'x': 25.0, 'y': 340.0},
+        # }
+
         self.positions = {
-            1: {'x': 25.0, 'y': 200.0},
-            2: {'x': 13.0, 'y': 250.0},
-            3: {'x': 32.0, 'y': 21.0},
-            4: {'x': 25.0, 'y': 300.0},
-            5: {'x': 25.0, 'y': 340.0},
+            1: {'x': self.silo_1_x, 'y': self.silo_1_y},
+            2: {'x': self.silo_2_x, 'y': self.silo_2_y},
+            3: {'x': self.silo_3_x, 'y': self.silo_3_y},
+            4: {'x': self.silo_4_x, 'y': self.silo_4_y},
+            5: {'x': self.silo_5_x, 'y': self.silo_5_y},
         }
 
-        # Get the position from the environment variable
-
-
         # Get the x and y goals from the selected position
-        # self.x_goal = self.positions[self.silo_number]['x']
-        # self.y_goal = self.positions[self.silo_number]['y']
+        self.x_goal = self.positions[self.silo_number]['x']
+        self.y_goal = self.positions[self.silo_number]['y']
+        
+        self.get_logger().info('x: %d' % self.x_goal)
+        self.get_logger().info('y: %d' % self.y_goal)
 
     def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
         control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
