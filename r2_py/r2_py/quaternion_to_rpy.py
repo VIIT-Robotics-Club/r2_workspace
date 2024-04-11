@@ -22,13 +22,18 @@ class QuatToRPY(Node):
         )
 
         self.publisher = self.create_publisher(Vector3, "/rpy", 10)
+        self.get_logger().info("Quat to RPY node has been started")
 
     def listener_callback(self, msg):
 
+
+        self.get_logger().info("Received a message")
         x = msg.orientation.x
         y = msg.orientation.y
         z = msg.orientation.z
         w = msg.orientation.w
+
+        self.get_logger().info(f"x: {x}, y: {y}, z: {z}, w: {w}")
 
         # roll (x-axis rotation)
         sinr_cosp = 2 * (w * x + y * z)
@@ -50,6 +55,8 @@ class QuatToRPY(Node):
         roll = roll * 180.0 / pi
         pitch = pitch * 180.0 / pi
         yaw = yaw * 180.0 / pi
+
+        self.get_logger().info(f"Roll: {roll}, Pitch: {pitch}, Yaw: {yaw}")
 
         # Create a Vector3 message
         rpy = Vector3()
