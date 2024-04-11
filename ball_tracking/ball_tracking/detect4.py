@@ -17,7 +17,7 @@ from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
-MODEL_RELATIVE_PATH = "weights/redbluesilo3.pt"
+MODEL_RELATIVE_PATH = "weights/redbluesilo2.pt"
 
 # Combine the current directory and the relative path to get the absolute path
 redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
@@ -55,9 +55,9 @@ class YOLOv5ROS2(Node):
     def __init__(self):
         super().__init__('yolov5_ros2_node')
         self.declare_parameter("setupareaball", -41000.0)       # The desired sensor reading
-        self.declare_parameter("setupdev", 80.01)                  # Proportional gain
-        self.declare_parameter("setupareasilo", -15000.00)                  # Integral gain
-        self.declare_parameter("Ball_Name", "silo")
+        self.declare_parameter("setupdev", 180.01)                  # Proportional gain
+        self.declare_parameter("setupareasilo", -48000.00)                  # Integral gain
+        self.declare_parameter("Ball_Name", "Red-ball")
         self.declare_parameters(
             namespace='',
             parameters=[
@@ -123,7 +123,7 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=2    ,  # file/dir/URL/glob/screen/0(webcam)
+        source=0  ,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # conidence threshold
@@ -606,6 +606,16 @@ class YOLOv5ROS2(Node):
                         #     print(f"silo is been seen : {silofound}")
                             
                             # self.publisher2_.publish(twist_msg2)  
+                        if silofound ==True and label != self.setupballname:
+                                twist_msg2.linear.z=0.0
+                                twist_msg2.linear.x=0.0
+                                twist_msg2.linear.y=0.0
+
+                                print(f"silo is been seen out of frame : {silofound}")
+
+                                # twist_msg2.angular.z = float(AngZpbl *2)
+                                twist_msg2.angular.z = 0.5
+                                self.publisher2_.publish(twist_msg2)   
                         if silo_count>=1:
                             silofound=True
                             print(f"silo is been seen : {silofound}")
@@ -622,7 +632,7 @@ class YOLOv5ROS2(Node):
 
                                         twist_msg2.linear.z=1.0
                                         self.publisher2_.publish(twist_msg2)
-                                        # self.destroy_node()
+                                        self.destroy_node()
                                         # rclpy.shutdown()
 
                                         # twist_msg2.linear.x = 0.0
@@ -752,7 +762,7 @@ class YOLOv5ROS2(Node):
                         print(f"silo is been seen out of frame : {silofound}")
 
                         # twist_msg2.angular.z = float(AngZpbl *2)
-                        twist_msg2.angular.z = 0.0
+                        twist_msg2.angular.z = 0.5
                         self.publisher2_.publish(twist_msg2)   
 
                

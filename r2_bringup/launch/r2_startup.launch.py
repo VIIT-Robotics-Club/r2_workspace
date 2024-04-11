@@ -24,7 +24,7 @@ def generate_launch_description():
         name='detect4',
         parameters=[
             {'Ball_Name': "Red-ball"},
-            {'setupareasilo': -33000.00},
+            {'setupareasilo': -48000.00},
              {'setupdev': 180.00},
             #  {'weights': "weights/redballbest.pt"},
 
@@ -143,32 +143,32 @@ def generate_launch_description():
 
         ball_following,
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=ball_following,
-        #         on_exit=claw_close
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=claw_close,
-        #         on_exit=lift_up
-        #     )
-        # ),
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=lift_up,
-        #         on_exit=silo_tracking
-        #     )
-        # ),
-
-        silo_tracking,
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ball_following,
+                on_exit=claw_close
+            )
+        ),
 
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=silo_tracking,
-                on_exit=go_to_silo_2_luna
+                target_action=claw_close,
+                on_exit=lift_up
             )
         ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=lift_up,
+                on_exit=silo_tracking
+            )
+        ),
+
+        # silo_tracking,
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=silo_tracking,
+        #         on_exit=go_to_silo_2_luna
+        #     )
+        # ),
     ])
