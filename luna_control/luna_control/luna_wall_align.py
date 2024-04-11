@@ -237,9 +237,10 @@ class LunaWallAlignNode(Node):
                 twist.angular.z = 0.0
                 self.get_logger().info('Robot is aligned to the goal')
                 self.cmd_vel_publisher.publish(twist)
+                sys.exit()
                 self.destroy_node()
                 rclpy.shutdown()
-                sys.exit()
+                
             
         #Publish the Twist message
         self.cmd_vel_publisher.publish(twist)

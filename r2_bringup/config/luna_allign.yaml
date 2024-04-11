@@ -9,20 +9,20 @@ luna_wall_align:
     kp_linear: 0.05
     ki_linear: 0.0
     kd_linear: 0.0
-    kp_angular: 0.08
+    kp_angular: 0.15
     ki_angular: 0.0
     kd_angular: 0.0
     # x_goal: 40.0
     # y_goal: 50.0
     silo_1_x: 25.0
     silo_1_y: 200.0
-    silo_2_x: 13.0
-    silo_2_y: 250.0
-    silo_3_x: 32.0
-    silo_3_y: 21.0
-    silo_4_x: 25.0
-    silo_4_y: 300.0
-    silo_5_x: 25.0
-    silo_5_y: 340.0
+    silo_2_x: 11.0
+    silo_2_y: 128.0
+    silo_3_x: 15.0
+    silo_3_y: 198.0
+    silo_4_x: 11.0
+    silo_4_y: 269.0
+    silo_5_x: 170.0
+    silo_5_y: 269.0
 
 

@@ -136,71 +136,91 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        ball_following_blue,
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=ball_following_blue,
-                on_exit=claw_close
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=claw_close,
-                on_exit=lift_up
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=lift_up,
-                on_exit=silo_tracking
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=silo_tracking,
-                on_exit=go_to_silo_1_luna
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=go_to_silo_1_luna,
-                on_exit=claw_open
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=claw_open,
-                on_exit=ball_following_purple 
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=ball_following_purple,
-                on_start=claw_close
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=claw_close,
-                on_exit=lift_down
-            )
-        ),
-
+        go_to_silo_2_luna,
         
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=ball_following_purple,
-                on_exit=claw_close
+                target_action=go_to_silo_2_luna,
+                on_exit=go_to_silo_3_luna
             )
         ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=go_to_silo_3_luna,
+                on_exit=go_to_silo_4_luna
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=go_to_silo_4_luna,
+                on_exit=go_to_silo_5_luna
+            )
+        )
+        # ball_following_blue,
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=ball_following_blue,
+        #         on_exit=claw_close
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=claw_close,
+        #         on_exit=lift_up
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=lift_up,
+        #         on_exit=silo_tracking
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=silo_tracking,
+        #         on_exit=go_to_silo_1_luna
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=go_to_silo_1_luna,
+        #         on_exit=claw_open
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=claw_open,
+        #         on_exit=ball_following_purple 
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessStart(
+        #         target_action=ball_following_purple,
+        #         on_start=claw_close
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=claw_close,
+        #         on_exit=lift_down
+        #     )
+        # ),
+
+        
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=ball_following_purple,
+        #         on_exit=claw_close
+        #     )
+        # ),
 
         
 
