@@ -99,7 +99,7 @@ class LunaWallAlignNode(Node):
 
 
         #State Management Variable 
-        self.correct_angle = False
+        self.correct_angle = True
 
         # Set initial integrals to zero
         self.int_error_linear_x = 0.0
