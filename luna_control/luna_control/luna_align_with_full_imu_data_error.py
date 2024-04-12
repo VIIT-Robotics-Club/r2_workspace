@@ -153,7 +153,7 @@ class LunaWallAlignNode(Node):
             variance = sum((x - mean)**2 for x in self.luna_readings[idx])/(len(self.luna_readings[idx]))
             sd = variance**0.5
 
-            if abs(old_val - val) > 3 * sd:
+            if abs(old_val - val) > 3 * sd:   #Change this 5 or 4 or 3 to 2 or 1 
                 self.get_logger().warn(f"Ignoring large change in Luna{idx}")
                 continue
 
