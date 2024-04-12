@@ -98,6 +98,7 @@ class YOLOv5ROS2(Node):
         # Publisher for publishing area and deviation
         self.publisher_ = self.create_publisher(Twist,'/ball_data',10)
         self.publisher2_ = self.create_publisher(Twist,'/cmd_vel',10)
+        self.timer = self.create_timer(0.1, self.timer_callback)
         # self.subscription = self.create_subscription(
         #   Int16MultiArray, 
         #   'drive_topic', 
@@ -111,6 +112,9 @@ class YOLOv5ROS2(Node):
 
         
         self.run()
+
+    def timer_callback(self):
+        self.publisher2_.publish(twist_msg2)
 
     def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
         control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
