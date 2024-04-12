@@ -17,7 +17,7 @@ from std_msgs.msg import Int16MultiArray
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Define the relative path to the model file
-MODEL_RELATIVE_PATH = "weights/redbluesilo2.pt"
+MODEL_RELATIVE_PATH = "weights/redbluepurplesilo.pt"
 
 # Combine the current directory and the relative path to get the absolute path
 redblue_model_path = os.path.join(current_directory, MODEL_RELATIVE_PATH)
@@ -128,7 +128,7 @@ class YOLOv5ROS2(Node):
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # conidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=1,  # maximum detections per image
+        max_det=100,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
