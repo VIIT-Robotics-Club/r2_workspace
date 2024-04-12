@@ -27,6 +27,7 @@ setup(
             "test_node1 = r2_py.test_node1:main",
             "test_node2 = r2_py.test_node2:main",
             "force_stop = r2_py.force_stop:main",
+            "quat_to_rpy = r2_py.quaternion_to_rpy:main",
         ],
     },
 )

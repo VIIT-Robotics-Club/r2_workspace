@@ -7,6 +7,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Vector3
 import sys
 import os
 
@@ -45,6 +46,7 @@ class LunaWallAlignNode(Node):
                 ('silo_4_y', 300.0),
                 ('silo_5_x', 25.0),
                 ('silo_5_y', 340.0),     
+                ('theta_goal', 0.0)
                 ]
         )
 
@@ -76,6 +78,7 @@ class LunaWallAlignNode(Node):
         self.silo_4_y = self.get_parameter('silo_4_y').value
         self.silo_5_x = self.get_parameter('silo_5_x').value
         self.silo_5_y = self.get_parameter('silo_5_y').value
+        self.theta_goal = self.get_parameter('theta_goal').value    
 
         
         self.luna_subscriber = self.create_subscription(
@@ -90,6 +93,14 @@ class LunaWallAlignNode(Node):
             'cmd_vel',
             10
         )
+
+        self.imu_rpy_subscriber = self.create_subscription(
+            Vector3,
+            'rpy',
+            self.imu_rpy_callback,
+            10,
+        )
+            
 
         # Initialize the luna data
         self.luna_1 = 0.00  
@@ -129,11 +140,29 @@ class LunaWallAlignNode(Node):
         
         self.get_logger().info('x: %d' % self.x_goal)
         self.get_logger().info('y: %d' % self.y_goal)
+        self.get_logger().info('theta: %d' % self.theta_goal)
+
+
+        #Initialize the rpy variables, getting this from the IMU (Quat to RPY)
+        self.roll = 0.0
+        self.pitch = 0.0
+        self.yaw = 0.0
+        
 
     def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
         control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
         return control_action
 
+
+    def imu_rpy_callback(self, msg):
+        self.roll = msg.x
+        self.pitch = msg.y
+        self.yaw = msg.z
+
+        self.get_logger().info('IMU data received')
+        self.get_logger().info('Roll: %f' % self.roll)
+        self.get_logger().info('Pitch: %f' % self.pitch)
+        self.get_logger().info('Yaw: %f' % self.yaw)
 
     def luna_callback(self, msg):
         self.luna_1 = float(msg.data[1]) - 2         #Front Left -14    -  2 is the offset (Luna sensor error correction)
@@ -161,26 +190,29 @@ class LunaWallAlignNode(Node):
         x_avg = (self.luna_1 + self.luna_2) / 2
         y_avg = (self.luna_3 + self.luna_4) / 2
 
+        yaw_error = self.yaw - self.theta_goal
+
         if self.correct_angle:
             #Calculate the time difference
             dt = 0.1  # Assuming fixed sample rate of 10 Hz
 
-            # Check if angular z correction is required
-            if abs(x_diff) <= 3:                                 #Or you can use abs(y_diff) <= 3
-                self.correct_angle = False
-                self.get_logger().info('Robot is aligned, adjusting linear velocities')
+            
 
+            # Check if angu lar z correction is required
+            if abs(yaw_error) < 3:
+                self.correct_angle = False
+                self.get_logger().info('Correcting angle')
+                
             # #Adjust the angular z velocity based on the difference between the sensor readings
             # twist.angular.z = self.kp_angular * (x_diff)
             # twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
 
             # Apply PID controller for angular z
-            ang_error = self.luna_1 - self.luna_2
-            self.int_error_angular_z += ang_error
-            twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.ki_angular, self.kd_angular, dt)
-            self.prev_ang_error = ang_error
+            self.int_error_angular_z += yaw_error
+            twist.angular.z = self.pid_controller(yaw_error, self.prev_ang_error, self.int_error_angular_z, self.ki_angular, self.kd_angular, dt)
+            self.prev_ang_error = yaw_error
 
-            if x_diff < 0:   #Lune front left < front right -> left side is closer to the wall
+            if yaw_error < 0:   #Lune front left < front right -> left side is closer to the wall
                 twist.angular.z = abs(twist.angular.z)    #Rotate Anti-clockwise
             else:
                 twist.angular.z = -abs(twist.angular.z) 

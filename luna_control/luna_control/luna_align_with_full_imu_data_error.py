@@ -9,6 +9,7 @@ from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
 import sys
 import os
+from collections import deque   
 
 class LunaWallAlignNode(Node):
     def __init__(self):
@@ -130,16 +131,40 @@ class LunaWallAlignNode(Node):
         self.get_logger().info('x: %d' % self.x_goal)
         self.get_logger().info('y: %d' % self.y_goal)
 
+
+        self.max_luna_readings = 10
+        self.luna_readings = {
+            1: deque([0]*self.max_luna_readings, maxlen=self.max_luna_readings),
+            2: deque([0]*self.max_luna_readings, maxlen=self.max_luna_readings),
+            3: deque([0]*self.max_luna_readings, maxlen=self.max_luna_readings),
+            4: deque([0]*self.max_luna_readings, maxlen=self.max_luna_readings),
+        }
+
     def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
         control_action = self.kp_linear * error + ki * int_error + kd * ((error - previous_error) / dt)
         return control_action
 
+    
+    def handle_new_luna_readings(self, luna_values):
+        
+        for idx, val in zip([1, 2, 3, 4], luna_values):
+            old_val = self.luna_readings[idx][-1]
+            mean = sum(self.luna_readings[idx]) / len(self.luna_readings[idx])
+            variance = sum((x - mean)**2 for x in self.luna_readings[idx])/(len(self.luna_readings[idx]))
+            sd = variance**0.5
+
+            if abs(old_val - val) > 3 * sd:
+                self.get_logger().warn(f"Ignoring large change in Luna{idx}")
+                continue
+
+            self.luna_readings[idx].append(val)
+
 
     def luna_callback(self, msg):
-        self.luna_1 = float(msg.data[1]) - 2         #Front Left -14    -  2 is the offset (Luna sensor error correction)
-        self.luna_2 = float(msg.data[3]) - 2         #Front right -12   -  2 is the offset (Luna sensor error correction)- 
-        self.luna_3 = float(msg.data[0])             #Side Left - 11
-        self.luna_4 = float(msg.data[2])             #Side right -13 
+        self.luna_1_new = float(msg.data[1]) - 2         #Front Left -14    -  2 is the offset (Luna sensor error correction)
+        self.luna_2_new = float(msg.data[3]) - 2         #Front right -12   -  2 is the offset (Luna sensor error correction)- 
+        self.luna_3_new = float(msg.data[0])             #Side Left - 11
+        self.luna_4_new = float(msg.data[2])             #Side right -13 
         self.get_logger().info('Luna data received')
         self.get_logger().info('x: %d' % self.x_goal)
         self.get_logger().info('y: %d' % self.y_goal)
@@ -150,6 +175,14 @@ class LunaWallAlignNode(Node):
         self.get_logger().info('Luna 2: %d' % self.luna_2)
         self.get_logger().info('Luna 3: %d' % self.luna_3)
         self.get_logger().info('Luna 4: %d' % self.luna_4)
+
+        #Update the luna readings
+        self.handle_new_luna_readings([self.luna_1_new, self.luna_2_new, self.luna_3_new, self.luna_4_new])
+
+        self.luna_1 = self.luna_readings[1][-1]
+        self.luna_2 = self.luna_readings[2][-1]
+        self.luna_3 = self.luna_readings[3][-1]
+        self.luna_4 = self.luna_readings[4][-1]
 
         #Calculate the difference between the sensor readings
         x_diff = self.luna_1 - self.luna_2
