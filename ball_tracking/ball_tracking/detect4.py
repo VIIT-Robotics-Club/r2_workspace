@@ -57,7 +57,7 @@ class YOLOv5ROS2(Node):
         self.declare_parameter("setupareaball", -41000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 180.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -48000.00)                  # Integral gain
-        self.declare_parameter("Ball_Name", "Red-ball")
+        self.declare_parameter("Ball_Name", "BlueBall")
         self.declare_parameters(
             namespace='',
             parameters=[
@@ -123,10 +123,10 @@ class YOLOv5ROS2(Node):
     def run(
         self,
         weights=redblue_model_path,  # model path or triton URL
-        source=0  ,  # file/dir/URL/glob/screen/0(webcam)
+        source=2 ,  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.5,  # conidence threshold
+        conf_thres=0.25,  # conidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=100,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -149,7 +149,7 @@ class YOLOv5ROS2(Node):
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        vid_stride=1,  # video frame-rate stride
+        vid_stride=0.5,  # video frame-rate stride
     ):  
         source = str(source)
         save_img = not nosave and not source.endswith(".txt")  # save inference images
