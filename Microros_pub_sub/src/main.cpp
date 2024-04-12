@@ -251,7 +251,7 @@ void rotate_clockwise_claw(bool &success)
   
 
   digitalWrite(dir2, HIGH);
-  analogWrite(pwmPin2, 150);
+  analogWrite(pwmPin2, 200);
   delay(2000);
   val=1;
   analogWrite(pwmPin2, 0);
@@ -261,7 +261,7 @@ void rotate_anticlockwise_claw(bool &success)
 {
 
   digitalWrite(dir2, LOW);
-  analogWrite(pwmPin2, 150);
+  analogWrite(pwmPin2, 200);
   delay(2000);
   val=0;
   analogWrite(pwmPin2, 0);
@@ -449,8 +449,9 @@ void timer_callback_junc(rcl_timer_t * timer, int64_t last_call_time)
       {   
           digitalWrite(dir2,LOW);
           analogWrite(pwmPin2,100);
-          nodeCount=5;
-          delay(2000);
+          digitalWrite(dir2,HIGH);
+          analogWrite(pwmPin2,100);
+          delay(100);
           // digitalWrite(dir2,HIGH);
           // analogWrite(pwmPin2,100);
           // delay(100);
@@ -550,6 +551,7 @@ void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
     static int64_t memory[4];
     msg_luna.data.data= memory;
    // Add new data
+   
       tflI2C.getData(tfDist_1, tfAddr1);
       tflI2C.getData(tfDist_2, tfAddr2);
       tflI2C.getData(tfDist_3, tfAddr3);
@@ -558,6 +560,8 @@ void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
       msg_luna.data.data[1] = tfDist_2;
       msg_luna.data.data[2] = tfDist_3;
       msg_luna.data.data[3] = tfDist_4;
+   
+
 
   if (timer != NULL) {
       // Publish the message
