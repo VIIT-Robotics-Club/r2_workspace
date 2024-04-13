@@ -8,8 +8,8 @@ import time
 class SetBoolServer(Node):
     def __init__(self):
         super().__init__('set_bool_server')
-        self.motor_claw_service = self.create_service(SetBool, 'motor_claw', self.motor_claw_callback)
-        self.motor_lift_service = self.create_service(SetBool, 'motor_lift', self.motor_lift_callback)
+        self.motor_claw_service = self.create_service(SetBool, 'service_claw', self.motor_claw_callback)
+        self.motor_lift_service = self.create_service(SetBool, 'service_lift', self.motor_lift_callback)
 
     def motor_claw_callback(self, request, response):
         self.get_logger().info('Started motor_claw_callback')

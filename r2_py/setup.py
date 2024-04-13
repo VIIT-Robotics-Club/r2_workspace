@@ -28,6 +28,8 @@ setup(
             "test_node2 = r2_py.test_node2:main",
             "force_stop = r2_py.force_stop:main",
             "quat_to_rpy = r2_py.quaternion_to_rpy:main",
+            "ps4 = r2_py.ps4:main",
+            "cmd_vel_slow_pub = r2_py.cmd_vel_slow_pub:main",
         ],
     },
 )
