@@ -19,7 +19,7 @@ class cmd_vel_slow_pub(Node):
         )
         self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
 
-        self.create_timer(0.1, self.timer_callback)
+        self.create_timer(0.2, self.timer_callback)
 
         self.lin_x = 0.0
         self.lin_y = 0.0
@@ -32,9 +32,9 @@ class cmd_vel_slow_pub(Node):
 
     def timer_callback(self):
         msg = Twist()
-        msg.linear.x = self.lin_x 
-        msg.linear.y = self.lin_y 
-        msg.angular.z = self.ang_z 
+        msg.linear.x = round(self.lin_x,3)
+        msg.linear.y = round(self.lin_y,3) 
+        msg.angular.z = round(self.ang_z,3) 
 
         self.publisher.publish(msg)
 

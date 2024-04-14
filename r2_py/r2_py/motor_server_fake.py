@@ -2,7 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
-from example_interfaces.srv import SetBool
+# from example_interfaces.srv import SetBool
+from std_srvs.srv import SetBool
 import time
 
 class SetBoolServer(Node):

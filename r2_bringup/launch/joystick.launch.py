@@ -42,12 +42,12 @@ def generate_launch_description():
     return LaunchDescription([
         joy_node,
         teleop_node,
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=teleop_node,
-                on_start=cmd_vel_slow_pub
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessStart(
+        #         target_action=teleop_node,
+        #         on_start=cmd_vel_slow_pub
+        #     )
+        # ),
         RegisterEventHandler(
             event_handler=OnProcessStart(
                 target_action=teleop_node,
