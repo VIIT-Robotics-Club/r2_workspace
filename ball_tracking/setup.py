@@ -26,7 +26,8 @@ setup(
         "ball_tracker4=ball_tracking.detect4:main",
         "testnode=ball_tracking.testnode:main",
         "videocapture=ball_tracking.videocapture:main",
-        "testnode2=ball_tracking.testnode2:main"
+        "testnode2=ball_tracking.testnode2:main",
+        "testnode3=ball_tracking.testnode3:main"
         ],
     },
 )
