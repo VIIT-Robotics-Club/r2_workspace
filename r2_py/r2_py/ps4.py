@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
-
+"""pip install pynput
+pip install keyboard
+"""
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
-from example_interfaces.srv import SetBool
 from time import time
+from std_srvs.srv import SetBool
+import subprocess
+from pynput import keyboard
+# import keyboard
 
 class PS4JoyNode(Node):
     def __init__(self):
@@ -21,10 +26,38 @@ class PS4JoyNode(Node):
 
         self.lift_service = self.create_client(SetBool, 'service_lift')
         self.claw_service = self.create_client(SetBool, 'service_claw')
+
+        # # Register keyboard event handlers
+        # keyboard.on_press_key('w', lambda _: self.lift_up())     # 'w' key for lift up
+        # keyboard.on_press_key('s', lambda _: self.lift_down())    # 's' key for lift down
+        # keyboard.on_press_key('a', lambda _: self.claw_open())    # 'a' key for claw open
+        # keyboard.on_press_key('d', lambda _: self.claw_close())   # 'd' key for claw close
+        # keyboard.on_press_key('1', lambda _: self.luna_silo_1())  # '1' key for Luna Silo 1
+        # keyboard.on_press_key('2', lambda _: self.luna_silo_2())  # '2' key for Luna Silo 2
+        # keyboard.on_press_key('3', lambda _: self.luna_silo_3())  # '3' key for Luna Silo 3
+
+        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
+        self.keyboard_listener.start()
         
-
-
-
+    def on_press(self, key):
+        try:
+            if key.char == 'w':
+                self.lift_up()
+            elif key.char == 's':
+                self.lift_down()
+            elif key.char == 'a':
+                self.claw_open()
+            elif key.char == 'd':
+                self.claw_close()
+            elif key.char == '1':
+                self.luna_silo_1()
+            elif key.char == '2':
+                self.luna_silo_2()
+            elif key.char == '3':
+                self.luna_silo_3()
+        except AttributeError:
+            pass
+                
     def call_service(self, service, data):
         while not service.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
@@ -62,14 +95,20 @@ class PS4JoyNode(Node):
     
     def luna_silo_1(self):
         self.get_logger().info("Luna Silo 1")
+        cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=1"
+        subprocess.Popen(cmd, shell=True)
         return
     
     def luna_silo_2(self):
         self.get_logger().info("Luna Silo 2")
+        cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=2"
+        subprocess.Popen(cmd, shell=True)
         return
     
     def luna_silo_3(self):
         self.get_logger().info("Luna Silo 3")
+        cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=3"
+        subprocess.Popen(cmd, shell=True)
         return
 
     def joy_callback(self, msg):
@@ -114,7 +153,7 @@ def main(args=None):
 
     rclpy.spin(ps4_joy_node)
 
-    # rclpy.shutdown()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

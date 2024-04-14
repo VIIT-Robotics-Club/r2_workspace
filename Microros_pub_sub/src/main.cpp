@@ -2,12 +2,11 @@
 #include <micro_ros_platformio.h>
 #include <Wire.h>
 #include <TFLI2C.h>
-// #include "ICM_20948.h"
 
 #include <rcl/rcl.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
-// #include <rosidl_runtime_c/string_functions.h>
+
 
 #include <rcl/error_handling.h>
 #include <geometry_msgs/msg/twist.h>
@@ -15,17 +14,13 @@
 #include <std_msgs/msg/int8.h>
 #include <std_msgs/msg/int64_multi_array.h> 
 #include <std_srvs/srv/set_bool.h>
-// #include <sensor_msgs/msg/imu.h>
-// #include <sensor_msgs/msg/magnetic_field.h>
+
 
 
 
 #if !defined(MICRO_ROS_TRANSPORT_ARDUINO_SERIAL)
 #endif
 
-// #define WIRE_PORT Wire
-// #define AD0_VAL 1
-// ICM_20948_I2C myICM;
 
 // define pins for ultrasonic 
 int trigPin = 52;    // TRIG pin
@@ -94,8 +89,6 @@ int BR_motor;
 int count = 0, last_value = 0;
 
 
-// rcl_publisher_t publisher_imu;
-// rcl_publisher_t publisher_mag; 
 rcl_publisher_t publisher_line;
 rcl_publisher_t publisher_luna;
 rcl_publisher_t publisher_junction;
@@ -103,21 +96,20 @@ rcl_publisher_t publisher_junction;
 std_msgs__msg__Int8 junc;
 std_msgs__msg__Int32 lsa08; 
 std_msgs__msg__Int64MultiArray msg_luna;        
-// sensor_msgs__msg__Imu imu_msg;
-// sensor_msgs__msg__MagneticField mag_msg;
+
 
 rcl_subscription_t subscriber;       
 geometry_msgs__msg__Twist sub_msg;
 
 rclc_executor_t executor;
+rclc_executor_t executor1;
 rclc_support_t support;
 rcl_allocator_t allocator;
 rcl_node_t node;
+rcl_node_t node2;
 
 
 rcl_timer_t timer_line;
-// rcl_timer_t timer_imu;
-// rcl_timer_t timer_mag;
 rcl_timer_t timer_luna;
 rcl_timer_t timer_junc;
 
@@ -139,21 +131,6 @@ std_srvs__srv__SetBool_Response res2;
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
 
-inline float MicroTeslaToTesla(float mT)
-{
-  return mT * 1000000;
-}
-
-inline float MilliGToMeterPerSecond(float g)
-{
-  return (g  * 9.80665)/1000;
-}
-
-inline float DegreesPerSecondToRadsPerSecond(float dps)
-{
-  return dps * 0.01745;
-}
-
 void pulse_detected()
 {
   nodeCount++;
@@ -164,6 +141,7 @@ void pinSetup()
 {
 
   pinMode(en,OUTPUT);
+  digitalWrite(en,LOW);
   pinMode(jPulse, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(jPulse), pulse_detected, RISING);
   pinMode(mPinFL, OUTPUT);
@@ -251,7 +229,7 @@ void rotate_clockwise_claw(bool &success)
   
 
   digitalWrite(dir2, HIGH);
-  analogWrite(pwmPin2, 200);
+  analogWrite(pwmPin2, 150);
   delay(2000);
   val=1;
   analogWrite(pwmPin2, 0);
@@ -261,7 +239,7 @@ void rotate_anticlockwise_claw(bool &success)
 {
 
   digitalWrite(dir2, LOW);
-  analogWrite(pwmPin2, 200);
+  analogWrite(pwmPin2, 150);
   delay(2000);
   val=0;
   analogWrite(pwmPin2, 0);
@@ -377,92 +355,10 @@ void move_to_zone_3()
      }
     
 }
-// void printScaledAGMT(ICM_20948_I2C *sensor)
-// {   
-//     float lin_covariance[9] = {0.1, 0.0, 0.0, 
-//                                 0.0, 0.1, 0.0, 
-//                                 0.0, 0.0, 0.1};
-
-//         float angular_covariance[9] = {0.1, 0.0, 0.0, 
-//                                 0.0, 0.1, 0.0, 
-//                                 0.0, 0.0, 0.1};
-
-//             float mag_covariance[9] = {0.1, 0.0, 0.0, 
-//                                 0.0, 0.1, 0.0, 
-//                                 0.0, 0.0, 0.1};
-
-
-//     imu_msg.header.stamp.sec = millis()/1000;
-//     imu_msg.header.stamp.nanosec=(millis()%1000)*1000000;
-//     rosidl_runtime_c__String__assign(&imu_msg.header.frame_id, "imu");
-//     imu_msg.linear_acceleration.x =  MilliGToMeterPerSecond(sensor->accX());
-//     imu_msg.linear_acceleration.y = MilliGToMeterPerSecond(sensor->accY());
-//     imu_msg.linear_acceleration.z = MilliGToMeterPerSecond(sensor->accZ());
-//     imu_msg.linear_acceleration_covariance[0] = lin_covariance[0];
-//     imu_msg.linear_acceleration_covariance[4] = lin_covariance[4];
-//     imu_msg.linear_acceleration_covariance[8] = lin_covariance[8];
-
-//     imu_msg.angular_velocity_covariance[0] = angular_covariance[0];
-//     imu_msg.angular_velocity_covariance[4] = angular_covariance[4];
-//     imu_msg.angular_velocity_covariance[8] = angular_covariance[8];
-                            
-       
-
-//     imu_msg.angular_velocity.x =  DegreesPerSecondToRadsPerSecond(sensor->gyrX());
-//     imu_msg.angular_velocity.y =  DegreesPerSecondToRadsPerSecond(sensor->gyrY());
-//     imu_msg.angular_velocity.z = DegreesPerSecondToRadsPerSecond(sensor->gyrZ());
-    
-//     mag_msg.header.stamp.sec = millis()/1000;
-//     mag_msg.header.stamp.nanosec=(millis()%1000)*1000000;
-//     rosidl_runtime_c__String__assign(&mag_msg.header.frame_id, "imu");
-//     mag_msg.magnetic_field.x = MicroTeslaToTesla(sensor->magX());
-//     mag_msg.magnetic_field.y = MicroTeslaToTesla(sensor->magY());
-//     mag_msg.magnetic_field.z = MicroTeslaToTesla(sensor->magZ());
-
-
-//     mag_msg.magnetic_field_covariance[0]= mag_covariance[0];
-//     mag_msg.magnetic_field_covariance[4]= mag_covariance[4];
-//     mag_msg.magnetic_field_covariance[8]= mag_covariance[8];
-
-//     // imu_msg.linear_acceleration.x = sensor->accX();
-//     // imu_msg.linear_acceleration.y = sensor->accY();
-//     // imu_msg.linear_acceleration.z = sensor->accZ();
-
-//     // imu_msg.angular_velocity.x =  sensor->gyrX();
-//     // imu_msg.angular_velocity.y =  sensor->gyrY();
-//     // imu_msg.angular_velocity.z = sensor->gyrZ();
-    
-//     // mag_msg.header.stamp.sec = millis()/1000;
-//     // mag_msg.header.stamp.nanosec=(millis()%1000)*1000000;
-//     // rosidl_runtime_c__String__assign(&mag_msg.header.frame_id, "imu");
-//     // mag_msg.magnetic_field.x = sensor->magX();
-//     // mag_msg.magnetic_field.y = sensor->magY();
-//     // mag_msg.magnetic_field.z = sensor->magZ();
-  
-// }
 
 void timer_callback_junc(rcl_timer_t * timer, int64_t last_call_time)
 {
       RCLC_UNUSED(last_call_time);
-      
-      if(val==1)
-      {   
-          digitalWrite(dir2,LOW);
-          analogWrite(pwmPin2,100);
-          digitalWrite(dir2,HIGH);
-          analogWrite(pwmPin2,100);
-          delay(100);
-          // digitalWrite(dir2,HIGH);
-          // analogWrite(pwmPin2,100);
-          // delay(100);
-          val=0;
-
-      }
-      else
-      {
-          analogWrite(pwmPin2,0);
-          //  nodeCount=-1;
-      }
       
       junc.data=nodeCount;
 
@@ -493,65 +389,20 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
   }
 }
 
-// void timer_callback_imu(rcl_timer_t * timer, int64_t last_call_time) {
-
-//     RCLC_UNUSED(last_call_time);
-
-//   if (myICM.dataReady())
-//   {
-//     myICM.getAGMT();         // The values are only updated when you call 'getAGMT'
-//     printScaledAGMT(&myICM);     
-//     delay(30);
-//   }
-//   else
-//   {
-//     // Serial.println("Waiting for data");
-//     delay(500);
-//   }
-//       if (timer != NULL) {
-     
-//      RCSOFTCHECK(rcl_publish(&publisher_imu, &imu_msg, NULL));
-
-//   }
-// }
-
-// void timer_callback_mag(rcl_timer_t * timer, int64_t last_call_time)
-// {  
-//   RCLC_UNUSED(last_call_time);
-
-//   if (myICM.dataReady())
-//   {
-//     myICM.getAGMT();         // The values are only updated when you call 'getAGMT'
-//     printScaledAGMT(&myICM);     
-//     delay(30);
-//   }
-//   else
-//   {
-//     // Serial.println("Waiting for data");
-//     delay(500);
-//   }    
-  
-//   if (timer != NULL) {
-
-//     RCSOFTCHECK(rcl_publish(&publisher_mag, &mag_msg, NULL));
-   
-//   }
-// }
-
 // luna timer callback
 void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
 {  
   RCLC_UNUSED(last_call_time);
 
   
-    Wire1.begin(); 
+   while(Wire1.available())
+   {
     // Clear previous data
     msg_luna.data.size = 4;
     msg_luna.data.capacity = 4;
     static int64_t memory[4];
     msg_luna.data.data= memory;
    // Add new data
-   
       tflI2C.getData(tfDist_1, tfAddr1);
       tflI2C.getData(tfDist_2, tfAddr2);
       tflI2C.getData(tfDist_3, tfAddr3);
@@ -560,9 +411,8 @@ void timer_callback_multiarray(rcl_timer_t * timer, int64_t last_call_time)
       msg_luna.data.data[1] = tfDist_2;
       msg_luna.data.data[2] = tfDist_3;
       msg_luna.data.data[3] = tfDist_4;
-   
 
-
+   }
   if (timer != NULL) {
       // Publish the message
       RCSOFTCHECK(rcl_publish(&publisher_luna, &msg_luna, NULL));
@@ -641,7 +491,7 @@ void subscription_callback(const void *msgin) {
 
 }
 
-void service_callback(const void * req, void * res){
+void service_callback_lift(const void * req, void * res){
   
   
   std_srvs__srv__SetBool_Request * req_in=(std_srvs__srv__SetBool_Request *) req;
@@ -708,7 +558,7 @@ void service_callback_line(const void * req2, void * res2){
   std_srvs__srv__SetBool_Request * req_in2=(std_srvs__srv__SetBool_Request *) req2;
   std_srvs__srv__SetBool_Response * res_in2=(std_srvs__srv__SetBool_Response *) res2;
 
-
+  
   if(req_in2->data == 1)
   {
       
@@ -731,41 +581,16 @@ void setup() {
   pinSetup();
   // Configure serial transport
   
-  Serial.begin(115200);
+
   set_microros_serial_transports(Serial);
   delay(1000);
   
-
+  Wire1.begin(); 
+  Serial.begin(115200);
   Serial1.begin(115200);
+
+
   
-  // while (!Serial)
-  // {
-  // };
-  // WIRE_PORT.begin();
-  // WIRE_PORT.setClock(400000);
-  
-  //myICM.enableDebugging(); // Uncomment this line to enable helpful debug messages on Serial
-  // bool initialized = false;
-  // while (!initialized)
-  // {
-
-    // myICM.begin(WIRE_PORT, AD0_VAL);
-
-
-  //   Serial.print(F("Initialization of the sensor returned: "));
-  //   Serial.println(myICM.statusString());
-  //   if (myICM.status != ICM_20948_Stat_Ok)
-  //   {
-  //     Serial.println("Trying again...");
-  //     delay(500);
-  //   }
-  //   else
-  //   {
-  //     initialized = true;
-  //   }
-  // }
-
-
  // Try to initialize!
 
   allocator = rcl_get_default_allocator();
@@ -775,6 +600,10 @@ void setup() {
 
   // create node 
   RCCHECK(rclc_node_init_default(&node, "r2_vrc", "", &support));
+
+  // create node 2 for subscriber 
+
+  RCCHECK(rclc_node_init_default(&node2,"subscribe","",&support));
 
   // create service for lift2
    RCCHECK(rclc_service_init_default(
@@ -811,22 +640,6 @@ void setup() {
     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
     "line_lsa"));
 
- //creating publisher for imu_sensor data
-
-//     RCCHECK(rclc_publisher_init_default(
-//     &publisher_imu,
-//     &node,
-//     ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu),
-//     "/imu/data_raw"));
-
-// // create publisher _ mag
-
-//     RCCHECK(rclc_publisher_init_default(
-//     &publisher_mag,
-//     &node,
-//     ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, MagneticField),
-//     "/imu/mag"));    
-  
  //create publisher for lunar sensor
 
     RCCHECK(rclc_publisher_init_default(
@@ -838,13 +651,13 @@ void setup() {
   // subscriber for cmd vel
     RCCHECK(rclc_subscription_init_default(
     &subscriber,
-    &node,
+    &node2,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
     "cmd_vel"));
 
 //  create timer for lunar sensor
 
-   const unsigned int timer_timeout_luna = 10;
+   const unsigned int timer_timeout_luna = 50;
     RCCHECK(rclc_timer_init_default(
     &timer_luna,
     &support,
@@ -867,44 +680,29 @@ void setup() {
     RCL_MS_TO_NS(timer_timeout),
     timer_callback));
 
-//  // create timer for ICM
-//   const unsigned int timer_timeout_imu = 10; // initially 500
-//   RCCHECK(rclc_timer_init_default(
-//     &timer_imu,
-//     &support,
-//     RCL_MS_TO_NS(timer_timeout_imu),
-//     timer_callback_imu));
-
-//   // create timer FOR MAG,
-//   const unsigned int timer_timeout_mag = 10;
-//   RCCHECK(rclc_timer_init_default(
-//     &timer_mag,
-//     &support,
-//     RCL_MS_TO_NS(timer_timeout_mag),
-//     timer_callback_mag));
   // create executor
   
-RCCHECK(rclc_executor_init(&executor, &support.context,5, &allocator));
+RCCHECK(rclc_executor_init(&executor, &support.context,4, &allocator));
+RCCHECK(rclc_executor_init(&executor1, &support.context,1, &allocator));
 
 //RCCHECK(rclc_executor_add_timer(&executor, &timer_line));
-// RCCHECK(rclc_executor_add_timer(&executor, &timer_imu));
-// RCCHECK(rclc_executor_add_timer(&executor, &timer_mag));
 // RCCHECK(rclc_executor_add_timer(&executor, &timer_junc));
 RCCHECK(rclc_executor_add_timer(&executor, &timer_luna));
 
-RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
+RCCHECK(rclc_executor_add_subscription(&executor1, &subscriber, &sub_msg, &subscription_callback, ON_NEW_DATA));
 
-RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback));
+RCCHECK(rclc_executor_add_service(&executor, &service, &req, &res, service_callback_lift));
 RCCHECK(rclc_executor_add_service(&executor, &service1, &req1, &res1, service_callback_claw));
 RCCHECK(rclc_executor_add_service(&executor, &service2, &req2, &res2, service_callback_line));
 
-  
 }
 
 void loop() {
 
   delay(100);
 
+  RCSOFTCHECK(rclc_executor_spin_some(&executor1, RCL_MS_TO_NS(100)));
   RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+
 
 }
