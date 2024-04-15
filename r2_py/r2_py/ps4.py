@@ -10,7 +10,7 @@ from time import time
 from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
 import subprocess
-from pynput import keyboard
+# from pynput import keyboard
 # import keyboard
 
 class PS4JoyNode(Node):
@@ -47,8 +47,8 @@ class PS4JoyNode(Node):
         # keyboard.on_press_key('2', lambda _: self.luna_silo_2())  # '2' key for Luna Silo 2
         # keyboard.on_press_key('3', lambda _: self.luna_silo_3())  # '3' key for Luna Silo 3
 
-        self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
-        self.keyboard_listener.start()
+        # self.keyboard_listener = keyboard.Listener(on_press=self.on_press)
+        # self.keyboard_listener.start()
 
         self.lin_x = 0.0
         self.lin_y = 0.0
@@ -60,6 +60,9 @@ class PS4JoyNode(Node):
         self.lift_up_old = 0
         self.claw_open_old = 0
         self.claw_close_old = 0
+        self.luna_1_old = 0
+        self.luna_2_old = 0
+        self.luna_3_old = 0
         
 
     def cmd_vel_callback(self, msg):
@@ -142,20 +145,31 @@ class PS4JoyNode(Node):
     
     def luna_silo_1(self):
         self.get_logger().info("Luna Silo 1")
+        self.is_service_executing = True
         cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=1"
         subprocess.Popen(cmd, shell=True)
+        self.is_service_executing = False
+
         return
     
     def luna_silo_2(self):
         self.get_logger().info("Luna Silo 2")
+        self.is_service_executing = True
+
         cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=2"
         subprocess.Popen(cmd, shell=True)
+        self.is_service_executing = False
+
         return
     
     def luna_silo_3(self):
         self.get_logger().info("Luna Silo 3")
+        self.is_service_executing = True
+
         cmd = "gnome-terminal -- ros2 run luna_control luna_wall_align --ros-args -p silo_number:=3"
         subprocess.Popen(cmd, shell=True)
+        self.is_service_executing = False
+
         return
 
     def joy_callback(self, msg):
@@ -184,19 +198,23 @@ class PS4JoyNode(Node):
         if ((claw_close_new == 1) and (self.claw_close_old == 0)):
             self.claw_close()
         
-        if luna_silo_1 == 1:
+        if ((luna_silo_1 == 1) and (self.luna_1_old == 0)):
             self.luna_silo_1()
 
-        if luna_silo_2 == 1:
+        if ((luna_silo_2 == 1) and (self.luna_2_old == 0)):
             self.luna_silo_2()
 
-        if luna_silo_3 == 1:
+        if ((luna_silo_3 == 1) and (self.luna_3_old == 0)):
             self.luna_silo_3()
 
         self.lift_up_old = lift_up_new 
         self.lift_down_old = lift_down_new
         self.claw_open_old = claw_open_new
         self.claw_close_old = claw_close_new
+
+        self.luna_1_old = luna_silo_1
+        self.luna_2_old = luna_silo_2
+        self.luna_3_old = luna_silo_3
 
         
 def main(args=None):
