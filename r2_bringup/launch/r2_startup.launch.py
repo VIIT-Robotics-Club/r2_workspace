@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 import launch_ros.actions
-from launch.actions import RegisterEventHandler, EmitEvent, ExecuteProcess
+from launch.actions import RegisterEventHandler, EmitEvent, ExecuteProcess, TimerAction
 from launch.event_handlers import OnProcessExit, OnProcessStart, OnProcessIO
 from launch.events import Shutdown
 from launch.substitutions import LaunchConfiguration
@@ -150,23 +150,33 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=lift_up,
-                on_exit=silo_tracking
+                on_exit=TimerAction(
+                    period = 4.0,
+                    actions = [go_to_silo_1_luna]
+                )
             )
         ),
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=silo_tracking,
-                on_exit=go_to_silo_2_luna
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=lift_up,
+        #         on_exit=silo_tracking
+        #     )
+        # ),
 
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=go_to_silo_2_luna,
-                on_exit=claw_open
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=silo_tracking,
+        #         on_exit=go_to_silo_2_luna
+        #     )
+        # ),
+
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=go_to_silo_2_luna,
+        #         on_exit=claw_open
+        #     )
+        # ),
 
         # RegisterEventHandler(
         #     event_handler=OnProcessExit(
