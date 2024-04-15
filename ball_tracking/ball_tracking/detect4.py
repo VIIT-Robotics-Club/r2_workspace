@@ -54,7 +54,7 @@ class YOLOv5ROS2(Node):
     
     def __init__(self):
         super().__init__('yolov5_ros2_node')
-        self.declare_parameter("setupareaball", -40000.0)       # The desired sensor reading
+        self.declare_parameter("setupareaball", -42000.0)       # The desired sensor reading
         self.declare_parameter("setupdev", 180.01)                  # Proportional gain
         self.declare_parameter("setupdevsilo", 80.01)                  # Proportional gain
         self.declare_parameter("setupareasilo", -15000.00)                  # Integral gain
@@ -131,7 +131,7 @@ class YOLOv5ROS2(Node):
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # conidence threshold
         iou_thres=0.45,  # NMS IOU threshold
-        max_det=100,  # maximum detections per image
+        max_det=2,  # maximum detections per image
         device="cpu",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
@@ -261,7 +261,7 @@ class YOLOv5ROS2(Node):
                   
                     # twist_msg2.linear.z=1.0
                     twist_msg2.linear.x = 0.0
-                    twist_msg2.angular.z = 0.5
+                    twist_msg2.angular.z = 0.2
                     print(f"silo is been seen : {silofound}")
                     self.publisher2_.publish(twist_msg2)   
                 if  purpleballfound == False :
@@ -458,6 +458,7 @@ class YOLOv5ROS2(Node):
                             if label == "Blue-Ball":
                                 x1, y1, x2, y2 = xyxy  # Extract bounding box coordinates
                                 areab = abs((x2 - x1) * (y2 - y1))  # Calculate area
+                                print(f"area:{areab}")
                                 leftmost_blue_ball_area= -areab
                       
                         # x1_intersect = max(box1[0], box2[0])

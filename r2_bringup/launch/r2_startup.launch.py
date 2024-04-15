@@ -23,9 +23,6 @@ def generate_launch_description():
         package='ball_tracking',
         executable='testnode3',
         name='testnode3',
-        parameters=[
-       
-        ]
     )
 
     ball_following_blue = Node(
@@ -134,62 +131,42 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        go_to_silo_1_luna,
-        
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=go_to_silo_2_luna,
-        #         on_exit=go_to_silo_3_luna
-        #     )
-        # ),
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=go_to_silo_3_luna,
-        #         on_exit=go_to_silo_4_luna
-        #     )
-        # ),
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=go_to_silo_4_luna,
-        #         on_exit=go_to_silo_5_luna
-        #     )
-        # )
-        # ball_following_blue,
+        ball_following_blue,
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=ball_following_blue,
-        #         on_exit=claw_close
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ball_following_blue,
+                on_exit=claw_close
+            )
+        ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=claw_close,
-        #         on_exit=lift_up
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=claw_close,
+                on_exit=lift_up
+            )
+        ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=lift_up,
-        #         on_exit=silo_tracking
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=lift_up,
+                on_exit=silo_tracking
+            )
+        ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=silo_tracking,
-        #         on_exit=go_to_silo_2_luna
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=silo_tracking,
+                on_exit=go_to_silo_2_luna
+            )
+        ),
 
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=go_to_silo_2_luna,
-        #         on_exit=claw_open
-        #     )
-        # ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=go_to_silo_2_luna,
+                on_exit=claw_open
+            )
+        ),
 
         # RegisterEventHandler(
         #     event_handler=OnProcessExit(

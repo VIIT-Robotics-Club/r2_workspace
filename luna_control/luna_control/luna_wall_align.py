@@ -5,7 +5,7 @@
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
 import sys
 import os
@@ -79,7 +79,7 @@ class LunaWallAlignNode(Node):
 
         
         self.luna_subscriber = self.create_subscription(
-            Int32MultiArray,
+            Int64MultiArray,
             'luna_data',
             self.luna_callback,
             10,
