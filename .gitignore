@@ -1,0 +1,10 @@
+
+# ide configs
+.vscode/
+.vs/
+
+# build files
+build/
+log/
+install/
+bin/
