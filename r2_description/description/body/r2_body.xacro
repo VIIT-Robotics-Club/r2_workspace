@@ -31,11 +31,10 @@
             </inertial>
             </link>
 
-            <joint name="fl_wheel_joint" type="continuous">
+            <joint name="fl_wheel_joint" type="fixed">
                 <parent link="base_link"/>
                 <child link="fl_wheel_link"/>
                 <origin xyz="${-wheel_offset_x} ${-wheel_offset_y} ${wheel_offset_z}" rpy="0 0 ${-M_PI/2}" />
-                <axis xyz="1 0 0" rpy="0 0 0"/>
             </joint>
 
             <link name="fl_wheel_link">
@@ -43,7 +42,7 @@
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
                 
-                <mesh filename="package://r2_description/meshes/fl_wheel_link.STL" scale="0.6 0.6 0.6" />
+                <mesh filename="$(find r2_description)/meshes/fl_wheel_link.STL" scale="0.6 0.6 0.6" />
                 </geometry>
                 <material name="darkgrey" />
             </visual>
@@ -60,18 +59,17 @@
             </inertial>
         </link>
 
-        <joint name="fr_wheel_joint" type="continuous">
+        <joint name="fr_wheel_joint" type="fixed">
             <parent link="base_link"/>
             <child link="fr_wheel_link"/>
             <origin xyz="${-wheel_offset_x} ${wheel_offset_y} ${wheel_offset_z}" rpy="0 0 ${M_PI/2}" />
-            <axis xyz="-1 0 0" rpy="0 0 0"/>
         </joint>
 
         <link name="fr_wheel_link">
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                <mesh filename="package://r2_description/meshes/fr_wheel_link.STL" scale="0.6 0.6 0.6" />
+                <mesh filename="$(find r2_description)/meshes/fr_wheel_link.STL" scale="0.6 0.6 0.6" />
                 </geometry>
                 <material name="darkgrey" />
             </visual>
@@ -88,18 +86,17 @@
             </inertial>
             </link>
 
-            <joint name="rl_wheel_joint" type="continuous">
+            <joint name="rl_wheel_joint" type="fixed">
                 <parent link="base_link"/>
                 <child link="rl_wheel_link"/>
                 <origin xyz="${wheel_offset_x} ${-wheel_offset_y} ${wheel_offset_z}" rpy="0 0 ${-M_PI/2}" />
-                <axis xyz="1 0 0" rpy="0 0 0"/>
             </joint>
 
             <link name="rl_wheel_link">
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                <mesh filename="package://r2_description/meshes/rl_wheel_link.STL" scale="0.6 0.6 0.6" />
+                <mesh filename="$(find r2_description)/meshes/rl_wheel_link.STL" scale="0.6 0.6 0.6" />
                 </geometry>
                 <material name="darkgrey" />
             </visual>
@@ -116,17 +113,16 @@
             </inertial>
             </link>
 
-            <joint name="rr_wheel_joint" type="continuous">
+            <joint name="rr_wheel_joint" type="fixed">
                 <parent link="base_link"/>
                 <child link="rr_wheel_link"/>
                 <origin xyz="${wheel_offset_x} ${wheel_offset_y} ${wheel_offset_z}" rpy="0 0 ${M_PI/2}" />
-                <axis xyz="-1 0 0" rpy="0 0 0"/>
             </joint>
             <link name="rr_wheel_link">
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                <mesh filename="package://r2_description/meshes/rr_wheel_link.STL" scale="0.6 0.6 0.6" />
+                <mesh filename="$(find r2_description)/meshes/rr_wheel_link.STL" scale="0.6 0.6 0.6" />
                 </geometry>
                 <material name="darkgrey" />
             </visual>
