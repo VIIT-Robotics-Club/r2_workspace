@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="flat_bot">
+    <xacro:include filename="common.xacro"/>
+    <xacro:include filename="body/flat_bot.xacro"/>
+    <xacro:flat_bot/>
+
+    <xacro:include filename="gazebo.xacro"/>
+    
+</robot>

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2">
     <xacro:include filename="common.xacro"/>
-    <xacro:include filename="body/r2_body.xacro"/>
-    <xacro:r2_body/>
+    <xacro:include filename="body/r2.xacro"/>
+    <xacro:r2/>
 
     <xacro:include filename="gazebo.xacro"/>
     
