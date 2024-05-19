@@ -374,18 +374,21 @@
             <limit upper="0.546" lower="0.0" effort="100" velocity="100"/>
           </joint>
           
-          <joint name="claw_left_lift" type="continuous">
+          <joint name="claw_left_lift" type="revolute">
             <origin xyz="0.09204 -0.024511 0.0225" rpy="0 0 0"/>
             <parent link="lift_1"/>
             <child link="claw_left_1"/>
             <axis xyz="0.0 0.0 1.0"/>
+            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="0.0"/>
           </joint>
           
-          <joint name="claw_right_lift" type="continuous">
+          <joint name="claw_right_lift" type="revolute">
             <origin xyz="0.09204 -0.060511 0.0225" rpy="0 0 -0.3"/>
             <parent link="lift_1"/>
             <child link="claw_right_1"/>
             <axis xyz="0.0 0.0 1.0"/>
+            <limit lower="0" upper="${-PI/4}" effort="4.0" velocity="0.0"/>
+
           </joint>
 
         <joint name="camera_joint" type="fixed">
@@ -399,7 +402,7 @@
                 <geometry>
                     <box size="0.010 0.03 0.03"/>
                 </geometry>
-                <material name="red"/>
+                <material name="silver"/>
             </visual>
         </link>
         

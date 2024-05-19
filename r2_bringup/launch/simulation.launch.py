@@ -11,6 +11,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     
     share = FindPackageShare("r2_bringup")
+    descShare = FindPackageShare("r2_description")
     
     urdfPath = PathJoinSubstitution([FindPackageShare("r2_description") , "description", "r2.urdf.xacro"])
     
@@ -72,10 +73,18 @@ def generate_launch_description():
     
     rviz = Node(
         package="rviz2",
-        executable="rviz2"
+        executable="rviz2",
+        arguments=[
+        "-d",
+        PathJoinSubstitution([descShare, "rviz", "config.rviz"])
+        ]
     )
     
 
+    jointStatePubGui = Node(
+        package="joint_state_publisher_gui",
+        executable="joint_state_publisher_gui",
+    )
     
     return LaunchDescription({
         gazebo,
@@ -86,7 +95,9 @@ def generate_launch_description():
         
         joy_node,
         teleop_node,
-        twist_mux
+        twist_mux,
+        
+        jointStatePubGui
     }
         
     )
