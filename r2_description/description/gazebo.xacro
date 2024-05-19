@@ -60,8 +60,6 @@
   </xacro:macro>
 
 
-
-
 <gazebo reference="imu_link">
     <sensor name="r2_imu" type="imu">
         <always_on>true</always_on>

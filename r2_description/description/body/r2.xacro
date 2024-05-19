@@ -410,5 +410,34 @@
         </joint>
     
         <link name="camera_link_optical"></link>
+
+            <!-- IMU LINK AT CENTER OF ROBOT -->
+    <joint name="imu_joint" type="fixed">
+      <parent link="base_link" />
+      <child link="imu_link" />
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+    </joint>
+
+  <link name="imu_link">
+      <visual>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <geometry>
+              <box size="0.02 0.02 0.02" />
+          </geometry>
+          <material name="grey" />
+      </visual>
+      <collision>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <geometry>
+              <box size="0.02 0.02 0.02" />
+          </geometry>
+      </collision>
+      <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.100"/>
+      <xacro:box_inertia m="0.100" x="0.02" y="0.02" z="0.02"/>
+      </inertial>
+</link>
+
     </xacro:macro>   
 </robot>
