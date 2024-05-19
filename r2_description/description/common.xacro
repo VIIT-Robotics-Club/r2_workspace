@@ -11,9 +11,70 @@
     <color rgba="0.0 0.0 0.8 1.0" />
 </material>
 
+<!-- <xacro:property name="body_color" value="Gazebo/Silver" /> -->
 <material name="silver">
     <color rgba="0.700 0.700 0.700 1.000"/>
   </material>
+
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  
+  <gazebo reference="wheel_fl_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="wheel_bl_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="wheel_fr_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="wheel_br_1">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_lf_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_lb_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_fl_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_fr_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_rf_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lidar_rb_1">
+    <material>Gazebo/Silver</material>
+  </gazebo>
+  
+  <gazebo reference="lift_1">
+    <material>Gazebo/Turquoise</material>
+  </gazebo>
+  
+  <gazebo reference="claw_left_1">
+    <material>Gazebo/Turquoise</material>
+  </gazebo>
+  
+  <gazebo reference="claw_right_1">
+    <material>Gazebo/Turquoise</material>
+  </gazebo>
 
 <xacro:property name="M_PI" value="3.1415926535897931" />
 <xacro:property name="M_PI_2" value="1.570796327" />
