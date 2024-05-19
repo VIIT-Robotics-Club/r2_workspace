@@ -12,4 +12,7 @@
     <xacro:luna prefix="lidar_rb_1"/>
     <xacro:luna prefix="lidar_rf_1"/>
     
+
+    <xacro:include filename="control.xacro"/>
+    
 </robot>

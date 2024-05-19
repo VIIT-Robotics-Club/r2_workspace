@@ -307,6 +307,7 @@
             <parent link="base_link"/>
             <child link="wheel_fl_1"/>
             <axis xyz="0.0 1.0 -0.0"/>
+            <limit upper="${2 * PI}" lower="0.0" effort="100" velocity="100"/>
           </joint>
           
           <joint name="wheel_bl_base" type="continuous">
@@ -314,6 +315,7 @@
             <parent link="base_link"/>
             <child link="wheel_bl_1"/>
             <axis xyz="0.0 1.0 -0.0"/>
+            <limit upper="${2 * PI}" lower="0.0" effort="100" velocity="100"/>
           </joint>
           
           <joint name="wheel_fr_base" type="continuous">
@@ -321,6 +323,7 @@
             <parent link="base_link"/>
             <child link="wheel_fr_1"/>
             <axis xyz="-0.0 -1.0 0.0"/>
+            <limit upper="${2 * PI}" lower="0.0" effort="100" velocity="100"/>
           </joint>
           
           <joint name="wheel_br_base" type="continuous">
@@ -328,6 +331,7 @@
             <parent link="base_link"/>
             <child link="wheel_br_1"/>
             <axis xyz="-0.0 -1.0 0.0"/>
+            <limit upper="${2 * PI}" lower="0.0" effort="100" velocity="100"/>
           </joint>
           
           <joint name="lidar_lf" type="fixed">
@@ -379,15 +383,15 @@
             <parent link="lift_1"/>
             <child link="claw_left_1"/>
             <axis xyz="0.0 0.0 1.0"/>
-            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="0.0"/>
+            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="10.0"/>
           </joint>
           
           <joint name="claw_right_lift" type="revolute">
-            <origin xyz="0.09204 -0.060511 0.0225" rpy="0 0 -0.3"/>
+            <origin xyz="0.09204 -0.060511 0.0225" rpy="0 0 0"/>
             <parent link="lift_1"/>
             <child link="claw_right_1"/>
-            <axis xyz="0.0 0.0 1.0"/>
-            <limit lower="0" upper="${-PI/4}" effort="4.0" velocity="0.0"/>
+            <axis xyz="0.0 0.0 -1.0"/>
+            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="10.0"/>
 
           </joint>
 

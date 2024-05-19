@@ -1,5 +1,17 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2">
+
+
+    <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gz_ros2_control">
+          <robot_param>robot_description</robot_param>
+          <robot_param_node>robot_state_publisher</robot_param_node>
+          <parameters>$(find r2_description)/config/controller.yaml</parameters>
+          <controller_manager_name>r2_controller_manager</controller_manager_name>
+        </plugin>
+    </gazebo>
+
+
     <gazebo>
         <plugin name="planar_move_plugin" filename="libgazebo_ros_planar_move.so">
             <robotNamespace>/</robotNamespace>
@@ -16,7 +28,6 @@
     <gazebo reference="${prefix}">
         <sensor name="${prefix}" type="ray">
             <always_on>true</always_on>
-            <visualize>true</visualize>
             <pose>0.0 0 0.0 0 0 0</pose>
             <update_rate>5</update_rate>
             <ray>
@@ -121,7 +132,6 @@
 
         <sensor name="camera" type="camera">
             <pose> 0 0 0 0 0 0 </pose>
-            <visualize>true</visualize>
             <update_rate>10</update_rate>
             <camera>
                 <horizontal_fov>1.089</horizontal_fov>

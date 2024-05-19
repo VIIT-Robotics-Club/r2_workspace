@@ -5,6 +5,7 @@ from launch_ros.actions import *
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, Command
 from launch_ros.parameter_descriptions import ParameterValue
+from math import pi
 
 
 
@@ -36,7 +37,6 @@ def generate_launch_description():
         }.items()
     )
     
-    pi = 3.1415
     gazebo_spawn = Node(
         package="gazebo_ros",
         executable="spawn_entity.py",
@@ -86,6 +86,46 @@ def generate_launch_description():
         executable="joint_state_publisher_gui",
     )
     
+    
+    # start joint state broadcaster controller
+    joint_state_broad = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster"
+        ]
+    )
+    
+    # start position controller
+    pos_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "position_controller"
+        ]
+    )
+    
+    joint_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_trajectory_controller"
+        ]
+    )
+    
+    
+    effort_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "effort_controller"
+        ]
+    )
+    
+    sliders = Node(package="rqt_joint_trajectory_controller",
+                               executable="rqt_joint_trajectory_controller")
+    
+    
     return LaunchDescription({
         gazebo,
         gazebo_spawn,
@@ -97,7 +137,14 @@ def generate_launch_description():
         teleop_node,
         twist_mux,
         
-        jointStatePubGui
+        # control systems
+        joint_state_broad,
+        joint_controller,
+        # pos_controller,
+        effort_controller,
+        sliders
+        
+        # jointStatePubGui
     }
         
     )
