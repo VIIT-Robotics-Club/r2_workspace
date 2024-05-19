@@ -35,11 +35,12 @@ def generate_launch_description():
         }.items()
     )
     
+    pi = 3.1415
     gazebo_spawn = Node(
         package="gazebo_ros",
         executable="spawn_entity.py",
         arguments=["-topic", "/robot_description",
-                   "-entity", "tarm","-x 0","-y 0","-z 0.4","-R 0","-P 0","-Y 0"]
+                   "-entity", "tarm","-x 0.1","-y 0.3","-z 0.4","-R 0","-P 0","-Y " + str(pi / 2)]
     )
     
     

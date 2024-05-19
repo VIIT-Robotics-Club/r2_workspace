@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="r2">
     <xacro:macro name="r2" >
+      <link name="base_footprint"/>
+      <joint name="base_joint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="0 0 0.126" rpy="0 0 0" />
+      </joint>
+      
         <link name="base_link">
             <inertial>
               <origin xyz="0.05532118051906009 0.005032766073950176 0.04867267064366568" rpy="0 0 0"/>
@@ -113,14 +120,14 @@
               <inertia ixx="1e-06" iyy="2e-06" izz="1e-06" ixy="0.0" iyz="-0.0" ixz="0.0"/>
             </inertial>
             <visual>
-              <origin xyz="-0.052465 -0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="-0.052465 -0.19 0.0745" rpy="0 0 ${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_lf_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
-              <origin xyz="-0.052465 -0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="-0.052465 -0.19 0.0745" rpy="0 0 ${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_lf_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
@@ -134,14 +141,14 @@
               <inertia ixx="1e-06" iyy="2e-06" izz="1e-06" ixy="0.0" iyz="0.0" ixz="-0.0"/>
             </inertial>
             <visual>
-              <origin xyz="0.047535 -0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="0.047535 -0.19 0.0745" rpy="0 0 ${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_lb_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
-              <origin xyz="0.047535 -0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="0.047535 -0.19 0.0745" rpy="0 0 ${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_lb_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
@@ -197,14 +204,14 @@
               <inertia ixx="1e-06" iyy="2e-06" izz="1e-06" ixy="0.0" iyz="0.0" ixz="0.0"/>
             </inertial>
             <visual>
-              <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_rf_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
-              <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_rf_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
@@ -218,14 +225,14 @@
               <inertia ixx="1e-06" iyy="2e-06" izz="1e-06" ixy="0.0" iyz="0.0" ixz="0.0"/>
             </inertial>
             <visual>
-              <origin xyz="0.047535 0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="0.047535 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_rb_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
-              <origin xyz="0.047535 0.19 0.0745" rpy="0 0 0"/>
+              <origin xyz="0.047535 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/lidar_rb_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
@@ -324,13 +331,13 @@
           </joint>
           
           <joint name="lidar_lf" type="fixed">
-            <origin xyz="0.052465 0.19 -0.0745" rpy="0 0 0"/>
+            <origin xyz="0.052465 0.19 -0.0745" rpy="0 0 ${pi/2}"/>
             <parent link="base_link"/>
             <child link="lidar_lf_1"/>
           </joint>
           
           <joint name="lidar_lb" type="fixed">
-            <origin xyz="-0.047535 0.19 -0.0745" rpy="0 0 0"/>
+            <origin xyz="-0.047535 0.19 -0.0745" rpy="0 0 ${pi/2}"/>
             <parent link="base_link"/>
             <child link="lidar_lb_1"/>
           </joint>
@@ -348,13 +355,13 @@
           </joint>
           
           <joint name="lidar_rf" type="fixed">
-            <origin xyz="0.052465 -0.19 -0.0745" rpy="0 0 0"/>
+            <origin xyz="0.052465 -0.19 -0.0745" rpy="0 0 -${pi/2}"/>
             <parent link="base_link"/>
             <child link="lidar_rf_1"/>
           </joint>
           
           <joint name="lidar_rb" type="fixed">
-            <origin xyz="-0.047535 -0.19 -0.0745" rpy="0 0 0"/>
+            <origin xyz="-0.047535 -0.19 -0.0745" rpy="0 0 -${pi/2}"/>
             <parent link="base_link"/>
             <child link="lidar_rb_1"/>
           </joint>
@@ -380,5 +387,28 @@
             <child link="claw_right_1"/>
             <axis xyz="0.0 0.0 1.0"/>
           </joint>
+
+        <joint name="camera_joint" type="fixed">
+            <parent link="base_link" />
+            <child link="camera_link"/>
+            <origin xyz="0.305 0 0.08" rpy="0 0 0"/>
+        </joint>
+    
+        <link name="camera_link">
+             <visual>
+                <geometry>
+                    <box size="0.010 0.03 0.03"/>
+                </geometry>
+                <material name="red"/>
+            </visual>
+        </link>
+        
+        <joint name="camera_optical_joint" type="fixed">
+            <parent link="camera_link" />
+            <child link="camera_link_optical"/>
+            <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        </joint>
+    
+        <link name="camera_link_optical"></link>
     </xacro:macro>   
 </robot>

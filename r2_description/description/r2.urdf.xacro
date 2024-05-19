@@ -5,5 +5,11 @@
     <xacro:r2/>
 
     <xacro:include filename="gazebo.xacro"/>
+    <xacro:luna prefix="lidar_fl_1"/>
+    <xacro:luna prefix="lidar_fr_1"/>
+    <xacro:luna prefix="lidar_lf_1"/>
+    <xacro:luna prefix="lidar_lb_1"/>
+    <xacro:luna prefix="lidar_rb_1"/>
+    <xacro:luna prefix="lidar_rf_1"/>
     
 </robot>

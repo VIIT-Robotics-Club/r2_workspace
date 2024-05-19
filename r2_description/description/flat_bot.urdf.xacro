@@ -5,5 +5,10 @@
     <xacro:flat_bot/>
 
     <xacro:include filename="gazebo.xacro"/>
+
+    <xacro:luna prefix="luna_1"/>
+    <xacro:luna prefix="luna_2"/>
+    <xacro:luna prefix="luna_3"/>
+    <xacro:luna prefix="luna_4"/>
     
 </robot>
