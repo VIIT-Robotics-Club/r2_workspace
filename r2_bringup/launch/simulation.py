@@ -39,7 +39,7 @@ def generate_launch_description():
         package="gazebo_ros",
         executable="spawn_entity.py",
         arguments=["-topic", "/robot_description",
-                   "-entity", "tarm"]
+                   "-entity", "R2"]
     )
     
     
@@ -64,7 +64,7 @@ def generate_launch_description():
         package="twist_mux",
         executable="twist_mux",
         remappings=[
-            ('/cmd_vel_out', '/out_cmd_vel')
+            ('/cmd_vel_out', '/cmd_vel')
         ],
         parameters= [PathJoinSubstitution([share, "config", "twist_mux.yaml"])]
     )
