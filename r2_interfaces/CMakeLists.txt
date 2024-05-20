@@ -11,7 +11,9 @@ find_package(rosidl_default_generators REQUIRED)
 
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/LedStateArray.msg"
+  "msg/Xywh.msg"
+  "msg/XyXy.msg"
+  "msg/YoloResults.msg"
   "srv/SetLed.srv"
   "action/CountUntil.action"
 )
