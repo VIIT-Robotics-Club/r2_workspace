@@ -30,6 +30,7 @@ setup(
             "quat_to_rpy = r2_py.quaternion_to_rpy:main",
             "ps4 = r2_py.ps4:main",
             "cmd_vel_slow_pub = r2_py.cmd_vel_slow_pub:main",
+            "joint_controllers = r2_py.joint_controllers:main",
         ],
     },
 )
