@@ -83,8 +83,8 @@ class YoloObjectTrackingNode(Node):
         img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
 
-        cv2.imshow('image', img)
-        cv2.waitKey(1)
+        # cv2.imshow('image', img)
+        # cv2.waitKey(1)
 
         self.yolo_object_detect(img)
 
@@ -138,18 +138,16 @@ class YoloObjectTrackingNode(Node):
                 
         # Class ids: 0- Blue-ball, 1- Purple-ball, 2- Red-Ball, 3- silo        
         cls_list = [int(cls) for cls in result.boxes.cls.tolist()]
-        # print(cls_list)
         yolo_result_msg.class_ids.extend(cls_list)
         
         # Confidence values
         conf_list = result.boxes.conf.tolist()
-        # print(conf_list)
         yolo_result_msg.confidence.extend(conf_list)
         
         # Tracking ids
-        ids_list = result.boxes.id.tolist()
-        # print(ids_list)
-        yolo_result_msg.tracking_id.extend(ids_list)
+        if result.boxes.id is not None:
+            ids_list = result.boxes.id.tolist()
+            yolo_result_msg.tracking_id.extend(ids_list)
         
 
         # Plot the annotated image

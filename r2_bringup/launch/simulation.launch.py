@@ -33,7 +33,7 @@ def generate_launch_description():
                     'launch/gazebo.launch.py'
                 ]) ]),
         launch_arguments={
-            "world" : PathJoinSubstitution([share, 'worlds', 'arena.world'])
+            "world" : PathJoinSubstitution([share, 'worlds', 'ballsinSilo.world'])
         }.items()
     )
     
@@ -125,6 +125,11 @@ def generate_launch_description():
     sliders = Node(package="rqt_joint_trajectory_controller",
                                executable="rqt_joint_trajectory_controller")
     
+    yolo_results = Node(
+        package="ball_tracking",
+        executable="ball_detect_sim",
+    )
+    
     
     return LaunchDescription({
         gazebo,
@@ -142,9 +147,11 @@ def generate_launch_description():
         joint_controller,
         # pos_controller,
         effort_controller,
-        sliders
+        sliders,
         
         # jointStatePubGui
+        
+        yolo_results
     }
         
     )
