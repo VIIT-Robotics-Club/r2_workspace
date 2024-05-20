@@ -278,6 +278,14 @@
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/claw_left_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
+              <surface>
+                <friction>
+                  <ode>
+                    <mu>0.01</mu>
+                    <mu2>0.01</mu2>
+                  </ode>
+                </friction>
+              </surface>
             </collision>
           </link>
           
@@ -299,6 +307,14 @@
               <geometry>
                 <mesh filename="file://$(find r2_description)/meshes/claw_right_1.stl" scale="0.001 0.001 0.001"/>
               </geometry>
+              <surface>
+                <friction>
+                  <ode>
+                    <mu>0.01</mu>
+                    <mu2>0.01</mu2>
+                  </ode>
+                </friction>
+              </surface>
             </collision>
           </link>
 
