@@ -29,6 +29,7 @@ setup(
         "testnode2=ball_tracking.testnode2:main",
         "testnode3=ball_tracking.testnode3:main",
         "ball_detect_sim=ball_tracking.ball_detect_sim:main",
+        "ball_tracking_sim=ball_tracking.ball_tracking_sim:main",
         ],
     },
 )

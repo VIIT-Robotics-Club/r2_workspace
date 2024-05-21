@@ -33,7 +33,7 @@ def generate_launch_description():
                     'launch/gazebo.launch.py'
                 ]) ]),
         launch_arguments={
-            "world" : PathJoinSubstitution([share, 'worlds', 'ballsinSilo.world'])
+            "world" : PathJoinSubstitution([share, 'worlds', 'arena.world']) # ballsinSilo.world, arena.world
         }.items()
     )
     

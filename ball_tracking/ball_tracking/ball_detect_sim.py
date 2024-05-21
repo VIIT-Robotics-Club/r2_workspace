@@ -42,7 +42,7 @@ class YoloObjectTrackingNode(Node):
         self.model = YOLO(model_path)
         
        
-        self.declare_parameter('deviation', 200)
+        self.declare_parameter('deviation', 170)
         self.deviation = self.get_parameter('deviation').value
         
         # Set the IOU and Confidence threshold
@@ -106,7 +106,7 @@ class YoloObjectTrackingNode(Node):
         results = self.model.track(img, persist=True, conf=self.conf, iou=self.iou)
         
         # Create a YoloResults message to store the results
-        yolo_result_msg = YoloResults()
+        yolo_result_msg = YoloResults() 
         
         # List to store contour areas
         contour_areas = []
@@ -135,7 +135,7 @@ class YoloObjectTrackingNode(Node):
                 contour_areas.append(contour_area)
                 
                 # Calculate difference
-                difference = abs(xywh[0] - line_x)
+                difference = (xywh[0] - line_x)
                 differences.append(difference)
 
             xyxy_list = result.boxes.xyxy.tolist() # top_left_x, top_left_y, bottom_right_x, bottom_right_y
