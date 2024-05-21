@@ -41,6 +41,10 @@ class YoloObjectTrackingNode(Node):
         model_path = os.path.join(current_script_dir, 'weights/model_sim.pt')
         self.model = YOLO(model_path)
         
+       
+        self.declare_parameter('deviation', 200)
+        self.deviation = self.get_parameter('deviation').value
+        
         # Set the IOU and Confidence threshold
         self.iou = 0.5
         self.conf = 0.0
@@ -90,7 +94,6 @@ class YoloObjectTrackingNode(Node):
 
 
     def yolo_object_detect(self, img):
-        
         '''
         Function to detect objects in the image using the YOLO model.
         
@@ -105,26 +108,37 @@ class YoloObjectTrackingNode(Node):
         # Create a YoloResults message to store the results
         yolo_result_msg = YoloResults()
         
+        # List to store contour areas
+        contour_areas = []
+        # List to store differences
+        differences = []
+        
+        # Calculate the deviation line's x-coordinate
+        line_x = img.shape[1] // 2 + self.deviation
+        
         # Loop through the results and store the bounding box and stores the results in the YoloResults message
         for result in results:
             
-            print(result.boxes)
-            
             xywh_list = result.boxes.xywh.tolist() # center_x, center_y, width, height
-            
-            # print(xywh_list)
             
             for xywh in xywh_list:
                 xywh_msg = Xywh()
                 xywh_msg.center_x = xywh[0]
                 xywh_msg.center_y = xywh[1]
-                xywh_msg.width= xywh[2]
+                xywh_msg.width = xywh[2]
                 xywh_msg.height = xywh[3]
                 
-                yolo_result_msg.xywh.append(xywh_msg)   #
+                yolo_result_msg.xywh.append(xywh_msg)
                 
+                # Calculate contour area
+                contour_area = xywh[2] * xywh[3]
+                contour_areas.append(contour_area)
+                
+                # Calculate difference
+                difference = abs(xywh[0] - line_x)
+                differences.append(difference)
+
             xyxy_list = result.boxes.xyxy.tolist() # top_left_x, top_left_y, bottom_right_x, bottom_right_y
-            # print(xyxy_list)
             
             for xyxy in xyxy_list:
                 xyxy_msg = XyXy()
@@ -134,8 +148,7 @@ class YoloObjectTrackingNode(Node):
                 xyxy_msg.br_y = xyxy[3]
                 
                 yolo_result_msg.xyxy.append(xyxy_msg)
-                
-                
+        
         # Class ids: 0- Blue-ball, 1- Purple-ball, 2- Red-Ball, 3- silo        
         cls_list = [int(cls) for cls in result.boxes.cls.tolist()]
         yolo_result_msg.class_ids.extend(cls_list)
@@ -148,18 +161,50 @@ class YoloObjectTrackingNode(Node):
         if result.boxes.id is not None:
             ids_list = result.boxes.id.tolist()
             yolo_result_msg.tracking_id.extend(ids_list)
-        
 
         # Plot the annotated image
         annotated_frame = results[0].plot()
 
+        # Draw the center points, contour areas, and differences
+        for i, xywh in enumerate(yolo_result_msg.xywh):
+            center_x, center_y, width, height = xywh.center_x, xywh.center_y, xywh.width, xywh.height
+            contour_area = contour_areas[i]
+            difference = differences[i]
+
+            # Draw the center point
+            cv2.circle(annotated_frame, (int(center_x), int(center_y)), 5, (0, 0, 255), -1)
+
+            # Put the contour area text
+            cv2.putText(annotated_frame, f'Area: {int(contour_area)}', 
+                        (int(center_x), int(center_y) - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        0.5, 
+                        (0, 255, 0), 
+                        2)
+
+            # Draw the difference line
+            cv2.line(annotated_frame, (int(center_x), int(center_y)), (line_x, int(center_y)), (255, 0, 0), 2)
+
+            # Put the difference text
+            cv2.putText(annotated_frame, f'Diff: {int(difference)}', 
+                        (int(center_x), int(center_y) + 20), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 
+                        0.5, 
+                        (255, 0, 0), 
+                        2)
+
+        # Add contour areas and differences to the YoloResults message
+        yolo_result_msg.contour_area.extend(contour_areas)
+        yolo_result_msg.differences.extend(differences)
+
+        cv2.line(annotated_frame, (line_x, 0), (line_x, img.shape[0]), (0, 255, 0), 2) 
+        
         cv2.imshow('YOLOv8 Tracking', annotated_frame)
         cv2.waitKey(1)
 
         # Convert the annotated image to a ROS message
         bridge = cv_bridge.CvBridge()
         annotated_frame_msg = bridge.cv2_to_imgmsg(annotated_frame, encoding="bgr8")
-        
         
         # Publish the results        
         self.yolo_result_publisher.publish(yolo_result_msg)
