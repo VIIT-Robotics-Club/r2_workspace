@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-
 '''
  Class names:
 0- Blue-ball
 1- Purple-ball
 2- Red-Ball
 3- silo
-
 '''
 
 from rclpy.node import Node
@@ -39,7 +37,7 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 75000),
+                ('desired_contour_area', 70000),
                 ('linear_kp', 0.01),
                 ('linear_ki', 0.001),
                 ('linear_kd', 0.001),
@@ -116,10 +114,12 @@ class BallTrackingNode(Node):
             'xywh': None
         }
         
+        self.last_seen_direction = None
+        
     def yolo_results_callback(self, msg):
         self.get_logger().info("Yolo Results Received")
         
-        #Clear Previous Values
+        # Clear Previous Values
         self.class_ids_list.clear()
         self.contour_areas_list.clear()
         self.differences_list.clear()
@@ -128,7 +128,7 @@ class BallTrackingNode(Node):
         self.xyxys_list.clear()
         self.xywhs_list.clear()
         
-        #Store the values from the message
+        # Store the values from the message
         self.class_ids_list.extend(msg.class_ids)
         self.contour_areas_list.extend(msg.contour_area)
         self.differences_list.extend(msg.differences)
@@ -178,7 +178,16 @@ class BallTrackingNode(Node):
             # Start tracking the selected blue ball
             self.tracking_blue_ball = True
 
+            # Record the last seen direction based on the difference error
+            if self.difference_error < 0:
+                self.last_seen_direction = 'left'
+            else:
+                self.last_seen_direction = 'right'
+
             self.move_robot()
+        else:
+            # Ball not in frame, sweep in the last seen direction
+            self.sweep_for_ball()
             
     def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
         
@@ -199,7 +208,6 @@ class BallTrackingNode(Node):
         
         return control, error_sum
         
-    
     def move_robot(self):
         if self.closest_blue_ball['class_id'] is not None:
             # Calculate the errors
@@ -258,8 +266,17 @@ class BallTrackingNode(Node):
             # Log the control commands
             self.get_logger().info(f"Publishing cmd_vel: linear_x = {linear_x}, angular_z = {angular_z}")
         
+    def sweep_for_ball(self):
+        twist_msg = Twist()
+        if self.last_seen_direction == 'right':
+            twist_msg.angular.z = -0.5  # Sweep right
+        else:
+            twist_msg.angular.z = 0.5  # Sweep left
+        twist_msg.linear.x = 0.0
+        twist_msg.linear.y = 0.0
         
-        
+        self.cmd_vel_pub.publish(twist_msg)
+        self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
     
 def main(args=None):
     rclpy.init(args=args)
@@ -270,5 +287,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-
