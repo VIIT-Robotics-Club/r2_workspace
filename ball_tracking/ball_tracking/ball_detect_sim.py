@@ -43,7 +43,6 @@ class YoloObjectTrackingNode(Node):
         
        
         self.declare_parameter('deviation', 170)
-        self.deviation = self.get_parameter('deviation').value
         
         # Set the IOU and Confidence threshold
         self.iou = 0.5
@@ -86,6 +85,8 @@ class YoloObjectTrackingNode(Node):
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
+        self.deviation = self.get_parameter('deviation').value
+
 
         # cv2.imshow('image', img)
         # cv2.waitKey(1)
