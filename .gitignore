@@ -8,3 +8,15 @@ build/
 log/
 install/
 bin/
+r2_py/r2_py/__pycache__/__init__.cpython-310.pyc
+r2_py/r2_py/__pycache__/cmd_vel_slow_pub.cpython-310.pyc
+r2_py/r2_py/__pycache__/force_stop.cpython-310.pyc
+r2_py/r2_py/__pycache__/motor_client.cpython-310.pyc
+r2_py/r2_py/__pycache__/motor_server_fake.cpython-310.pyc
+r2_py/r2_py/__pycache__/number_counter.cpython-310.pyc
+r2_py/r2_py/__pycache__/number_publisher.cpython-310.pyc
+r2_py/r2_py/__pycache__/ps4.cpython-310.pyc
+r2_py/r2_py/__pycache__/quaternion_to_rpy.cpython-310.pyc
+r2_py/r2_py/__pycache__/robot_altitude_check.cpython-310.pyc
+r2_py/r2_py/__pycache__/test_node1.cpython-310.pyc
+r2_py/r2_py/__pycache__/test_node2.cpython-310.pyc

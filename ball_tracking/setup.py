@@ -20,14 +20,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        "ball_tracker = ball_tracking.detect:main",
-        "ball_tracker2=ball_tracking.detect2:main",
-        "ball_tracker3=ball_tracking.detect3:main",
-        "ball_tracker4=ball_tracking.detect4:main",
-        "testnode=ball_tracking.testnode:main",
-        "videocapture=ball_tracking.videocapture:main",
-        "testnode2=ball_tracking.testnode2:main",
-        "testnode3=ball_tracking.testnode3:main",
         "ball_detect_sim=ball_tracking.ball_detect_sim:main",
         "ball_tracking_sim=ball_tracking.ball_tracking_sim:main",
         ],
