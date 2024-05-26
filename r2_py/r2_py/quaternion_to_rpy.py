@@ -13,6 +13,7 @@ from math import atan2, asin, pi
 class QuatToRPY(Node):
     def __init__(self):
         super().__init__("quat_to_rpy")
+        self.get_logger().info("Quat to RPY node has been started")
 
         self.subscription = self.create_subscription(
             Imu,
@@ -21,19 +22,30 @@ class QuatToRPY(Node):
             10
         )
 
+        self.declare_parameter("logging", False)
+
         self.publisher = self.create_publisher(Vector3, "/rpy", 10)
-        self.get_logger().info("Quat to RPY node has been started")
+    
+        self.create_timer(0.1, self.time_callback)
+        
+
+        self.roll = 0.0
+        self.pitch = 0.0
+        self.yaw = 0.0
+
 
     def listener_callback(self, msg):
 
-
-        self.get_logger().info("Received a message")
+        if self.get_parameter("logging").value:
+            self.get_logger().info("Received a message")
+            
         x = msg.orientation.x
         y = msg.orientation.y
         z = msg.orientation.z
         w = msg.orientation.w
-
-        self.get_logger().info(f"x: {x}, y: {y}, z: {z}, w: {w}")
+        
+        if self.get_parameter("logging").value:
+            self.get_logger().info(f"x: {x}, y: {y}, z: {z}, w: {w}")
 
         # roll (x-axis rotation)
         sinr_cosp = 2 * (w * x + y * z)
@@ -52,18 +64,27 @@ class QuatToRPY(Node):
 
 
         # Convert to degrees
-        roll = roll * 180.0 / pi
-        pitch = pitch * 180.0 / pi
-        yaw = yaw * 180.0 / pi
+        self.roll = roll * 180.0 / pi
+        self.pitch = pitch * 180.0 / pi
+        self.yaw = yaw * 180.0 / pi
+        
+        
+        if self.get_parameter("logging").value:
+            self.get_logger().info(f"Roll: {roll}, Pitch: {pitch}, Yaw: {yaw}")
 
-        self.get_logger().info(f"Roll: {roll}, Pitch: {pitch}, Yaw: {yaw}")
+        
 
+    def time_callback(self):
+        
+        if self.get_parameter("logging").value:
+            self.get_logger().info("Time callback called")
+        
         # Create a Vector3 message
         rpy = Vector3()
-        rpy.x = roll
-        rpy.y = pitch
-        rpy.z = yaw
-
+        rpy.x = self.roll
+        rpy.y = self.pitch
+        rpy.z = self.yaw
+        
         self.publisher.publish(rpy)
     
 

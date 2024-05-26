@@ -130,6 +130,16 @@ def generate_launch_description():
         executable="ball_detect_sim",
     )
     
+    quaternion_to_rpy = Node(
+        package="r2_py",
+        executable="quat_to_rpy",
+    )
+    
+    robot_altitude_check = Node(
+        package="r2_py",
+        executable="robot_altitude_check",
+    )
+    
     
     return LaunchDescription({
         gazebo,
@@ -151,7 +161,9 @@ def generate_launch_description():
         
         # jointStatePubGui
         
-        yolo_results
+        yolo_results,
+        quaternion_to_rpy,
+        robot_altitude_check
     }
         
     )

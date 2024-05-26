@@ -43,6 +43,7 @@ class YoloObjectTrackingNode(Node):
         
        
         self.declare_parameter('deviation', 170)
+        self.declare_parameter('logging', False)
         
         # Set the IOU and Confidence threshold
         self.iou = 0.5
@@ -81,7 +82,10 @@ class YoloObjectTrackingNode(Node):
         Converts the image message to a cv2 image and processes it using the YOLO model.
         
         """
-        self.get_logger().info("Image received")
+        
+        if self.get_parameter('logging').value:
+            self.get_logger().info("Image received")
+            
         bridge = cv_bridge.CvBridge()
         img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
