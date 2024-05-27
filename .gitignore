@@ -20,3 +20,7 @@ r2_py/r2_py/__pycache__/quaternion_to_rpy.cpython-310.pyc
 r2_py/r2_py/__pycache__/robot_altitude_check.cpython-310.pyc
 r2_py/r2_py/__pycache__/test_node1.cpython-310.pyc
 r2_py/r2_py/__pycache__/test_node2.cpython-310.pyc
+r2_navigation/r2_navigation/__pycache__/__init__.cpython-310.pyc
+r2_navigation/r2_navigation/__pycache__/robot_altitude_check.cpython-310.pyc
+r2_navigation/r2_navigation/__pycache__/navigation_client_test.cpython-310.pyc
+r2_navigation/r2_navigation/__pycache__/navigation_server.cpython-310.pyc

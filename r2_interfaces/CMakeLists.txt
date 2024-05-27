@@ -14,8 +14,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Xywh.msg"
   "msg/XyXy.msg"
   "msg/YoloResults.msg"
-  "srv/SetLed.srv"
-  "action/CountUntil.action"
+  "srv/BestSilo.srv"
+  "srv/SiloToGo.srv"
+  "action/OrientAndMove.action"
 )
 
 

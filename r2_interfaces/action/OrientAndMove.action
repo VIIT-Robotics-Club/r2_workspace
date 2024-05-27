@@ -1,0 +1,10 @@
+# Goal
+float64 target_yaw
+
+---
+# Result
+bool success
+
+---
+# Feedback
+int32 current_silo_count

@@ -17,7 +17,8 @@ from ultralytics import YOLO
 
 from geometry_msgs.msg import Twist
 from r2_interfaces.msg import YoloResults
-
+from r2_interfaces.srv import BestSilo
+import sys
 
 class SiloDetectionNode(Node):
     def __init__(self):
@@ -35,6 +36,12 @@ class SiloDetectionNode(Node):
             Twist, 
             'cmd_vel', 
             10
+        )
+        
+        self.best_silo_srv = self.create_service(
+            BestSilo,
+            'best_silo',
+            self.best_silo_callback
         )
         
         # Arrays to store values from the message
@@ -63,9 +70,19 @@ class SiloDetectionNode(Node):
         #Silo Pt Difference: [No of silo pts of ours - No of silo pts of opponent]
         self.silo_pts_diff = 0
         
+        print('init done')
+        
+        
+    def best_silo_callback(self, request, response):
+        print("Best Silo Service Requested")
+        best_silo = self.silo_decision()
+        response.best_silo = best_silo
+        self.get_logger().error(f"---------------------------Best Silo: {best_silo}-----------------------------")
+        # sys.exit()
+        return response    
         
     def yolo_results_callback(self, msg):
-        self.get_logger().info("Yolo Results Received")
+        # self.get_logger().info("Yolo Results Received")
         
         # Clear Previous Values
         self.class_ids_list.clear()
@@ -101,6 +118,9 @@ class SiloDetectionNode(Node):
 
         self.find_balls_in_silos()
 
+        # REMOVED THIS PART, AS THIS SCRIPT IS ONLY FOR DECIDING
+        # THE SILO AND GIVE THE BEST SILO AS A RESPONSE(SERVICE - CLIENT)
+        '''
         if len(self.silo_indices) >= 5:
             time.sleep(0.3)                          # Small delay so the complete silo detection is done before stopping the robot
             self.stop_robot()
@@ -110,10 +130,9 @@ class SiloDetectionNode(Node):
             
         else:
             self.sweep_for_silos()
-
+        '''
 
     def find_balls_in_silos(self):
-        
         # Indices for balls and silos
         self.blue_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 0]
         self.red_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 2]
@@ -154,14 +173,14 @@ class SiloDetectionNode(Node):
         
         
     def get_silo_pts_diff(self):
-        
+        print("Getting Silo Points Difference")
         our_points = 0
         opponent_points = 0
         
         for balls in self.balls_in_silos.values():
-            if len(balls) >= 2 and balls[-1] == 'b' and balls.count('b') >= 2:
+            if len(balls) == 3 and balls[-1] == 'b' and balls.count('b') >= 2:
                 our_points += 1
-            elif len(balls) >= 2 and balls[-1] == 'r' and balls.count('r') >= 2:
+            elif len(balls) == 3 and balls[-1] == 'r' and balls.count('r') >= 2:
                 opponent_points += 1
         
         self.silo_pts_diff = our_points - opponent_points
@@ -170,6 +189,7 @@ class SiloDetectionNode(Node):
         print("Opponent Points: ", opponent_points)
                
     def silo_decision(self):
+        print("Deciding the Silo")
         # Function to prioritize the silos based on the conditions
         def evaluate_silo(silo, balls):
             blue_count = balls.count('b')
