@@ -20,9 +20,9 @@ teleop_node:
     axis_angular: 
       yaw: 3
     scale_angular: 
-      yaw: 0.5
+      yaw: 2.0
     scale_angular_turbo: 
-      yaw: 3.0
+      yaw: 8.0
 
     require_enable_button: true
     enable_button : 4

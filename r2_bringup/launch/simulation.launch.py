@@ -3,20 +3,27 @@ from launch import LaunchDescription
 from launch.actions import *
 from launch_ros.actions import *
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import PathJoinSubstitution, Command
+from launch.substitutions import PathJoinSubstitution, Command, LaunchConfiguration, PythonExpression
 from launch_ros.parameter_descriptions import ParameterValue
 from math import pi
-
+from launch.conditions import IfCondition 
 
 
 def generate_launch_description():
     
     share = FindPackageShare("r2_bringup")
     descShare = FindPackageShare("r2_description")
-    
     urdfPath = PathJoinSubstitution([FindPackageShare("r2_description") , "description", "r2.urdf.xacro"])
     
+    # launch simulation only, exclude any other nodes
+    sim_only_arg = DeclareLaunchArgument("sim_only", default_value="False")
+    sim_only = LaunchConfiguration("sim_only")
     
+    
+    # gazebo world 
+    world_name_arg = DeclareLaunchArgument("world", default_value="ballsinSilo.world")
+    world_name = LaunchConfiguration("world")
+        
     robot_state_pub = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -33,7 +40,7 @@ def generate_launch_description():
                     'launch/gazebo.launch.py'
                 ]) ]),
         launch_arguments={
-            "world" : PathJoinSubstitution([share, 'worlds', 'ballsinSilo.world']) # ballsinSilo.world, arena.world
+            "world" : PathJoinSubstitution([share, 'worlds', world_name]) # ballsinSilo.world, arena.world
         }.items()
     )
     
@@ -121,32 +128,20 @@ def generate_launch_description():
             "effort_controller"
         ]
     )
-    
+
     sliders = Node(package="rqt_joint_trajectory_controller",
                                executable="rqt_joint_trajectory_controller")
+
     
-    yolo_results = Node(
-        package="ball_tracking",
-        executable="ball_detect_sim",
-    )
-    
-    quaternion_to_rpy = Node(
-        package="r2_py",
-        executable="quat_to_rpy",
-    )
-    
-    robot_altitude_check = Node(
-        package="r2_navigation",
-        executable="robot_altitude_check",
-    )
-    
-    
-    return LaunchDescription({
+    nodes = {
+        # launch arguments,
+        sim_only_arg,
+        world_name_arg,
+        
         gazebo,
         gazebo_spawn,
         robot_state_pub,
         rviz,
-        
         
         joy_node,
         teleop_node,
@@ -158,12 +153,16 @@ def generate_launch_description():
         # pos_controller,
         effort_controller,
         sliders,
-        
-        # jointStatePubGui
-        
-        yolo_results,
-        quaternion_to_rpy,
-        robot_altitude_check
+
     }
-        
-    )
+    
+    otherNode = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            PathJoinSubstitution([
+                share,
+                'launch/ball_tracker.launch.py'
+            ])]))
+
+    nodes.add(otherNode)
+
+    return LaunchDescription(nodes)
