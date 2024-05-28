@@ -281,8 +281,8 @@
               <surface>
                 <friction>
                   <ode>
-                    <mu>0.01</mu>
-                    <mu2>0.01</mu2>
+                    <mu>10000</mu>
+                    <mu2>10000</mu2>
                   </ode>
                 </friction>
               </surface>
@@ -310,8 +310,8 @@
               <surface>
                 <friction>
                   <ode>
-                    <mu>0.01</mu>
-                    <mu2>0.01</mu2>
+                    <mu>10000</mu>
+                    <mu2>10000</mu2>
                   </ode>
                 </friction>
               </surface>
@@ -391,7 +391,7 @@
             <parent link="base_link"/>
             <child link="lift_1"/>
             <axis xyz="0.0 0.0 1.0"/>
-            <limit upper="0.546" lower="0.0" effort="100" velocity="100"/>
+            <limit upper="0.546" lower="0.0" effort="100" velocity="1"/>
           </joint>
           
           <joint name="claw_left_lift" type="revolute">
@@ -399,7 +399,7 @@
             <parent link="lift_1"/>
             <child link="claw_left_1"/>
             <axis xyz="0.0 0.0 1.0"/>
-            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="10.0"/>
+            <limit lower="0.015" upper="${PI/4}" effort="10000.0" velocity="10.0"/>
           </joint>
           
           <joint name="claw_right_lift" type="revolute">
@@ -407,7 +407,7 @@
             <parent link="lift_1"/>
             <child link="claw_right_1"/>
             <axis xyz="0.0 0.0 -1.0"/>
-            <limit lower="0" upper="${PI/4}" effort="4.0" velocity="10.0"/>
+            <limit lower="0.015" upper="${PI/4}" effort="10000.0" velocity="10.0"/>
 
           </joint>
 
