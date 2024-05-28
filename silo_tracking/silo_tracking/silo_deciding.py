@@ -44,6 +44,9 @@ class SiloDetectionNode(Node):
             self.best_silo_callback
         )
         
+        self.declare_parameter('logging', False)
+        self.logging = self.get_parameter('logging').value
+        
         # Arrays to store values from the message
         self.class_ids_list = []
         self.contour_areas_list = []
@@ -74,15 +77,21 @@ class SiloDetectionNode(Node):
         
         
     def best_silo_callback(self, request, response):
-        print("Best Silo Service Requested")
+        
+        if self.logging:
+            self.get_logger().info("Best Silo Service Requested")
+
         best_silo = self.silo_decision()
         response.best_silo = best_silo
+        
         self.get_logger().error(f"---------------------------Best Silo: {best_silo}-----------------------------")
         # sys.exit()
         return response    
         
     def yolo_results_callback(self, msg):
-        # self.get_logger().info("Yolo Results Received")
+        
+        if self.logging:
+            self.get_logger().info("Yolo Results Received")
         
         # Clear Previous Values
         self.class_ids_list.clear()
@@ -105,32 +114,22 @@ class SiloDetectionNode(Node):
             # Append the data to the lists
             self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
             self.xywhs_list.append([xywh.center_x, xywh.center_y, xywh.width, xywh.height])
-        
+    
+    
         # Log the received values       
-        self.get_logger().info(f"Class IDs: {self.class_ids_list}")
-        # self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
-        # self.get_logger().info(f"Differences: {self.differences_list}")
-        # self.get_logger().info(f"Confidences: {self.confidences_list}")
-        # self.get_logger().info(f"Tracking IDs: {self.tracking_ids_list}")
-        # self.get_logger().info(f"XyXys: {self.xyxys_list}")
-        # self.get_logger().info(f"Xywhs: {self.xywhs_list}")
+        if self.logging:
+            self.get_logger().info(f"Class IDs: {self.class_ids_list}")
+            # self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
+            # self.get_logger().info(f"Differences: {self.differences_list}")
+            # self.get_logger().info(f"Confidences: {self.confidences_list}")
+            # self.get_logger().info(f"Tracking IDs: {self.tracking_ids_list}")
+            # self.get_logger().info(f"XyXys: {self.xyxys_list}")
+            # self.get_logger().info(f"Xywhs: {self.xywhs_list}")
         
 
+        # Call the function to find balls in silos
         self.find_balls_in_silos()
 
-        # REMOVED THIS PART, AS THIS SCRIPT IS ONLY FOR DECIDING
-        # THE SILO AND GIVE THE BEST SILO AS A RESPONSE(SERVICE - CLIENT)
-        '''
-        if len(self.silo_indices) >= 5:
-            time.sleep(0.3)                          # Small delay so the complete silo detection is done before stopping the robot
-            self.stop_robot()
-            
-            best_silo = self.silo_decision()
-            self.get_logger().info(f"Best Silo: {best_silo}")
-            
-        else:
-            self.sweep_for_silos()
-        '''
 
     def find_balls_in_silos(self):
         # Indices for balls and silos
@@ -138,9 +137,10 @@ class SiloDetectionNode(Node):
         self.red_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 2]
         self.silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3]
         
-        # print("Blue Ball Indices: ", self.blue_ball_indices)
-        # print("Red Ball Indices: ", self.red_ball_indices)
-        # print("Silo Indices: ", self.silo_indices)        
+        if self.logging:
+            print("Blue Ball Indices: ", self.blue_ball_indices)
+            print("Red Ball Indices: ", self.red_ball_indices)
+            print("Silo Indices: ", self.silo_indices)        
         
         # Sort the silos by their x-coordinate (left to right)
         self.silo_indices.sort(key=lambda i: self.xyxys_list[i][0])
@@ -169,27 +169,38 @@ class SiloDetectionNode(Node):
             
         self.get_silo_pts_diff()
         
-        self.get_logger().info(f"Balls in Silos: {self.balls_in_silos}")
+        if self.logging:
+            self.get_logger().info(f"Balls in Silos: {self.balls_in_silos}")
         
         
     def get_silo_pts_diff(self):
-        print("Getting Silo Points Difference")
+        
+        if self.logging:
+            self.get_logger().info("Getting Silo Points Difference")
+            
         our_points = 0
         opponent_points = 0
         
+        # Check for the points in the silos
         for balls in self.balls_in_silos.values():
-            if len(balls) == 3 and balls[-1] == 'b' and balls.count('b') >= 2:
+            if len(balls) == 3 and balls[-1] == 'b' and balls.count('b') >= 2:      #Count of blue balls is 2 or more
                 our_points += 1
-            elif len(balls) == 3 and balls[-1] == 'r' and balls.count('r') >= 2:
+            elif len(balls) == 3 and balls[-1] == 'r' and balls.count('r') >= 2:    #Count of red balls is 2 or more
                 opponent_points += 1
         
-        self.silo_pts_diff = our_points - opponent_points
+        self.silo_pts_diff = our_points - opponent_points       #Silo Pt Difference: [No of silo pts of ours - No of silo pts of opponent]
         
-        print("Our Points: ", our_points)
-        print("Opponent Points: ", opponent_points)
+        if self.logging:
+            self.get_logger().info(f"Silo Points Difference: {self.silo_pts_diff}")
+            self.get_logger().info(f"Our Points: {our_points}")
+            self.get_logger().info(f"Opponent Points: {opponent_points}")
+            
                
     def silo_decision(self):
-        print("Deciding the Silo")
+        
+        if self.logging:
+            self.get_logger().info("Deciding the Best Silo")
+
         # Function to prioritize the silos based on the conditions
         def evaluate_silo(silo, balls):
             blue_count = balls.count('b')
@@ -260,8 +271,10 @@ class SiloDetectionNode(Node):
         # Sort silos by their score and then by their number if scores are equal
         sorted_silos = sorted(silo_scores.keys(), key=lambda s: (silo_scores[s], s))
         
-        self.get_logger().info(f"Silo scores: {silo_scores}")
-        self.get_logger().info(f"Sorted silos: {sorted_silos}")
+        # Log the scores and sorted silos
+        if self.logging:
+            self.get_logger().info(f"Silo scores: {silo_scores}")
+            self.get_logger().info(f"Sorted silos: {sorted_silos}")
 
         # Return the silo with the highest priority (lowest score)
         return sorted_silos[0] if sorted_silos else None
@@ -273,7 +286,9 @@ class SiloDetectionNode(Node):
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
+        
+        if self.logging:
+            self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
 
     def stop_robot(self):
         twist_msg = Twist()
@@ -281,7 +296,9 @@ class SiloDetectionNode(Node):
         twist_msg.angular.z = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        self.get_logger().info("Stopping the robot.")
+        
+        if self.logging:
+            self.get_logger().info("Stopping the robot.")
 
 
 def main(args=None):

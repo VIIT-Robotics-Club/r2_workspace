@@ -18,9 +18,9 @@ def generate_launch_description():
     )
     
     robot_altitude_check = Node(
-        package="r2_py",
+        package="r2_navigation",
         executable="robot_altitude_check",
-    )
+    )   
     
     
     return LaunchDescription([
