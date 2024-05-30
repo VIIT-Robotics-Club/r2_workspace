@@ -132,6 +132,11 @@ def generate_launch_description():
     sliders = Node(package="rqt_joint_trajectory_controller",
                                executable="rqt_joint_trajectory_controller")
 
+
+    gripperService = Node(package="gripper_srvs",
+                          executable="gripper_service",
+                          remappings=[("traject_out", "joint_trajectory_controller/joint_trajectory")])
+
     
     nodes = {
         # launch arguments,
@@ -152,7 +157,8 @@ def generate_launch_description():
         joint_controller,
         # pos_controller,
         effort_controller,
-        sliders,
+        # sliders,
+        gripperService
 
     }
     
@@ -160,7 +166,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
                 share,
-                'launch/ball_tracker.launch.py'
+                'launch/system.launch.py'
             ])]))
 
     nodes.add(otherNode)

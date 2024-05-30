@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(r2_interfaces REQUIRED)
 
 
@@ -16,6 +17,7 @@ add_executable(gripper_service src/gripperSrvs.cpp)
 ament_target_dependencies(gripper_service 
   rclcpp
   trajectory_msgs
+  sensor_msgs
   r2_interfaces
 )
 
