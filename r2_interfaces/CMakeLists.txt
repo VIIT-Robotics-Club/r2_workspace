@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/XyXy.msg"
   "msg/YoloResults.msg"
   "srv/SetLed.srv"
+  "srv/GripperCmd.srv"
   "action/CountUntil.action"
 )
 
