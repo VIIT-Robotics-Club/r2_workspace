@@ -150,12 +150,32 @@ class BallTrackingNode(Node):
         self.get_logger().info(f"XyXys: {self.xyxys_list}")
         self.get_logger().info(f"Xywhs: {self.xywhs_list}")
         
+        # Check if the blue ball is behind a red or purple ball
+        def is_behind_other_ball(blue_ball_coords, other_ball_coords):
+            blue_tl_x, blue_tl_y, blue_br_x, blue_br_y = blue_ball_coords
+            other_tl_x, other_tl_y, other_br_x, other_br_y = other_ball_coords
+            return (blue_tl_x > other_tl_x and blue_tl_y > other_tl_y and blue_br_x < other_br_x and blue_br_y < other_br_y)
+        
         # Find all blue balls (class_id = 0)
         blue_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 0]
 
+        # Filter out blue balls that are behind red or purple balls
+        filtered_blue_ball_indices = []
+        for i in blue_ball_indices:
+            blue_ball_coords = self.xyxys_list[i]
+            behind_other_ball = False
+            for j, class_id in enumerate(self.class_ids_list):
+                if class_id in [1, 2]:  # Purple or Red ball
+                    other_ball_coords = self.xyxys_list[j]
+                    if is_behind_other_ball(blue_ball_coords, other_ball_coords):
+                        behind_other_ball = True
+                        break
+            if not behind_other_ball:
+                filtered_blue_ball_indices.append(i)
+        
         # Find the blue ball with the largest contour area
-        if blue_ball_indices:
-            largest_contour_index = max(blue_ball_indices, key=lambda i: self.contour_areas_list[i])
+        if filtered_blue_ball_indices:
+            largest_contour_index = max(filtered_blue_ball_indices, key=lambda i: self.contour_areas_list[i])
             
             # Store the closest blue ball's data
             self.closest_blue_ball = {
