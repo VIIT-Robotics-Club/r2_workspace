@@ -108,7 +108,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>base_link.stl</uri>
+              <uri>base_link1.stl</uri>
             </mesh>
           </geometry>
           <surface>
@@ -133,7 +133,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>base_link.stl</uri>
+              <uri>base_link1.stl</uri>
             </mesh>
           </geometry>
           <material>
