@@ -37,7 +37,7 @@ class LunaWallAlignNode(Node):
                 ('ki_linear_y', 0.01),
                 ('kd_linear_y', 0.00),
                 ('kp_angular', 1.4),
-                ('ki_angular', 0.0),
+                ('ki_angular', 0.1),
                 ('kd_angular', 0.0),          
                 # ('x_goal', 13.0),
                 # ('y_goal', 250.0),
@@ -127,6 +127,7 @@ class LunaWallAlignNode(Node):
         )
         
         self.create_service( SiloToGo,  'silo_to_go',  self.silo_to_go_callback)
+        self.get_logger().info('Service created')
 
         # Initialize the luna data
         self.luna_rb = 0.00     #Right Back
@@ -190,35 +191,35 @@ class LunaWallAlignNode(Node):
     def luna_fr_callback(self, msg: Range):
         try:
             self.luna_fr = float(msg.range)
-            print(self.luna_fr)
+            # print(self.luna_fr)
         except Exception as e:
             print(f"Error in luna_fr_callback: {e}")
 
     def luna_lb_callback(self, msg: Range):
         try:
             self.luna_lb = float(msg.range)
-            print(self.luna_lb)
+            # print(self.luna_lb)
         except Exception as e:
             print(f"Error in luna_lb_callback: {e}")
 
     def luna_lf_callback(self, msg: Range):
         try:
             self.luna_lf = float(msg.range)
-            print(self.luna_lf)
+            # print(self.luna_lf)
         except Exception as e:
             print(f"Error in luna_lf_callback: {e}")
 
     def luna_rf_callback(self, msg: Range):
         try:
             self.luna_rf = float(msg.range)
-            print(self.luna_rf)
+            # print(self.luna_rf)
         except Exception as e:
             print(f"Error in luna_rf_callback: {e}")
 
     def luna_rb_callback(self, msg: Range):
         try:
             self.luna_rb = float(msg.range)
-            print(self.luna_rb)
+            # print(self.luna_rb)
         except Exception as e:
             print(f"Error in luna_rb_callback: {e}")
             

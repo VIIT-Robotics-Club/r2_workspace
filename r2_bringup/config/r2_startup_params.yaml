@@ -1,0 +1,27 @@
+ball_tracking:
+  ros__parameters:
+    desired_contour_area: 70000
+    linear_kp: 0.002
+    linear_ki: 0.001
+    linear_kd: 0.001
+    angular_kp: 0.5
+    angular_ki: 0.05
+    angular_kd: 0.01
+    max_linear_speed: 1.0
+    max_angular_speed: 5.0
+    max_integral: 10.0
+    contour_area_threshold: 20000
+    difference_threshold: 30
+    sweep_duration: 1.0
+    logging: True
+
+navigation_server:
+  ros__parameters:
+    kp: 1.0
+    ki: 0.1
+    kd: 0.3
+    yaw_error_threshold: 5.0
+    goal_yaw: 90.0
+    logging: False
+
+

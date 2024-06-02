@@ -2,33 +2,35 @@
 
 import rclpy
 from rclpy.node import Node
-from example_interfaces.srv import SetBool
+# from example_interfaces.srv import SetBool
+from r2_interfaces.srv import GripperCmd
+
 import time
 
-class SetBoolClient(Node):
+class GripperCmdClient(Node):
     def __init__(self):
         super().__init__('set_bool_client')
-        self.motor_claw_client = self.create_client(SetBool, 'motor_claw')
-        self.motor_lift_client = self.create_client(SetBool, 'motor_lift')
+        self.gripper_grab_client = self.create_client(GripperCmd, 'gripper_grab')
+        self.gripper_lift_client = self.create_client(GripperCmd, 'gripper_lift')
 
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('client_to_call', 'motor_claw'),
+                ('client_to_call', '/gripper_lift'),
                 ('request_data', True)
             ]
         )
 
-        while not self.motor_claw_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('motor_claw service not available, waiting again...')
-        self.get_logger().info('motor_claw service is available')
+        while not self.gripper_grab_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('gripper_grab service not available, waiting again...')
+        self.get_logger().info('gripper_grab service is available')
 
-        while not self.motor_lift_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('motor_lift service not available, waiting again...')
-        self.get_logger().info('motor_lift service is available')
+        while not self.gripper_lift_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('gripper_lift service not available, waiting again...')
+        self.get_logger().info('gripper_lift service is available')
 
-        self.get_logger().info('SetBool client has been started')
-        self.req = SetBool.Request()
+        self.get_logger().info('GripperCmd client has been started')
+        self.req = GripperCmd.Request()
 
 
     def send_request(self):
@@ -38,10 +40,10 @@ class SetBoolClient(Node):
         self.req.data = request_data
         self.get_logger().info('Sending request\n%s' % self.req.data)
 
-        if client_to_call == 'motor_claw':
-            future = self.motor_claw_client.call_async(self.req)
-        elif client_to_call == 'motor_lift':
-            future = self.motor_lift_client.call_async(self.req)
+        if client_to_call == 'gripper_grab':
+            future = self.gripper_grab_client.call_async(self.req)
+        elif client_to_call == 'gripper_lift':
+            future = self.gripper_lift_client.call_async(self.req)
         else:
             self.get_logger().info('Invalid client_to_call parameter value')
             return
@@ -49,14 +51,14 @@ class SetBoolClient(Node):
         rclpy.spin_until_future_complete(self, future)
 
         if future.result() is not None:
-            self.get_logger().info('Result received: %s' % future.result().success)
+            self.get_logger().info('Result received: %s' % future.result().result)
         else:
             self.get_logger().info('Service call failed')
 
 def main(args=None):
     rclpy.init(args=args)
 
-    set_bool_client = SetBoolClient()
+    set_bool_client = GripperCmdClient()
     set_bool_client.send_request()
     # while rclpy.ok():
     #     set_bool_client.send_request()

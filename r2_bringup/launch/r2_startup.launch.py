@@ -14,247 +14,104 @@ import os
 
 def generate_launch_description():
 
-    ball_tracking_params = os.path.join(get_package_share_directory('r2_bringup'),'config','ball_tracking.yaml')
-    silo_luna_params = os.path.join(get_package_share_directory('r2_bringup'),'config','luna_allign.yaml')
+    startup_params = os.path.join(get_package_share_directory('r2_bringup'),'config','r2_startup_params.yaml')
 
-
-
-    ball_following_purple = Node(
+    ball_tracking = Node(
         package='ball_tracking',
-        executable='testnode3',
-        name='testnode3',
-    )
-
-    ball_following_blue = Node(
-        package='ball_tracking',
-        executable='testnode',
-        name='testnode',
-        # parameters=[
-        #     {'Ball_Name': "blue-ball"},
-        #     {'setupareasilo': -40000.00},
-        #     {'setupdev': 180.00},
-        # ]
-    )
-
-
-    # line_follow = Node(
-    #     package='line_following',
-    #     executable='pid_tuning.py',
-    #     name='line_follower'
-    # )
-
-    line_following_client = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_line_follow', 'std_srvs/srv/SetBool', '{data: True}'],
+        executable='ball_tracking_sim',
+        name='ball_tracking',
+        parameters=[startup_params],
         output='screen'
     )
-
-    # command to run ros2 service call /setbool std_srvs/srv/SetBool {data: True}
-    lift_down = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: False}'],
+    
+    gripper_lift_up = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'gripper_lift', 'request_data': True}
+        ]
+    )
+    
+    gripper_lift_down = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'gripper_lift', 'request_data': False}
+        ]
+    )
+    
+    gripper_grab_close = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'gripper_grab', 'request_data': True}
+        ]
+    )
+    
+    gripper_grab_open = Node(
+        package='r2_py',
+        executable='motor_client',
+        name='motor_client',
+        output='screen',
+        shell=True,
+        parameters=[
+            {'client_to_call': 'gripper_grab', 'request_data': False}
+        ]
+    )
+    
+    gripper_lift_up_and_close = [
+        gripper_grab_close,
+        
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=gripper_grab_close,
+                on_exit=gripper_lift_up
+            )
+        )
+    ]
+    
+    navigation_server = Node(               #Robot has the ball -> go to silo
+        package='r2_navigation',
+        executable='navigation_server',
+        parameters=[startup_params],
         output='screen'
     )
-
-    lift_up = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_lift', 'std_srvs/srv/SetBool', '{data: True}'],
-        output='screen'
-    )
-
-    claw_open = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: False}'],
-        output='screen'
-    )
-
-    claw_close = ExecuteProcess(
-        cmd=['ros2', 'service', 'call', '/service_claw', 'std_srvs/srv/SetBool', '{data: True}'],
-        output='screen'
-    )
-
-    silo_tracking = Node(
-        package='ball_tracking',
-        executable='testnode2',
-        name='testnode2',
-        # parameters=[
-        #     {'Ball_Name': "silo"},
-        #     {'setupareasilo': -15000.00},            
-        # ]
-    )
-
-    go_to_silo_1_luna = Node(
-        package='luna_control',
-        executable='luna_wall_align',
-        name='luna_wall_align',
-        parameters=[
-            {'silo_number': 1},
-            silo_luna_params
-        ]
-    )
-
-    go_to_silo_2_luna = Node(
-        package='luna_control',
-        executable='luna_wall_align',
-        name='luna_wall_align',
-        parameters=[
-            {'silo_number': 2},
-            silo_luna_params
-        ]
-    )
-
-    go_to_silo_3_luna = Node(
-        package='luna_control',
-        executable='luna_wall_align',
-        name='luna_wall_align',
-        parameters=[
-            {'silo_number': 3},
-            silo_luna_params
-        ]
-    )
-
-    go_to_silo_4_luna = Node(
-        package='luna_control',
-        executable='luna_wall_align',
-        name='luna_wall_align',
-        parameters=[
-            {'silo_number': 4},
-            silo_luna_params
-        ]
-    )
-
-    go_to_silo_5_luna = Node(
-        package='luna_control',
-        executable='luna_wall_align',
-        name='luna_wall_align',
-        parameters=[
-            {'silo_number': 5},
-            silo_luna_params
-        ]
-    )
+    
+    
 
 
     return LaunchDescription([
-        ball_following_blue,
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=ball_following_blue,
-                on_exit=claw_close
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=claw_close,
-                on_exit=lift_up
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=lift_up,
-                on_exit=TimerAction(
-                    period = 4.0,
-                    actions = [go_to_silo_1_luna]
-                )
-            )
-        ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=lift_up,
-        #         on_exit=silo_tracking
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=silo_tracking,
-        #         on_exit=go_to_silo_2_luna
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=go_to_silo_2_luna,
-        #         on_exit=claw_open
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=claw_open,
-        #         on_exit=ball_following_purple 
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessStart(
-        #         target_action=ball_following_purple,
-        #         on_start=claw_close
-        #     )
-        # ),
-
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=claw_close,
-        #         on_exit=lift_down
-        #     )
-        # ),
-
         
-        # RegisterEventHandler(
-        #     event_handler=OnProcessExit(
-        #         target_action=ball_following_purple,
-        #         on_exit=claw_close
-        #     )
-        # ),
-
+        ball_tracking,
         
-
-
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=ball_tracking,
+                on_exit=gripper_lift_up_and_close
+            )
+        ),
+        
+        RegisterEventHandler(
+            event_handler=OnProcessStart(
+                target_action=gripper_lift_up,
+                on_start=navigation_server
+            )
+        ),
+        
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=navigation_server,
+                on_exit=gripper_grab_open
+            )
+        ),
+        
     ])
-
-    # def create_sequence(ball_following_colour, silo_number):
-    #     return [
-    #         ball_following_{ball_following_colour},
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=ball_following_{ball_following_colour},
-    #                 on_exit=claw_close
-    #             )
-    #         ),
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=claw_close,
-    #                 on_exit=lift_up
-    #             )
-    #         ),
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=lift_up,
-    #                 on_exit=silo_tracking
-    #             )
-    #         ),
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=silo_tracking,
-    #                 on_exit=go_to_silo_{silo_number}_luna
-    #             )
-    #         ),
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=go_to_silo_{silo_number}_luna,
-    #                 on_exit=claw_open
-    #             )
-    #         ),
-
-    #         RegisterEventHandler(
-    #             event_handler=OnProcessExit(
-    #                 target_action=claw_open,
-    #                 on_exit=ball_following_purple
-    #             )
-    #         ),
-    #     ]
