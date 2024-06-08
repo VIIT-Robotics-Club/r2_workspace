@@ -23,8 +23,8 @@ from r2_interfaces.msg import XyXy
 import sys
 
 class BallTrackingNode(Node):
-    def _init_(self):
-        super()._init_('ball_tracking_node')
+    def __init__(self):
+        super().__init__('ball_tracking_node')
         self.get_logger().info("Ball Tracking Node has been started")
         
         self.declare_parameters(
@@ -234,5 +234,5 @@ def main(args=None):
     ball_tracking_node.destroy_node()
     rclpy.shutdown()
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
