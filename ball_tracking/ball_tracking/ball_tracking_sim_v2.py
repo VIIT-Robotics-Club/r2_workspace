@@ -31,17 +31,17 @@ class BallTrackingNode(Node):
             namespace='',
             parameters=[
                 ('desired_contour_area', 50000),
-                ('linear_kp', 0.01),
-                ('linear_ki', 0.001),
-                ('linear_kd', 0.001),
-                ('angular_kp', 0.1),
+                ('linear_kp', 0.0001),
+                ('linear_ki', 0.00),
+                ('linear_kd', 0.00),
+                ('angular_kp', 0.01),
                 ('angular_ki', 0.01),
                 ('angular_kd', 0.01),
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 4.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 80)
+                ('difference_threshold', 10)
             ]
         )
         
@@ -144,7 +144,7 @@ class BallTrackingNode(Node):
             
             self.get_logger().info(f"Closest Blue Ball: {self.closest_blue_ball}")
             self.contour_area_error = self.desired_contour_area - self.closest_blue_ball['contour_area']
-            self.difference_error = self.closest_blue_ball['xywh'][0] - (self.get_camera_width() / 2)  # Adjusted error calculation
+            self.difference_error = self.closest_blue_ball['difference'] # Adjusted error calculation
             self.tracking_blue_ball = True
 
             if self.difference_error < 0:

@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
         "ball_detect_sim=ball_tracking.ball_detect_sim:main",
         "ball_tracking_sim=ball_tracking.ball_tracking_sim:main",
+        "ball_tracking_sim_v2=ball_tracking.ball_tracking_sim_v2:main",
         ],
     },
 )

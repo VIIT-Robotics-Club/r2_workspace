@@ -161,6 +161,10 @@ class LunaWallAlignNode(Node):
 
     def silo_to_go_callback(self, request, response):
         self.silo_number = request.silo_number
+        
+        if self.silo_number==0:
+            self.silo_number = 1
+        
         self.x_goal = self.positions[self.silo_number]['x']
         self.y_goal = self.positions[self.silo_number]['y']
 
