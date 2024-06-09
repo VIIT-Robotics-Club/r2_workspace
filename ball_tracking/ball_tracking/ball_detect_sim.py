@@ -38,7 +38,9 @@ class YoloObjectTrackingNode(Node):
         current_script_dir = os.path.dirname(os.path.realpath(__file__))
 
         #Loads the model
-        model_path = os.path.join(current_script_dir, 'weights/model_sim.pt')
+        model_path = os.path.join(current_script_dir, 'weights/model_sim_v2.pt')
+        # model_path = os.path.join(current_script_dir, 'weights/model_sim.pt')
+
         self.model = YOLO(model_path)
         
        
@@ -51,8 +53,8 @@ class YoloObjectTrackingNode(Node):
 
         # Subscribe to the camera image topic
         self.create_subscription(
-            Image,
-            'camera/image_raw',
+            CompressedImage,
+            '/image_raw/compressed',
             self.image_callback,
             10
         )
@@ -87,8 +89,8 @@ class YoloObjectTrackingNode(Node):
             self.get_logger().info("Image received")
             
         bridge = cv_bridge.CvBridge()
-        img = bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
+        img = bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
         self.deviation = self.get_parameter('deviation').value
 
 
