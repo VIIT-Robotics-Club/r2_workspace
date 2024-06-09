@@ -1,0 +1,18 @@
+# configuration for camera_ros node
+/camera:
+  ros__parameters:
+    AeEnable: true
+    AnalogueGain: 1.0
+    Brightness: -0.28
+    Contrast: 1.14
+    ExposureTime: 15700
+    Saturation: 2.4150943756103516
+    format: ''
+    height: 0
+    qos_overrides./parameter_events.publisher.depth: 1000
+    qos_overrides./parameter_events.publisher.durability: volatile
+    qos_overrides./parameter_events.publisher.history: keep_last
+    qos_overrides./parameter_events.publisher.reliability: reliable
+    role: video
+    use_sim_time: false
+    width: 0
