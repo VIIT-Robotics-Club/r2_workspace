@@ -59,6 +59,13 @@ class YoloObjectTrackingNode(Node):
             10
         )
         
+        self.create_subscription(
+            CompressedImage,
+            '/camera/image_raw/compressed',
+            self.image_callback,
+            10
+        )
+        
         # Publish the annotated image
         self.publisher = self.create_publisher(
                                 Image,
