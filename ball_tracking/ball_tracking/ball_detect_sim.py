@@ -43,7 +43,6 @@ class YoloObjectTrackingNode(Node):
 
         self.model = YOLO(model_path)
         
-       
         self.declare_parameter('deviation', 170)
         self.declare_parameter('logging', False)
         
@@ -62,7 +61,7 @@ class YoloObjectTrackingNode(Node):
         # Publish the annotated image
         self.publisher = self.create_publisher(
                                 Image,
-                                'camera/image_raw/annotated',
+                                '/image_raw/annotated',
                                 10
                             )
         # Publish the YOLO results

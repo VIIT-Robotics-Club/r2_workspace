@@ -1,0 +1,41 @@
+/camera:
+  ros__parameters:
+    AeEnable: true
+    AnalogueGain: 1.0
+    Brightness: -0.28
+    Contrast: 1.14
+    ExposureTime: 15700
+    Saturation: 2.4150943756103516
+    format: ''
+    height: 0
+    qos_overrides./parameter_events.publisher.depth: 1000
+    qos_overrides./parameter_events.publisher.durability: volatile
+    qos_overrides./parameter_events.publisher.history: keep_last
+    qos_overrides./parameter_events.publisher.reliability: reliable
+    role: video
+    use_sim_time: false
+    width: 0
+
+  
+
+    # video_device: /dev/video0
+    # video_device: /dev/media0
+
+    # # auto_exposure: 3
+    # backlight_compensation: 0
+    # brightness: 0
+    # contrast: 50
+    # exposure_time_absolute: 312
+    # gain: 64
+    # gamma: 300
+    # hue: 0
+
+
+
+
+    # power_line_frequency: 1
+    # saturation: 64
+    # sharpness: 50
+    # use_sim_time: false
+    # white_balance_automatic: true
+    # white_balance_temperature: 4600

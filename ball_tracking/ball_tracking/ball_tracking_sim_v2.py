@@ -1,26 +1,14 @@
 #!/usr/bin/env python3
 
-from rclpy.node import Node
 import rclpy
-import cv_bridge
-import cv2
-from time import time
-import os
+from rclpy.node import Node
+import tkinter as tk
+from tkinter import ttk
 import numpy as np
-
-from ultralytics import YOLO
-from ultralytics import utils
+import sys
 
 from geometry_msgs.msg import Twist
-
-from sensor_msgs.msg import Image
-from sensor_msgs.msg import CompressedImage
-
 from r2_interfaces.msg import YoloResults
-from r2_interfaces.msg import Xywh
-from r2_interfaces.msg import XyXy
-
-import sys
 
 class BallTrackingNode(Node):
     def __init__(self):
@@ -30,18 +18,18 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 50000),
-                ('linear_kp', 0.0001),
-                ('linear_ki', 0.00),
+                ('desired_contour_area', 220000),
+                ('linear_kp', 0.1),
+                ('linear_ki', 0.0002),
                 ('linear_kd', 0.00),
                 ('angular_kp', 0.01),
                 ('angular_ki', 0.01),
                 ('angular_kd', 0.01),
                 ('max_linear_speed', 2.0),
-                ('max_angular_speed', 4.0),
+                ('max_angular_speed', 0.5),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 10)
+                ('difference_threshold', 30)
             ]
         )
         
@@ -68,7 +56,7 @@ class BallTrackingNode(Node):
 
         self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
         self.cmd_vel_pub = self.create_publisher(Twist, 'nav_vel', 10)
-        
+        self.cmd_vel_pub_count = 0
         self.class_ids_list = []
         self.contour_areas_list = []
         self.differences_list = []
@@ -89,6 +77,27 @@ class BallTrackingNode(Node):
         
         self.last_seen_direction = None
         
+            
+    
+    def parameters_callback(self, params):
+
+        # update local state of all parameters
+        self.desired_contour_area = self.get_parameter('desired_contour_area').value
+        self.linear_kp = self.get_parameter('linear_kp').value
+        self.linear_ki = self.get_parameter('linear_ki').value
+        self.linear_kd = self.get_parameter('linear_kd').value
+        self.angular_kp = self.get_parameter('angular_kp').value
+        self.angular_ki = self.get_parameter('angular_ki').value
+        self.angular_kd = self.get_parameter('angular_kd').value
+        self.max_linear_speed = self.get_parameter('max_linear_speed').value
+        self.max_angular_speed = self.get_parameter('max_angular_speed').value
+        self.max_integral = self.get_parameter('max_integral').value
+        self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
+        self.difference_threshold = self.get_parameter('difference_threshold').value
+
+
+        
+    
     def yolo_results_callback(self, msg):
         self.get_logger().info("Yolo Results Received")
         
@@ -115,18 +124,34 @@ class BallTrackingNode(Node):
             other_tl_x, other_tl_y, other_br_x, other_br_y = other_ball_coords
             return (blue_tl_x > other_tl_x and blue_tl_y > other_tl_y and blue_br_x < other_br_x and blue_br_y < other_br_y)
         
+        def is_inside_silo(blue_ball_coords, silo_coords):
+            blue_tl_x, blue_tl_y, blue_br_x, blue_br_y = blue_ball_coords
+            silo_tl_x, silo_tl_y, silo_br_x, silo_br_y = silo_coords
+            return (blue_tl_x >= silo_tl_x and blue_tl_y >= silo_tl_y and blue_br_x <= silo_br_x and blue_br_y <= silo_br_y)
+        
         blue_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 0]
+        silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3] 
+        
         filtered_blue_ball_indices = []
         for i in blue_ball_indices:
             blue_ball_coords = self.xyxys_list[i]
             behind_other_ball = False
+            inside_silo = False
+            
             for j, class_id in enumerate(self.class_ids_list):
                 if class_id in [1, 2]:  # Purple or Red ball
                     other_ball_coords = self.xyxys_list[j]
                     if is_behind_other_ball(blue_ball_coords, other_ball_coords):
                         behind_other_ball = True
                         break
-            if not behind_other_ball:
+            
+            for k in silo_indices:
+                silo_coords = self.xyxys_list[k]
+                if is_inside_silo(blue_ball_coords, silo_coords):
+                    inside_silo = True
+                    break
+
+            if not behind_other_ball and not inside_silo:
                 filtered_blue_ball_indices.append(i)
         
         if filtered_blue_ball_indices:
@@ -144,7 +169,7 @@ class BallTrackingNode(Node):
             
             self.get_logger().info(f"Closest Blue Ball: {self.closest_blue_ball}")
             self.contour_area_error = self.desired_contour_area - self.closest_blue_ball['contour_area']
-            self.difference_error = self.closest_blue_ball['difference'] # Adjusted error calculation
+            self.difference_error = self.closest_blue_ball['difference']
             self.tracking_blue_ball = True
 
             if self.difference_error < 0:
@@ -155,7 +180,7 @@ class BallTrackingNode(Node):
             self.move_robot()
         else:
             self.sweep_for_ball()
-            
+           
     def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
         P = kp * error
         error_sum += error
@@ -190,8 +215,8 @@ class BallTrackingNode(Node):
                 }
                 return
 
-            self.linear_error_sum += self.contour_area_error / 100
-            self.angular_error_sum += self.difference_error
+            self.linear_error_sum += self.contour_area_error / 10000
+            self.angular_error_sum += self.difference_error/70
             
             linear_x, self.linear_error_sum = self.PID_controller(self.contour_area_error, self.linear_error_sum, self.linear_last_error,
                                                                   self.linear_kp, self.linear_ki, self.linear_kd)
@@ -208,16 +233,18 @@ class BallTrackingNode(Node):
             twist_msg = Twist()
             twist_msg.linear.x = linear_x
             twist_msg.angular.z = -angular_z  # Ensure correct direction
-            
-            self.cmd_vel_pub.publish(twist_msg)
+            self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
+            if(self.cmd_vel_pub_count >9):
+                self.cmd_vel_pub.publish(twist_msg)
+                self.cmd_vel_pub_count=0
             self.get_logger().info(f"Publishing cmd_vel: linear_x = {linear_x}, angular_z = {-angular_z}")
         
     def sweep_for_ball(self):
         twist_msg = Twist()
         if self.last_seen_direction == 'right':
-            twist_msg.angular.z = -2.5
+            twist_msg.angular.z = -0.4
         else:
-            twist_msg.angular.z = 2.5
+            twist_msg.angular.z = 0.4
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)

@@ -143,8 +143,8 @@ def generate_launch_description():
         sim_only_arg,
         world_name_arg,
         
-        gazebo,
-        gazebo_spawn,
+        # gazebo,
+        # gazebo_spawn,
         robot_state_pub,
         rviz,
         
@@ -156,7 +156,7 @@ def generate_launch_description():
         joint_state_broad,
         joint_controller,
         # pos_controller,
-        effort_controller,
+        # effort_controller,
         # sliders,
         gripperService
 
