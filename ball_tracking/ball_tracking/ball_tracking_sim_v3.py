@@ -26,6 +26,15 @@ from r2_interfaces.msg import XyXy
 
 import sys
 
+
+'''
+
+For error in angular z tune the PID such that angular alignment is slow (that is the robot does not rotate too fast), it should not align perfectily to -90 degrees, it should be slow and smooth.
+Because if the ball is on edges the robot facing -90 degrees will not be able to see the ball, so it should rotate slowly to see the ball.
+
+
+'''
+
 class BallTrackingNode(Node):
     def __init__(self):
         super().__init__('ball_tracking_node')
@@ -35,15 +44,15 @@ class BallTrackingNode(Node):
             namespace='',
             parameters=[
                 ('desired_contour_area', 50000),
-                ('linearX_kp', 0.0001),
+                ('linearX_kp', 0.00001),
                 ('linearX_ki', 0.00),
                 ('linearX_kd', 0.00),
-                ('linearY_kp', 0.0001),
+                ('linearY_kp', 0.005),
                 ('linearY_ki', 0.00),
                 ('linearY_kd', 0.00),
-                ('angular_kp', 0.01),
-                ('angular_ki', 0.01),
-                ('angular_kd', 0.01),
+                ('angular_kp', 0.2),
+                ('angular_ki', 0.00),
+                ('angular_kd', 0.00),
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 4.0),
                 ('max_integral', 10.0),
@@ -124,32 +133,32 @@ class BallTrackingNode(Node):
         self.last_seen_direction = None
         
         self.yaw = 0.0      # Degrees
-        self.target_yaw = 0.0
+        self.target_yaw = -90.0
         self.target_yaw_in_rad = self.target_yaw * (np.pi / 180)
         self.yaw_in_rad = 0.0
         self.yaw_error = 0.0
         
         
         # Debug: detect and print parameter changes
-        # self.create_timer(1, self.time_callback)
+    #     self.create_timer(1, self.time_callback)
     
     
     
     # def time_callback(self):
-        # Print all parameter values
-        # print("Parameter Values:")
-        # print(f"desired_contour_area: {self.desired_contour_area}")
-        # print(f"linear_kp: {self.linear_kp}")
-        # print(f"linear_ki: {self.linear_ki}")
-        # print(f"linear_kd: {self.linear_kd}")
-        # print(f"angular_kp: {self.angular_kp}")
-        # print(f"angular_ki: {self.angular_ki}")
-        # print(f"angular_kd: {self.angular_kd}")
-        # print(f"max_linear_speed: {self.max_linear_speed}")
-        # print(f"max_angular_speed: {self.max_angular_speed}")
-        # print(f"max_integral: {self.max_integral}")
-        # print(f"contour_area_threshold: {self.contour_area_threshold}")
-        # print(f"difference_threshold: {self.difference_threshold}")
+    #     # Print all parameter values
+    #     print("Parameter Values:")
+    #     print(f"desired_contour_area: {self.desired_contour_area}")
+    #     print(f"linear_kp: {self.linearX_kp}")
+    #     print(f"linear_ki: {self.linearX_ki}")
+    #     print(f"linear_kd: {self.linearX_kd}")
+    #     print(f"angular_kp: {self.angular_kp}")
+    #     print(f"angular_ki: {self.angular_ki}")
+    #     print(f"angular_kd: {self.angular_kd}")
+    #     print(f"max_linear_speed: {self.max_linear_speed}")
+    #     print(f"max_angular_speed: {self.max_angular_speed}")
+    #     print(f"max_integral: {self.max_integral}")
+    #     print(f"contour_area_threshold: {self.contour_area_threshold}")
+    #     print(f"difference_threshold: {self.difference_threshold}")
         
         
         
@@ -287,7 +296,7 @@ class BallTrackingNode(Node):
             
             twist_msg = Twist()
             twist_msg.linear.x = linear_x
-            twist_msg.linear.y = linear_y
+            twist_msg.linear.y = -linear_y
             twist_msg.angular.z = angular_z  # Ensure correct direction
             
             self.cmd_vel_pub.publish(twist_msg)
