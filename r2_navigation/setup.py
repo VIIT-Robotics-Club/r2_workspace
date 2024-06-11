@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
         "robot_altitude_check = r2_navigation.robot_altitude_check:main",
         "navigation_server = r2_navigation.navigation_server:main",
+        "rotate_and_move = r2_navigation.rotate_and_move:main",
         ],
     },
 )

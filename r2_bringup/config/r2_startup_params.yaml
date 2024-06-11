@@ -24,4 +24,15 @@ navigation_server:
     goal_yaw: 90.0
     logging: False
 
-
+rotate_and_move:
+  ros__parameters:
+    angular_kp: 4.1
+    angular_ki: 0.05
+    angular_kd: 0.00
+    logging: False
+    linear_speed: 0.7.0  #How fast the robot should move forward
+    move_duration: 3.0    #How many seconds the robot should move forward
+    max_angular_speed: 4.0  
+    max_integral: 10.0
+    rotation_angle: 180.0   #How many degrees the robot should rotate
+    yaw_error_threshold: 0.1
