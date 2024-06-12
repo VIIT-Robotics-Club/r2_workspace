@@ -18,15 +18,15 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 220000),
+                ('desired_contour_area', 170000),
                 ('linear_kp', 0.1),
-                ('linear_ki', 0.0002),
+                ('linear_ki', 0.05  ),
                 ('linear_kd', 0.00),
                 ('angular_kp', 0.01),
                 ('angular_ki', 0.01),
                 ('angular_kd', 0.01),
                 ('max_linear_speed', 2.0),
-                ('max_angular_speed', 0.5),
+                ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
                 ('difference_threshold', 30)
@@ -80,21 +80,13 @@ class BallTrackingNode(Node):
             
     
     def parameters_callback(self, params):
-
-        # update local state of all parameters
-        self.desired_contour_area = self.get_parameter('desired_contour_area').value
-        self.linear_kp = self.get_parameter('linear_kp').value
-        self.linear_ki = self.get_parameter('linear_ki').value
-        self.linear_kd = self.get_parameter('linear_kd').value
-        self.angular_kp = self.get_parameter('angular_kp').value
-        self.angular_ki = self.get_parameter('angular_ki').value
-        self.angular_kd = self.get_parameter('angular_kd').value
-        self.max_linear_speed = self.get_parameter('max_linear_speed').value
-        self.max_angular_speed = self.get_parameter('max_angular_speed').value
-        self.max_integral = self.get_parameter('max_integral').value
-        self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
-        self.difference_threshold = self.get_parameter('difference_threshold').value
-
+        for param in params:
+            param_name = param.name
+            param_value = param.value
+            setattr(self, param_name, param_value)
+        
+        return SetParametersResult(successful=True)     
+    
 
         
     
@@ -181,14 +173,9 @@ class BallTrackingNode(Node):
         else:
             self.sweep_for_ball()
            
-    def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
-        P = kp * error
-        error_sum += error
-        error_sum = np.clip(error_sum, -self.max_integral, self.max_integral)
-        I = ki * error_sum
-        D = kd * (error - last_error)
-        control = P + I + D
-        return control, error_sum
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
+        control_action = self.linear_kp * error + ki * int_error + kd * ((error - previous_error) / dt)
+        return control_action
         
     def move_robot(self):
         if self.closest_blue_ball['class_id'] is not None:
@@ -214,30 +201,21 @@ class BallTrackingNode(Node):
                     'xywh': None
                 }
                 return
-
-            self.linear_error_sum += self.contour_area_error / 10000
-            self.angular_error_sum += self.difference_error/70
-            
-            linear_x, self.linear_error_sum = self.PID_controller(self.contour_area_error, self.linear_error_sum, self.linear_last_error,
-                                                                  self.linear_kp, self.linear_ki, self.linear_kd)
-            
-            angular_z, self.angular_error_sum = self.PID_controller(self.difference_error, self.angular_error_sum, self.angular_last_error,
-                                                                    self.angular_kp, self.angular_ki, self.angular_kd)
-            
-            self.linear_last_error = self.contour_area_error
-            self.angular_last_error = self.difference_error
-            
-            linear_x = np.clip(linear_x, -self.max_linear_speed, self.max_linear_speed)
-            angular_z = np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed)
-            
             twist_msg = Twist()
-            twist_msg.linear.x = linear_x
-            twist_msg.angular.z = -angular_z  # Ensure correct direction
+            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/50,0,0,0,0,0.1))
+            # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/60),0,0,0,0,0.1))
+
+            twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
+            # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
+            twist_msg.angular.z = max(min(twist_msg.angular.z, self.max_angular_speed), -self.max_angular_speed)
+                                           
+                                            
             self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
             if(self.cmd_vel_pub_count >9):
                 self.cmd_vel_pub.publish(twist_msg)
                 self.cmd_vel_pub_count=0
-            self.get_logger().info(f"Publishing cmd_vel: linear_x = {linear_x}, angular_z = {-angular_z}")
+            self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z} ,linear_y= {twist_msg.linear.y}")
         
     def sweep_for_ball(self):
         twist_msg = Twist()

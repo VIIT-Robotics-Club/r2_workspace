@@ -127,13 +127,11 @@ class YoloObjectTrackingNode(Node):
         # List to store differences
         differences = []
         
-        # Calculate the deviation line's x-coordinate
         line_x = img.shape[1] // 2 + self.deviation
         
-        # Loop through the results and store the bounding box and stores the results in the YoloResults message
         for result in results:
             
-            xywh_list = result.boxes.xywh.tolist() # center_x, center_y, width, height
+            xywh_list = result.boxes.xywh.tolist() 
             
             for xywh in xywh_list:
                 xywh_msg = Xywh()
@@ -152,7 +150,7 @@ class YoloObjectTrackingNode(Node):
                 difference = (xywh[0] - line_x)
                 differences.append(difference)
 
-            xyxy_list = result.boxes.xyxy.tolist() # top_left_x, top_left_y, bottom_right_x, bottom_right_y
+            xyxy_list = result.boxes.xyxy.tolist() 
             
             for xyxy in xyxy_list:
                 xyxy_msg = XyXy()

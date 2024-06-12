@@ -39,7 +39,7 @@ def generate_launch_description():
         parameters= [PathJoinSubstitution([share, "config", "twist_mux.yaml"])]
     )
 
-    
+
     
     camera_params = PathJoinSubstitution([share ,"config", "cam.yaml"])
     
@@ -55,12 +55,24 @@ def generate_launch_description():
                            ("/camera/image_raw/compressed", "/image_raw/compressed")
                            ])
 
+    camStreamDecompress = Node(
+        package="image_transport",
+        executable="republish",
+        arguments=["raw", "compressed"],
+        remappings=[
+            ("/in", "/camera/image_raw/annotated"),
+            ("/out/compressed", "/camera/image_raw/annotated_compressed")
+        ]
+    )
+    
+
     nodes = {
         # launch arguments,        
         joy_node,
         teleop_node,
         twist_mux,
-        camera_node
+        camera_node,
+        camStreamDecompress
     }
     
     otherNode = IncludeLaunchDescription(
