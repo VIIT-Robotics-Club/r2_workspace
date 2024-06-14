@@ -35,8 +35,8 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 220000),
-                ('linearX_kp', 0.00001),
+                ('desired_contour_area', 173000),
+                ('linearX_kp', 0.7),
                 ('linearX_ki', 0.00),
                 ('linearX_kd', 0.00),
                 ('linearY_kp', 0.5),
@@ -48,7 +48,7 @@ class BallTrackingNode(Node):
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 0.5),
                 ('max_integral', 10.0),
-                ('contour_area_threshold', 3000),
+                ('contour_area_threshold', 0),
                 ('difference_threshold', 30)
             ]
         )
@@ -184,7 +184,7 @@ class BallTrackingNode(Node):
             blue_ball_coords = self.xyxys_list[i]
             behind_other_ball = False
             for j, class_id in enumerate(self.class_ids_list):
-                if class_id in [1, 2]:  # Purple or Red ball
+                if class_id in [1, 2]: 
                     other_ball_coords = self.xyxys_list[j]
                     if is_behind_other_ball(blue_ball_coords, other_ball_coords):
                         behind_other_ball = True
@@ -194,7 +194,7 @@ class BallTrackingNode(Node):
         
         if filtered_blue_ball_indices:
             largest_contour_index = max(filtered_blue_ball_indices, key=lambda i: self.contour_areas_list[i])
-            
+
             self.closest_blue_ball = {
                 'class_id': self.class_ids_list[largest_contour_index],
                 'contour_area': self.contour_areas_list[largest_contour_index],
@@ -252,11 +252,14 @@ class BallTrackingNode(Node):
                     'xywh': None
                 }
                 return
-
-            self.linearX_error_sum += self.contour_area_error / 1000
-            self.linearY_error_sum += self.difference_error / 70
+            X_divisor=90000# for max x = 1 the value for divisor is 90000 multiply this value by whatever multiplying factor
+            Yaw_divisor=70
+            self.contour_area_error=self.contour_area_error /X_divisor
+            self.difference_error= self.difference_error / Yaw_divisor
+            self.linearX_error_sum += self.contour_area_error
+            self.linearY_error_sum += self.difference_error 
             self.angular_error_sum += self.yaw_error
-            
+
             linear_x, self.linearX_error_sum = self.PID_controller(self.contour_area_error, self.linearX_error_sum, self.linearX_last_error,
                                                                   self.linearX_kp, self.linearX_ki, self.linearX_kd)
             
@@ -272,7 +275,7 @@ class BallTrackingNode(Node):
             
             linear_x = np.clip(linear_x, -self.max_linear_speed, self.max_linear_speed)
             linear_y = np.clip(linear_y, -self.max_angular_speed, self.max_angular_speed)
-            angular_z = np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed) 
+            angular_z = -np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed) 
             
             twist_msg = Twist()
             twist_msg.linear.x = linear_x
@@ -292,9 +295,7 @@ class BallTrackingNode(Node):
         
         self.cmd_vel_pub.publish(twist_msg)
         self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
-    def get_camera_width(self):
-        # Assuming a fixed camera resolution, e.g., 640x480
-        return 640
+  
     
 def main(args=None):
     rclpy.init(args=args)

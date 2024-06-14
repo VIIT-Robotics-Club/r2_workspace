@@ -18,14 +18,14 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 170000),
-                ('linear_kp', 0.1),
-                ('linear_ki', 0.05  ),
+                ('desired_contour_area', 235000),
+                ('linear_kp', 0.7),
+                ('linear_ki', 0.0),
                 ('linear_kd', 0.00),
-                ('angular_kp', 0.01),
-                ('angular_ki', 0.01),
+                ('angular_kp', 0.02),
+                ('angular_ki', 0.0),
                 ('angular_kd', 0.01),
-                ('max_linear_speed', 2.0),
+                ('max_linear_speed', 1.0),
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
@@ -173,13 +173,13 @@ class BallTrackingNode(Node):
         else:
             self.sweep_for_ball()
            
-    def pid_controller(self, error, previous_error, int_error, ki, kd, dt):
-        control_action = self.linear_kp * error + ki * int_error + kd * ((error - previous_error) / dt)
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt,linear_kp ):
+        control_action = linear_kp * error + ki * int_error + kd * ((error - previous_error) / dt)
         return control_action
         
     def move_robot(self):
         if self.closest_blue_ball['class_id'] is not None:
-            self.get_logger().info(f"Contour Area Error: {self.contour_area_error}")
+            self.get_logger().info(f"Contour Area Error: {self.contour_area_error/80000}")
             self.get_logger().info(f"Difference Error: {self.difference_error}")
             
             if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
@@ -188,7 +188,7 @@ class BallTrackingNode(Node):
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
                 self.get_logger().info("Reached the ball. Stopping the robot.")
-                sys.exit()
+                # sys.exit()
   
                 self.tracking_blue_ball = False
                 self.closest_blue_ball = {
@@ -201,10 +201,12 @@ class BallTrackingNode(Node):
                     'xywh': None
                 }
                 return
+            divisor=90000# for max x = 1 the value for divisor is 90000 multiply this value by whatever multiplying factor
+
             twist_msg = Twist()
-            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/50,0,0,0,0,0.1))
+            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/divisor,0,0,0,0,0.1,self.linear_kp ))
             # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
-            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/60),0,0,0,0,0.1))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/50),0,0,0,0,0.1,self.angular_kp))
 
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
             # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
@@ -212,7 +214,7 @@ class BallTrackingNode(Node):
                                            
                                             
             self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
-            if(self.cmd_vel_pub_count >9):
+            if(self.cmd_vel_pub_count >5):
                 self.cmd_vel_pub.publish(twist_msg)
                 self.cmd_vel_pub_count=0
             self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z} ,linear_y= {twist_msg.linear.y}")

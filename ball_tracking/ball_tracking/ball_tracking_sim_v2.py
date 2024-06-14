@@ -228,7 +228,7 @@ class BallTrackingNode(Node):
             self.angular_last_error = self.difference_error
             
             linear_x = np.clip(linear_x, -self.max_linear_speed, self.max_linear_speed)
-            angular_z = np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed)
+            angular_z = -np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed)
             
             twist_msg = Twist()
             twist_msg.linear.x = linear_x
