@@ -28,9 +28,9 @@ class RobotAltitudeCheckNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('pitch_threshold', 2),                         # Pitch threshold for detecting climb/descent
-                ('pitch_stable_threshold', 0.3),                # Threshold to consider the pitch stable around 0
-                ('pitch_history_size', 7),                      # Size of pitch values (tuned for the robot's speed)
+                ('pitch_threshold', 5),                         # Pitch threshold for detecting climb/descent
+                ('pitch_stable_threshold', 0.4),                # Threshold to consider the pitch stable around 0
+                ('pitch_history_size', 60),                      # Size of pitch values (tuned for the robot's speed)
                 ('slope_state', False),                          # Initial state 
                 ('logging', False)
             ]
@@ -52,7 +52,7 @@ class RobotAltitudeCheckNode(Node):
     def subscriber_callback(self, msg):
 
         # Get pitch value
-        pitch = msg.y
+        pitch = msg.x
         
         # Append pitch value to history
         self.pitch_history.append(pitch)
@@ -62,9 +62,9 @@ class RobotAltitudeCheckNode(Node):
         pitch_avg = sum(self.pitch_history) / len(self.pitch_history)
 
         # Log pitch values
-        if self.get_parameter('logging').value:
-            self.get_logger().info(f"Average pitch: {pitch_avg}")
-            self.get_logger().info(f"Pitch history: {list(self.pitch_history)}")
+        # if self.get_parameter('logging').value:
+        self.get_logger().info(f"Average pitch: {pitch_avg}")
+        self.get_logger().info(f"Pitch history: {list(self.pitch_history)}")
 
         # Check if the robot is climbing or descending
         if not self.is_climbing and not self.is_descending:

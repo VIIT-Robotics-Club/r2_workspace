@@ -1,3 +1,4 @@
+from ament_index_python import get_package_share_directory
 from launch_ros.substitutions import FindPackageShare
 from launch import LaunchDescription
 from launch.actions import *
@@ -7,6 +8,7 @@ from launch.substitutions import PathJoinSubstitution, Command, LaunchConfigurat
 from launch_ros.parameter_descriptions import ParameterValue
 from math import pi
 from launch.conditions import IfCondition 
+import os
 
 
 def generate_launch_description():
@@ -14,6 +16,9 @@ def generate_launch_description():
     share = FindPackageShare("r2_bringup")
     
     joy_params = PathJoinSubstitution([share, 'config', 'joystick.yaml'])
+    startup_params = os.path.join(get_package_share_directory('r2_bringup'),'config','r2_startup_params.yaml')
+    descShare = FindPackageShare("r2_description")
+
 
     joy_node = Node(
             package='joy',
@@ -21,6 +26,15 @@ def generate_launch_description():
             name='joy_node',
             parameters=[joy_params],
         )
+    
+    rviz = Node(
+        package="rviz2",
+        executable="rviz2",
+        arguments=[
+        "-d",
+        PathJoinSubstitution([descShare, "rviz", "config.rviz"])
+        ]
+    )
     
     teleop_node = Node(
         package='teleop_twist_joy',
@@ -39,8 +53,6 @@ def generate_launch_description():
         parameters= [PathJoinSubstitution([share, "config", "twist_mux.yaml"])]
     )
 
-    
-    
     camera_params = PathJoinSubstitution([share ,"config", "cam.yaml"])
     
     camera_node = Node(package="camera_ros", executable="camera_node",
@@ -54,13 +66,28 @@ def generate_launch_description():
                             ("/camera/camera_info", "/image_raw/camera_info"),
                            ("/camera/image_raw/compressed", "/image_raw/compressed")
                            ])
+    
+
+    imuFusion  = Node(package="imu_complementary_filter", executable="complementary_filter_node")
+
+    # Start the rotate_and_move node: This is the node that will be used to rotate the robot towards the balls and move it forward
+    rotate_and_move = Node(
+        package='r2_navigation',
+        executable='rotate_and_move',
+        name='rotate_and_move',
+        parameters=[startup_params],
+        output='screen'
+    ) 
 
     nodes = {
         # launch arguments,        
         joy_node,
         teleop_node,
         twist_mux,
-        camera_node
+        # rviz,
+        # camera_node,
+        # imuFusion,
+        # rotate_and_move
     }
     
     otherNode = IncludeLaunchDescription(

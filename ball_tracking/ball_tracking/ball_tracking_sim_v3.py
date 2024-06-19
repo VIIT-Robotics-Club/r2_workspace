@@ -43,7 +43,7 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 50000),
+                ('desired_contour_area', 70000),
                 ('linearX_kp', 0.00001),
                 ('linearX_ki', 0.00),
                 ('linearX_kd', 0.00),

@@ -30,7 +30,7 @@ rotate_and_move:
     angular_ki: 0.05
     angular_kd: 0.00
     logging: False
-    linear_speed: 0.7.0  #How fast the robot should move forward
+    linear_speed: 0.7  #How fast the robot should move forward
     move_duration: 3.0    #How many seconds the robot should move forward
     max_angular_speed: 4.0  
     max_integral: 10.0

@@ -20,7 +20,7 @@ def generate_launch_description():
     # This is the Node for ball tracking update: Update the version of script to be used
     ball_tracking = Node(
         package='ball_tracking',
-        executable='ball_tracking_sim',
+        executable='ball_tracking_sim_v3',
         name='ball_tracking',
         parameters=[startup_params],
         output='screen'
@@ -108,6 +108,7 @@ def generate_launch_description():
     return LaunchDescription([
         
         # Robot tracks the balls -> Go towards a ball and stop
+        gripper_grab_open,
         ball_tracking,
         
         #Along with ball tracking node, gripper should also be lowered (When the robot is crossing the slope): Gripper claw should be opened at this point
