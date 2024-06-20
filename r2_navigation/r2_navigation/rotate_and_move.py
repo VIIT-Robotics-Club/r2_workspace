@@ -25,7 +25,7 @@ class RotateAndMoveNode(Node):
                 ('max_angular_speed', 4.0),     # Maximum angular speed for rotation
                 ('max_integral', 10.0),         # Maximum integral term value for angular PID controller
                 ('rotation_angle', 180.0),       # Angle of rotation in degrees
-                ('yaw_error_threshold', 0.1)   # Threshold for considering rotation completed (in radians
+                ('yaw_error_threshold', 0.1)   # Threshold for considering rotation completed (in radians)
             ]
         )
 
