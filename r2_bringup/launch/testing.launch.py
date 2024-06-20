@@ -65,14 +65,25 @@ def generate_launch_description():
         ]
     )
     
+    
+    imuParams = PathJoinSubstitution([share ,"config", "madgwick.yaml"])
+    
+    imuFilter = Node(package="imu_filter_madgwick",
+                     executable="imu_filter_madgwick_node",
+                    arguments=[
+                        "--ros-args",
+                        "--params-file",
+                        imuParams])
+    
 
     nodes = {
         # launch arguments,        
         joy_node,
         teleop_node,
         twist_mux,
-        camera_node,
-        camStreamDecompress
+        # camera_node,
+        # camStreamDecompress,
+        imuFilter
     }
     
     otherNode = IncludeLaunchDescription(

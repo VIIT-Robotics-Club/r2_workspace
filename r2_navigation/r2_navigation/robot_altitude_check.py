@@ -28,8 +28,8 @@ class RobotAltitudeCheckNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('pitch_threshold', 2),                         # Pitch threshold for detecting climb/descent
-                ('pitch_stable_threshold', 0.3),                # Threshold to consider the pitch stable around 0
+                ('pitch_threshold', 2.0),                         # Pitch threshold for detecting climb/descent
+                ('noise_threshold', 0.3),                # Threshold to consider the pitch stable around 0
                 ('pitch_history_size', 7),                      # Size of pitch values (tuned for the robot's speed)
                 ('slope_state', False),                          # Initial state 
                 ('logging', False)
@@ -38,7 +38,7 @@ class RobotAltitudeCheckNode(Node):
         
         # Get parameters
         self.pitch_threshold = self.get_parameter('pitch_threshold').value
-        self.pitch_stable_threshold = self.get_parameter('pitch_stable_threshold').value
+        self.noise_threshold = self.get_parameter('noise_threshold').value
         self.pitch_history_size = self.get_parameter('pitch_history_size').value
         self.slope_state = self.get_parameter('slope_state').value
         
@@ -52,7 +52,7 @@ class RobotAltitudeCheckNode(Node):
     def subscriber_callback(self, msg):
 
         # Get pitch value
-        pitch = msg.y
+        pitch = msg.x
         
         # Append pitch value to history
         self.pitch_history.append(pitch)
@@ -64,7 +64,7 @@ class RobotAltitudeCheckNode(Node):
         # Log pitch values
         if self.get_parameter('logging').value:
             self.get_logger().info(f"Average pitch: {pitch_avg}")
-            self.get_logger().info(f"Pitch history: {list(self.pitch_history)}")
+            # self.get_logger().info(f"Pitch history: {list(self.pitch_history)}")
 
         # Check if the robot is climbing or descending
         if not self.is_climbing and not self.is_descending:
@@ -74,31 +74,31 @@ class RobotAltitudeCheckNode(Node):
                 if pitch_avg > 0:   
                     self.is_climbing = True
                     
-                    if self.get_parameter('logging').value:
-                        self.get_logger().info("Started climbing")
+                    # if self.get_parameter('logging').value:
+                    #     self.get_logger().info("Started climbing")
                         
                 else:
                     
                     self.is_descending = True
                     
-                    if self.get_parameter('logging').value:
-                        self.get_logger().info("Started descending")
+                    # if self.get_parameter('logging').value:
+                    #     self.get_logger().info("Started descending")
 
         # Check if the robot has climbed or descended the slope
-        if self.is_climbing and abs(pitch_avg) < self.pitch_stable_threshold:
+        if self.is_climbing and abs(pitch_avg) < self.noise_threshold:
             self.is_climbing = False
             self.slope_state = not self.slope_state
             
-            if self.get_parameter('logging').value:
-                self.get_logger().info("Climbed the slope, state flipped")
+            # if self.get_parameter('logging').value:
+            #     self.get_logger().info("Climbed the slope, state flipped")
 
         # Check if the robot has climbed or descended the slope
-        if self.is_descending and abs(pitch_avg) < self.pitch_stable_threshold:
+        if self.is_descending and abs(pitch_avg) < self.noise_threshold:
             self.is_descending = False
             self.slope_state = not self.slope_state
             
-            if self.get_parameter('logging').value:
-                self.get_logger().info("Descended the slope, state flipped")
+            # if self.get_parameter('logging').value:
+            #     self.get_logger().info("Descended the slope, state flipped")
 
         # Publish the state
         self.publish_state()
@@ -108,8 +108,8 @@ class RobotAltitudeCheckNode(Node):
         msg.data = self.slope_state
         self.publisher.publish(msg)
         
-        if self.get_parameter('logging').value:
-            self.get_logger().info(f"Published state: {'on top' if self.slope_state else 'at bottom'}")
+        # if self.get_parameter('logging').value:
+        #     self.get_logger().info(f"Published state: {'on top' if self.slope_state else 'at bottom'}")
 
 def main(args=None):
     rclpy.init(args=args)

@@ -35,16 +35,16 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 220000),
-                ('linearX_kp', 0.00001),
+                ('desired_contour_area', 230000),
+                ('linearX_kp', 0.5),
                 ('linearX_ki', 0.00),
                 ('linearX_kd', 0.00),
                 ('linearY_kp', 0.5),
                 ('linearY_ki', 0.00),
                 ('linearY_kd', 0.00),
-                ('angular_kp', 0.2),
+                ('angular_kp', 0.1),
                 ('angular_ki', 0.00),
-                ('angular_kd', 0.00),
+                ('angular_kd', 0.01),
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 0.5),
                 ('max_integral', 10.0),
@@ -253,8 +253,8 @@ class BallTrackingNode(Node):
                 }
                 return
 
-            self.linearX_error_sum += self.contour_area_error / 1000
-            self.linearY_error_sum += self.difference_error / 70
+            self.linearX_error_sum += self.contour_area_error / 120000
+            self.linearY_error_sum += self.difference_error / 170
             self.angular_error_sum += self.yaw_error
             
             linear_x, self.linearX_error_sum = self.PID_controller(self.contour_area_error, self.linearX_error_sum, self.linearX_last_error,

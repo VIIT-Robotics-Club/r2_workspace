@@ -55,9 +55,9 @@ def generate_launch_description():
     
     
     return LaunchDescription([
-        yolo_results,
+        # yolo_results,
         quaternion_to_rpy,
         robot_altitude_check,
-        luna_allignment_server,
-        silo_deciding_server
+        # luna_allignment_server,
+        # silo_deciding_server
     ])

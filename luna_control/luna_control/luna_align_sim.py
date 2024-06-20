@@ -5,10 +5,12 @@
 
 import rclpy
 from rclpy.node import Node
-
+from rclpy.parameter import Parameter
+from rcl_interfaces.msg import SetParametersResult
 from std_msgs.msg import Int64MultiArray
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Range
+from std_msgs.msg import Int32
 from r2_interfaces.srv import SiloToGo
 
 import sys
@@ -28,22 +30,22 @@ class LunaWallAlignNode(Node):
                 ('linear_y_max', 2.0),
                 ('linear_x_min', -2.0),
                 ('linear_y_min', -2.0),
-                ('angular_z_max', 3.0),
-                ('angular_z_min', -3.0),
-                ('kp_linear_x', 0.5),
-                ('ki_linear_x', 0.01),
-                ('kd_linear_x', 0.00),
-                ('kp_linear_y', 0.9),
-                ('ki_linear_y', 0.01),
-                ('kd_linear_y', 0.00),
-                ('kp_angular', 1.4),
-                ('ki_angular', 0.1),
+                ('angular_z_max', 2.0),
+                ('angular_z_min', -2.0),
+                ('kp_linear_x', 1.8),
+                ('ki_linear_x', 0.0),
+                ('kd_linear_x', 0.0),
+                ('kp_linear_y', 1.8),
+                ('ki_linear_y', 0.0),
+                ('kd_linear_y', 0.0),
+                ('kp_angular', 0.08),
+                ('ki_angular', 0.0),
                 ('kd_angular', 0.0),          
                 # ('x_goal', 13.0),
                 # ('y_goal', 250.0),
                 # ('silo_number', 1),    
-                ('silo_1_x', 0.1),
-                ('silo_1_y', 3.28),
+                ('silo_1_x', 0.03),
+                ('silo_1_y', 1.06),
                 ('silo_2_x', 0.1),
                 ('silo_2_y', 2.55),
                 ('silo_3_x', 0.1),
@@ -86,16 +88,17 @@ class LunaWallAlignNode(Node):
         self.silo_4_y = self.get_parameter('silo_4_y').value
         self.silo_5_x = self.get_parameter('silo_5_x').value
         self.silo_5_y = self.get_parameter('silo_5_y').value
+        self.add_on_set_parameters_callback(self.param_callback)
 
         
         # All 6 lunar sensors subscribers
         
         self.luna_fl_subscriber = self.create_subscription(         #Front Left
-            Range, '/distance/lidar_fl_1', self.luna_fl_callback, 10
+            Int32, 'luna_fl', self.luna_fl_callback, 10
         )
         
         self.luna_fr_subscriber = self.create_subscription(         #Front Right
-            Range, '/distance/lidar_fr_1', self.luna_fr_callback, 10
+            Int32, 'luna_fr', self.luna_fr_callback, 10
         )
         
         # self.luna_lb_subscriber = self.create_subscription(         #Left Back      
@@ -114,16 +117,16 @@ class LunaWallAlignNode(Node):
         
         
         self.luna_rf_subscriber = self.create_subscription(         #Right Front
-            Range,   '/distance/lidar_rf_1', self.luna_rf_callback, 10
+            Int32,   'luna_rf', self.luna_rf_callback, 10
         )
         
         
         self.luna_rb_subscriber = self.create_subscription(         #Right Back           
-            Range, '/distance/lidar_rb_1', self.luna_rb_callback, 10
+            Int32, 'luna_rb', self.luna_rb_callback, 10
         )        
         
 
-        self.cmd_vel_publisher = self.create_publisher( Twist, 'cmd_vel', 10
+        self.cmd_vel_publisher = self.create_publisher( Twist, 'nav_vel', 10
         )
         
         self.create_service( SiloToGo,  'silo_to_go',  self.silo_to_go_callback)
@@ -158,7 +161,14 @@ class LunaWallAlignNode(Node):
         self.active = False
 
 
-
+    def param_callback(self, params: list[Parameter]):
+        
+        for param in params:
+            param_name = param.name
+            param_value = param.value
+            setattr(self, param_name, param_value)
+        
+        return SetParametersResult(successful=True)  
     def silo_to_go_callback(self, request, response):
         self.silo_number = request.silo_number
         
@@ -185,44 +195,44 @@ class LunaWallAlignNode(Node):
         control_action = kp * error + ki * int_error + kd * ((error - previous_error) / dt)
         return control_action
     
-    def luna_fl_callback(self, msg: Range):
+    def luna_fl_callback(self, msg: Int32):
         try:
-            self.luna_fl = float(msg.range)
+            self.luna_fl = float(msg.data)
         except Exception as e:
             self.get_logger().error(f"Error in luna_fl_callback: {e}")
             
         
-    def luna_fr_callback(self, msg: Range):
+    def luna_fr_callback(self, msg: Int32):
         try:
-            self.luna_fr = float(msg.range)
+            self.luna_fr = float(msg.data)
             # print(self.luna_fr)
         except Exception as e:
             print(f"Error in luna_fr_callback: {e}")
 
-    def luna_lb_callback(self, msg: Range):
+    def luna_lb_callback(self, msg: Int32):
         try:
-            self.luna_lb = float(msg.range)
+            self.luna_lb = float(msg.data)
             # print(self.luna_lb)
         except Exception as e:
             print(f"Error in luna_lb_callback: {e}")
 
-    def luna_lf_callback(self, msg: Range):
+    def luna_lf_callback(self, msg: Int32):
         try:
-            self.luna_lf = float(msg.range)
+            self.luna_lf = float(msg.data)
             # print(self.luna_lf)
         except Exception as e:
             print(f"Error in luna_lf_callback: {e}")
 
-    def luna_rf_callback(self, msg: Range):
+    def luna_rf_callback(self, msg: Int32):
         try:
-            self.luna_rf = float(msg.range)
+            self.luna_rf = float(msg.data)
             # print(self.luna_rf)
         except Exception as e:
             print(f"Error in luna_rf_callback: {e}")
 
-    def luna_rb_callback(self, msg: Range):
+    def luna_rb_callback(self, msg: Int32):
         try:
-            self.luna_rb = float(msg.range)
+            self.luna_rb = float(msg.data)
             # print(self.luna_rb)
         except Exception as e:
             print(f"Error in luna_rb_callback: {e}")
@@ -241,9 +251,8 @@ class LunaWallAlignNode(Node):
 
         # Create a new Twist message
         twist = Twist()
-
-        x_avg = (self.luna_fl + self.luna_fr) / 2
-        y_avg = (self.luna_rf + self.luna_rb) / 2
+        x_avg = (self.luna_fl + self.luna_fr) / 200
+        y_avg = (self.luna_rf + self.luna_rb) / 200
 
         if self.correct_angle:
             # Calculate the time difference
@@ -277,7 +286,7 @@ class LunaWallAlignNode(Node):
                 dt = 0.2
                 prev_lin_error_x = 0
                 prev_lin_error_y = 0
-                lin_error_x = self.x_goal - x_avg               
+                lin_error_x = (self.x_goal - x_avg)               
                 lin_error_y = self.y_goal - y_avg
                 self.int_error_linear_x += lin_error_x
                 self.int_error_linear_y += lin_error_y
@@ -294,18 +303,23 @@ class LunaWallAlignNode(Node):
                 self.prev_ang_error = ang_error
                 prev_lin_error_x, prev_lin_error_y = lin_error_x, lin_error_y
 
+                self.get_logger().info('angular z: %f' % twist.angular.z)
+
                 twist.linear.x = -max(min(twist.linear.x, self.linear_x_max), self.linear_x_min) 
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) 
                 twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min) 
 
-                if abs(y_avg - self.y_goal) <= 0.02:
+                if abs(y_avg - self.y_goal) <= 0.06:
                     twist.linear.y = 0.0
-                if abs(x_avg - self.x_goal) <= 0.02:
+                    self.get_logger().info('abs(y_avg - self.y_goal) %f' % abs(y_avg - self.y_goal))
+                if abs(x_avg - self.x_goal) <= 0.06:
+                    self.get_logger().info('abs(x_avg - self.x_goal) %f' % abs(x_avg - self.x_goal))
                     twist.linear.x = 0.0
                     twist.angular.z = 0.0
 
                 self.get_logger().info('Linear x: %f' % twist.linear.x)
                 self.get_logger().info('Linear y: %f' % twist.linear.y)
+                # self.get_logger().info('angular z: %f' % twist.linear.z)
 
             else:
                 twist.linear.x = 0.0

@@ -80,7 +80,7 @@ class LunaWallAlignNode(Node):
         
         self.luna_subscriber = self.create_subscription(
             Int64MultiArray,
-            'luna_data',
+            'luna',
             self.luna_callback,
             10,
         )
@@ -136,10 +136,10 @@ class LunaWallAlignNode(Node):
 
 
     def luna_callback(self, msg):
-        self.luna_1 = float(msg.data[1]) - 2         #Front Left -14    -  2 is the offset (Luna sensor error correction)
-        self.luna_2 = float(msg.data[3]) - 2         #Front right -12   -  2 is the offset (Luna sensor error correction)- 
-        self.luna_3 = float(msg.data[0])             #Side Left - 11
-        self.luna_4 = float(msg.data[2])             #Side right -13 
+        self.luna_1 = float(msg.data[1]) - 2 /100       #Front Left -14    -  2 is the offset (Luna sensor error correction)
+        self.luna_2 = float(msg.data[3]) - 2 /100           #Front right -12   -  2 is the offset (Luna sensor error correction)- 
+        self.luna_3 = float(msg.data[0]) /100            #Side Left - 11
+        self.luna_4 = float(msg.data[2])/100   #Side right -13 
         self.get_logger().info('Luna data received')
         self.get_logger().info('x: %d' % self.x_goal)
         self.get_logger().info('y: %d' % self.y_goal)
