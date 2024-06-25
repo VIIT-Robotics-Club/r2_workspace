@@ -221,6 +221,7 @@ class BallTrackingNode(Node):
             twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/70000,0,0,0,0,0.1,self.linear_kp))
             # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
             twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
 
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
             # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
