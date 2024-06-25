@@ -25,7 +25,7 @@ setup(
         "ball_tracking_sim_v2=ball_tracking.ball_tracking_sim_v2:main",
         "ball_tracking_sim_v3=ball_tracking.ball_tracking_sim_v3:main",
         "ball_tracking_sim_v4=ball_tracking.ball_tracking_sim_v4:main",
-
+        "ball_tracking_server=ball_tracking.ball_tracking_server:main",
         ],
     },
 )
