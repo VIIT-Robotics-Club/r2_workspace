@@ -15,7 +15,7 @@ import cv2
 from time import time
 import os
 import numpy as np
-
+import sys
 from ultralytics import YOLO
 from ultralytics import utils
 
@@ -37,17 +37,17 @@ class SiloDetectionNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 70000),
-                ('linear_kp', 0.01),
-                ('linear_ki', 0.001),
-                ('linear_kd', 0.001),
+                ('desired_contour_area', 53000),
+                ('linear_kp', 0.3),
+                ('linear_ki', 0.0),
+                ('linear_kd', 0.0),
                 ('angular_kp', 0.1),
-                ('angular_ki', 0.01),
-                ('angular_kd', 0.01),
-                ('max_linear_speed', 0.5),
+                ('angular_ki', 0.0),
+                ('angular_kd', 0.0),
+                ('max_linear_speed', 2.0),
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
-                ('contour_area_threshold', 20000),
+                ('contour_area_threshold', 3000),
                 ('difference_threshold', 30)
                 ]
         )
@@ -87,7 +87,7 @@ class SiloDetectionNode(Node):
         
         self.cmd_vel_pub = self.create_publisher(
             Twist, 
-            'cmd_vel', 
+            'nav_vel', 
             10
         )
         
@@ -121,15 +121,15 @@ class SiloDetectionNode(Node):
         self.get_logger().info(f"Silos: {self.silos}")
         self.get_logger().info(f"Balls: {self.balls}")
 
-        if len(self.silos) >= 5:
-            self.stop_robot()
+        if len(self.silos) >= 1:
+            # self.stop_robot()
             self.move_to_middle_silo()
         else:
             self.sweep_for_silos()
 
     def move_to_middle_silo(self):
         # Assuming the middle silo is the 3rd one in the list of 5 silos
-        middle_silo_index = 2
+        middle_silo_index = len(self.silos)//2
         middle_silo = self.silos[middle_silo_index]
         target_contour_area = self.contour_areas_list[middle_silo_index]
         deviation = self.differences_list[middle_silo_index]
@@ -143,13 +143,21 @@ class SiloDetectionNode(Node):
         self.get_logger().info(f"Contour Area Error: {contour_area_error}")
         self.get_logger().info(f"Deviation Error: {deviation_error}")
 
-        if abs(contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
-            self.stop_robot()
-            self.get_logger().info("Reached the middle silo. Stopping the robot.")
-            return
+        if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
+            # self.stop_robot()
+            twist_msg = Twist()
+            twist_msg.linear.x = 0.0
+            twist_msg.angular.z = 0.0
+        
+            self.cmd_vel_pub.publish(twist_msg)
 
+            self.get_logger().info("Reached the middle silo. Stopping the robot.")
+            sys.exit()
+            return
+        contour_area_error=contour_area_error/70000
+        deviation_error=deviation_error/170
         self.linear_error_sum += contour_area_error
-        self.angular_error_sum += deviation_error
+        self.angular_error_sum += contour_area_error
 
         linear_x, self.linear_error_sum = self.PID_controller(contour_area_error, self.linear_error_sum, self.linear_last_error,
                                                               self.linear_kp, self.linear_ki, self.linear_kd)
@@ -180,7 +188,7 @@ class SiloDetectionNode(Node):
 
     def sweep_for_silos(self):
         twist_msg = Twist()
-        twist_msg.angular.z = 2.0
+        twist_msg.angular.z = 0.40
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)

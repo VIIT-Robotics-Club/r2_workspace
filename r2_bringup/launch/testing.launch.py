@@ -95,8 +95,8 @@ def generate_launch_description():
         joy_node,
         teleop_node,
         twist_mux,
-        # camera_node,
-        # camStreamDecompress,
+        camera_node,
+        camStreamDecompress,
         imuFilter
     }
     

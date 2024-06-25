@@ -14,15 +14,15 @@ luna_wall_align:
     kd_angular: 0.0
     # x_goal: 40.0
     # y_goal: 50.0
-    silo_1_x: 8.0
-    silo_1_y: 213.0
-    silo_2_x: 18.0
-    silo_2_y: 218.0
-    silo_3_x: 40.0
-    silo_3_y: 270.0
-    silo_4_x: 11.0
-    silo_4_y: 239.0
-    silo_5_x: 170.0
-    silo_5_y: 239.0
+    silo_1_x: 12.0
+    silo_1_y: 312.0
+    silo_2_x: 12.0
+    silo_2_y: 240.0
+    silo_3_x: 12.0
+    silo_3_y: 166.0
+    silo_4_x: 12.0
+    silo_4_y: 98.0
+    silo_5_x: 12.0
+    silo_5_y: 25.0
 
 

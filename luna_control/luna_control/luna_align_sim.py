@@ -44,8 +44,8 @@ class LunaWallAlignNode(Node):
                 # ('x_goal', 13.0),
                 # ('y_goal', 250.0),
                 # ('silo_number', 1),    
-                ('silo_1_x', 0.03),
-                ('silo_1_y', 1.06),
+                ('silo_1_x', 0.10),
+                ('silo_1_y', 0.13),
                 ('silo_2_x', 0.1),
                 ('silo_2_y', 2.55),
                 ('silo_3_x', 0.1),
@@ -268,6 +268,8 @@ class LunaWallAlignNode(Node):
             self.int_error_angular_z += ang_error
             twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
             self.prev_ang_error = ang_error
+
+            twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
 
             if x_diff < 0:  # Luna front left < front right -> left side is closer to the wall
                 twist.angular.z = abs(twist.angular.z)  # Rotate Anti-clockwise

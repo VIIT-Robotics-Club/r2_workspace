@@ -21,17 +21,17 @@ class BallTrackingNode(Node):
             namespace='',
             parameters=[
                 ('desired_contour_area', 200000), #change according to camera position
-                ('linear_kp', 1.3),
+                ('linear_kp', 0.5),
                 ('linear_ki', 0.0),
                 ('linear_kd', 0.00),
-                ('angular_kp', 0.30),
+                ('angular_kp', 0.2),
                 ('angular_ki', 0.00007),
                 ('angular_kd', 1.8),
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 400)
+                ('difference_threshold', 600)
             ]
         )
         
@@ -192,7 +192,7 @@ class BallTrackingNode(Node):
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
                 self.get_logger().info("Reached the ball. Stopping the robot.")
-                # sys.exit()
+                sys.exit()
   
                 self.tracking_blue_ball = False
                 self.closest_blue_ball = {
@@ -237,10 +237,7 @@ class BallTrackingNode(Node):
         self.cmd_vel_pub.publish(twist_msg)
         self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
     
-    def get_camera_width(self):
-        # Assuming a fixed camera resolution, e.g., 640x480
-        return 640
-    
+        
 def main(args=None):
     rclpy.init(args=args)
     ball_tracking_node = BallTrackingNode()

@@ -53,7 +53,7 @@ class RobotAltitudeCheckNode(Node):
 
         # Get pitch value
         pitch = msg.x
-        pitch = msg.x
+        # pitch = msg.y
         
         # Append pitch value to history
         self.pitch_history.append(pitch)
