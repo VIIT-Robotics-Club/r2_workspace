@@ -20,18 +20,20 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 230000),
+
+                ('desired_contour_area', 180000),
                 ('linear_kp', 0.5),
-                ('linear_ki', 0.001),
+                ('linear_ki', 0.0),
                 ('linear_kd', 0.00),
-                ('angular_kp', 0.4),
+                ('angular_kp', 0.2),
                 ('angular_ki', 0.00007),
                 ('angular_kd', 1.8),
                 ('max_linear_speed', 2.0),
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 120)
+                ('difference_threshold', 400),
+                ('ball_colour','red')
             ]
         )
         
@@ -47,12 +49,14 @@ class BallTrackingNode(Node):
         self.max_integral = self.get_parameter('max_integral').value
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
+        self.ball_colour=self.get_parameter('ball_colour').value
+
         
         self.linear_error_sum = 0.0
         self.linear_last_error = 0.0
         self.angular_error_sum = 0.0
         self.angular_last_error = 0.0
-        self.tracking_blue_ball = False
+        self.tracking_our_ball = False
         self.difference_error = 0.0
         self.contour_area_error = 0.0
 
@@ -67,7 +71,7 @@ class BallTrackingNode(Node):
         self.xyxys_list = []
         self.xywhs_list = []
         self.int_error=0
-        self.closest_blue_ball = {
+        self.closest_our_ball = {
             'class_id': None,
             'contour_area': None,
             'difference': None,
@@ -113,45 +117,50 @@ class BallTrackingNode(Node):
             self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
             self.xywhs_list.append([xywh.center_x, xywh.center_y, xywh.width, xywh.height])
         
-        def is_behind_other_ball(blue_ball_coords, other_ball_coords):
-            blue_tl_x, blue_tl_y, blue_br_x, blue_br_y = blue_ball_coords
+        def is_behind_other_ball(our_ball_coords, other_ball_coords):
+            our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
             other_tl_x, other_tl_y, other_br_x, other_br_y = other_ball_coords
-            return (blue_tl_x > other_tl_x and blue_tl_y > other_tl_y and blue_br_x < other_br_x and blue_br_y < other_br_y)
+            return (our_tl_x > other_tl_x and our_tl_y > other_tl_y and our_br_x < other_br_x and our_br_y < other_br_y)
         
-        def is_inside_silo(blue_ball_coords, silo_coords):
-            blue_tl_x, blue_tl_y, blue_br_x, blue_br_y = blue_ball_coords
+        def is_inside_silo(our_ball_coords, silo_coords):
+            our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
             silo_tl_x, silo_tl_y, silo_br_x, silo_br_y = silo_coords
-            return (blue_tl_x >= silo_tl_x and blue_tl_y >= silo_tl_y and blue_br_x <= silo_br_x and blue_br_y <= silo_br_y)
-        
-        blue_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 0]
+            return (our_tl_x >= silo_tl_x and our_tl_y >= silo_tl_y and our_br_x <= silo_br_x and our_br_y <= silo_br_y)
+        if self.ball_colour=="red": 
+            our_id=2
+            opp_id=0
+        elif self.ball_colour=="blue":
+            our_id=2
+            opp_id=0
+        our_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == our_id ]
         silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3] 
         
-        filtered_blue_ball_indices = []
-        for i in blue_ball_indices:
-            blue_ball_coords = self.xyxys_list[i]
+        filtered_our_ball_indices = []
+        for i in our_ball_indices:
+            our_ball_coords = self.xyxys_list[i]
             behind_other_ball = False
             inside_silo = False
             
             for j, class_id in enumerate(self.class_ids_list):
-                if class_id in [1, 2]:  # Purple or Red ball
+                if class_id in [1, opp_id]:  # Purple or Red ball
                     other_ball_coords = self.xyxys_list[j]
-                    if is_behind_other_ball(blue_ball_coords, other_ball_coords):
+                    if is_behind_other_ball(our_ball_coords, other_ball_coords):
                         behind_other_ball = True
                         break
             
             for k in silo_indices:
                 silo_coords = self.xyxys_list[k]
-                if is_inside_silo(blue_ball_coords, silo_coords):
+                if is_inside_silo(our_ball_coords, silo_coords):
                     inside_silo = True
                     break
 
             if not behind_other_ball and not inside_silo:
-                filtered_blue_ball_indices.append(i)
+                filtered_our_ball_indices.append(i)
         
-        if filtered_blue_ball_indices:
-            largest_contour_index = max(filtered_blue_ball_indices, key=lambda i: self.contour_areas_list[i])
+        if filtered_our_ball_indices:
+            largest_contour_index = max(filtered_our_ball_indices, key=lambda i: self.contour_areas_list[i])
             
-            self.closest_blue_ball = {
+            self.closest_our_ball = {
                 'class_id': self.class_ids_list[largest_contour_index],
                 'contour_area': self.contour_areas_list[largest_contour_index],
                 'difference': self.differences_list[largest_contour_index],
@@ -161,10 +170,10 @@ class BallTrackingNode(Node):
                 'xywh': self.xywhs_list[largest_contour_index]
             }
             
-            self.get_logger().info(f"Closest Blue Ball: {self.closest_blue_ball}")
-            self.contour_area_error = self.desired_contour_area - self.closest_blue_ball['contour_area']
-            self.difference_error = self.closest_blue_ball['difference']
-            self.tracking_blue_ball = True
+            self.get_logger().info(f"Closest our Ball: {self.closest_our_ball}")
+            self.contour_area_error = self.desired_contour_area - self.closest_our_ball['contour_area']
+            self.difference_error = self.closest_our_ball['difference']
+            self.tracking_our_ball = True
 
             if self.difference_error < 0:
                 self.last_seen_direction = 'left'
@@ -182,8 +191,8 @@ class BallTrackingNode(Node):
         return control_action
         
     def move_robot(self):
-        if self.closest_blue_ball['class_id'] is not None:
-            self.get_logger().info(f"Contour Area Error: {self.contour_area_error/120000}")
+        if self.closest_our_ball['class_id'] is not None:
+            self.get_logger().info(f"Contour Area Error: {self.contour_area_error/70000}")
             self.get_logger().info(f"Difference Error: {self.difference_error/170}")
             
             if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
@@ -192,10 +201,10 @@ class BallTrackingNode(Node):
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
                 self.get_logger().info("Reached the ball. Stopping the robot.")
-                # sys.exit()
+                sys.exit()
   
-                self.tracking_blue_ball = False
-                self.closest_blue_ball = {
+                self.tracking_our_ball = False
+                self.closest_our_ball = {
                     'class_id': None,
                     'contour_area': None,
                     'difference': None,
@@ -211,7 +220,7 @@ class BallTrackingNode(Node):
             print(self.int_error)
             twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/70000,0,0,0,0,0.1,self.linear_kp))
             # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
-            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/230),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
 
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
             # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
@@ -229,9 +238,9 @@ class BallTrackingNode(Node):
     def sweep_for_ball(self):
         twist_msg = Twist()
         if self.last_seen_direction == 'right':
-            twist_msg.angular.z = -0.4
+            twist_msg.angular.z = -0.8
         else:
-            twist_msg.angular.z = 0.4
+            twist_msg.angular.z = 0.8
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)

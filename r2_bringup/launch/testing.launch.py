@@ -53,6 +53,12 @@ def generate_launch_description():
         parameters= [PathJoinSubstitution([share, "config", "twist_mux.yaml"])]
     )
 
+    navigation_server = Node(              
+        package='r2_navigation',
+        executable='navigation_server',
+        parameters=[startup_params],
+        output='screen'
+    )
 
     
     camera_params = PathJoinSubstitution([share ,"config", "cam.yaml"])
@@ -97,6 +103,7 @@ def generate_launch_description():
         twist_mux,
         # camera_node,
         # camStreamDecompress,
+        navigation_server,
         imuFilter
     }
     
