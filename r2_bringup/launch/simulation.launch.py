@@ -146,7 +146,7 @@ def generate_launch_description():
         gazebo,
         gazebo_spawn,
         robot_state_pub,
-        rviz,
+        # rviz,
         
         joy_node,
         teleop_node,

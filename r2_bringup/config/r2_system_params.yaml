@@ -35,7 +35,7 @@ robot_altitude_check:
     noise_threshold: 0.6                # Threshold to consider the pitch stable around 0
     pitch_history_size: 10                # Size of pitch values (tuned for the robot's speed)
     slope_state: False                   # Initial state
-    logging: True
+    logging: False
 
 silo_deciding_server:
   ros__parameters:
