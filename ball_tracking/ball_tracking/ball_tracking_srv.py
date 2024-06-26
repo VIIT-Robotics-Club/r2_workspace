@@ -5,11 +5,12 @@ from rclpy.node import Node
 from rcl_interfaces.msg import SetParametersResult
 from example_interfaces.srv import SetBool
 from r2_interfaces.srv import PerformTask
-
+from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import Twist
 from r2_interfaces.msg import YoloResults
 import numpy as np
 import asyncio
+reached = False
 
 class BallTrackingNode(Node):
     def __init__(self):
@@ -91,7 +92,7 @@ class BallTrackingNode(Node):
         
         
     def ball_tracking_callback(self, request, response):
-        self.reached = False
+        # reached = False
         if request.data:
             self.our_id = 2
             self.opp_id = 0
@@ -106,7 +107,8 @@ class BallTrackingNode(Node):
         self.get_logger().info(response.message)
         
         if not self.tracking_active:
-            while self.reached==False :
+            global reached
+            while reached==False :
                 self.timer = self.create_timer(0.1, self.process_yolo_results)
                 self.tracking_active = True
         
@@ -123,7 +125,7 @@ class BallTrackingNode(Node):
         self.xywhs_list = [[xywh.center_x, xywh.center_y, xywh.width, xywh.height] for xywh in msg.xywh]
 
     def process_yolo_results(self):
-        if self.reached == 1 or self.our_id == -1 or self.opp_id == -1:
+        if self.our_id == -1 or self.opp_id == -1:
             return
         
         def is_behind_other_ball(our_ball_coords, other_ball_coords):
@@ -203,7 +205,8 @@ class BallTrackingNode(Node):
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
-                self.reached = True
+                global reached
+                reached = True
                 # self.reached_event.set()
                 
                 self.get_logger().info("Reached the ball. Stopping the robot.")
@@ -240,18 +243,31 @@ class BallTrackingNode(Node):
 class BallTrackingClient(Node):
     def __init__(self):
         super().__init__('ball_tracking_client')
-        self.client = self.create_client(SetBool, 'ball_tracking_srv')
+        self.client = self.create_service(SetBool,"ball_tracking_srv",self.ball_tracking_callback)
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('Service not available, waiting again...')
     
-    async def toggle_ball_tracking(self, data):
-        request = SetBool.Request()
-        request.data = data
-        response = await self.client.call_async(request)
-        if response.success:
-            self.get_logger().info(f'Successfully toggled ball tracking: {response.message}')
-        else:
-            self.get_logger().info(f'Failed to toggle ball tracking: {response.message}')
+    def ball_tracking_callback(self,request, response):        
+        
+        if request.data == "red":
+            self.our_id = 2
+            self.opp_id = 0
+            response.success = True
+            response.message = "Red Ball Tracking Started"
+        elif request.data == "blue":
+            self.our_id = 0
+            self.opp_id = 2
+            response.success = True
+            response.message = "Blue Ball Tracking Started"
+        
+        while True:
+            self.process_yolo_results()
+            if self.reached == 1:
+                break
+                    
+        self.get_logger().info(response.message)        
+        # await  self.reached_event.wait()
+        return response
 
 def main(args=None):
     rclpy.init(args=args)
@@ -259,18 +275,15 @@ def main(args=None):
     # Initialize nodes
     ball_tracking_node = BallTrackingNode()
     ball_tracking_client = BallTrackingClient()
-    
-    # Asynchronously toggle ball tracking on and off
-    asyncio.ensure_future(ball_tracking_client.toggle_ball_tracking(True))  # Turn ball tracking on
-    
+    executor = MultiThreadedExecutor()
+    executor.add_node(ball_tracking_client)
+    executor.add_node(ball_tracking_node)
     try:
-        rclpy.spin(ball_tracking_node)
-    except KeyboardInterrupt:
-        pass
-    
-    # Cleanup
-    ball_tracking_node.destroy_node()
-    ball_tracking_client.destroy_node()
+      executor.spin()
+    finally:
+      executor.shutdown()
+      ball_tracking_node.destroy_node()
+      ball_tracking_client.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':

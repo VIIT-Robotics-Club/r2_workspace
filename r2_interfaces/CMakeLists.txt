@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/BestSilo.srv"
   "srv/SiloToGo.srv"
   "srv/GripperCmd.srv"
+  "srv/PerformTask.srv"
   "action/OrientAndMove.action"
 )
 

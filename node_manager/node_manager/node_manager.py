@@ -49,6 +49,7 @@ class NodeManager():
             if self.side == "red":
                 self.call_service("ball_tracking_srv","red")
                 self.call_bool_service("gripper_grab_close",True)
+                self.call_bool_service("gripper_grab_close",True)
                 self.call_bool_service("gripper_lift_up",True)
                 self.call_service("navigation_server","red")
                 self.call_service("silo_to_go","red")
@@ -71,7 +72,7 @@ class NodeManager():
         req = PerformTask()
         req.srv_name = service_name
         req.state = state
-        future = service_name.call_async(req) # Call asynchronously
+        future = service_name.call(req) # Call asynchronously
         future.add_done_callback(self.response_callback(service_name))
         
     def call_bool_service(self,service_name,state):
@@ -80,19 +81,15 @@ class NodeManager():
         future = service_name.call_async(req)
         future.add_done_callback(self.response_callback(service_name))
         
-        
-    def response_callback(self, service_name):
-        def callback(future):
-            try:
-                response = future.result()
-                if response.success:
-                    self.get_logger().info(f'{service_name} task completed successfully')
-                else:
-                    self.get_logger().warn(f'{service_name} task failed')
-            except Exception as e:
-                self.get_logger().error(f'Service call to {service_name} failed: {e}')
-        return callback
-
+    def response_callback(self,future,service_name):
+        try:
+            response = future.result()
+            if response.success:
+                self.get_logger().info(f'{service_name} task completed successfully')
+            else:
+                self.get_logger().warn(f'{service_name} task failed')
+        except Exception as e:
+            self.get_logger().error(f'Service call to {service_name} failed: {e}')
     
 
 def main(args=None):
@@ -102,6 +99,17 @@ def main(args=None):
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+    def response_callback(self,future,service_name):
+        try:
+            response = future.result()
+            if response.success:
+                self.get_logger().info(f'{service_name} task completed successfully')
+            else:
+                self.get_logger().warn(f'{service_name} task failed')
+        except Exception as e:
+            self.get_logger().error(f'Service call to {service_name} failed: {e}')
+    
+
 
 if __name__ == "__main__":
     main()
