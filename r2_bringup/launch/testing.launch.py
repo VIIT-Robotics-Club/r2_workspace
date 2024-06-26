@@ -75,6 +75,8 @@ def generate_launch_description():
                            ("/camera/image_raw/compressed", "/image_raw/compressed")
                            ])
 
+    
+    
     camStreamDecompress = Node(
         package="image_transport",
         executable="republish",
