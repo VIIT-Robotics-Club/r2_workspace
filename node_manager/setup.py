@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'ball_tracking'
+package_name = 'node_manager'
 
 setup(
     name=package_name,
@@ -12,20 +12,14 @@ setup(
         ('share/' + package_name, ['package.xml']),
     ],
     install_requires=['setuptools'],
-    zip_safe=True,  
-    maintainer='adyansh04',
-    maintainer_email='gupta.adyansh@gmail.com',
+    zip_safe=True,
+    maintainer='gawar',
+    maintainer_email='engineer160904@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-        "ball_detect_sim=ball_tracking.ball_detect_sim:main",
-        "ball_tracking_sim=ball_tracking.ball_tracking_sim:main",
-        "ball_tracking_sim_v2=ball_tracking.ball_tracking_sim_v2:main",
-        "ball_tracking_sim_v3=ball_tracking.ball_tracking_sim_v3:main",
-        "ball_tracking_server=ball_tracking.ball_tracking_srv:main",
-        
         ],
     },
 )

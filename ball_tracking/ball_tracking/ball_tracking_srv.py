@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+
+import rclpy
+from rclpy.node import Node
+from rcl_interfaces.msg import SetParametersResult
+from example_interfaces.srv import SetBool
+from r2_interfaces.srv import PerformTask
+
+from geometry_msgs.msg import Twist
+from r2_interfaces.msg import YoloResults
+import numpy as np
+import asyncio
+
+class BallTrackingNode(Node):
+    def __init__(self):
+        super().__init__('ball_tracking_node')
+        self.get_logger().info("Ball Tracking Node has been started")
+        
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('desired_contour_area', 180000),
+                ('linear_kp', 0.5),
+                ('linear_ki', 0.0),
+                ('linear_kd', 0.00),
+                ('angular_kp', 0.2),
+                ('angular_ki', 0.00007),
+                ('angular_kd', 1.8),
+                ('max_linear_speed', 2.0),
+                ('max_angular_speed', 1.0),
+                ('max_integral', 10.0),
+                ('contour_area_threshold', 3000),
+                ('difference_threshold', 400),
+                ('ball_colour', 'red')
+            ]
+        )
+        
+        # Initialize parameters
+        self.desired_contour_area = self.get_parameter('desired_contour_area').value
+        self.linear_kp = self.get_parameter('linear_kp').value
+        self.linear_ki = self.get_parameter('linear_ki').value
+        self.linear_kd = self.get_parameter('linear_kd').value
+        self.angular_kp = self.get_parameter('angular_kp').value
+        self.angular_ki = self.get_parameter('angular_ki').value
+        self.angular_kd = self.get_parameter('angular_kd').value
+        self.max_linear_speed = self.get_parameter('max_linear_speed').value
+        self.max_angular_speed = self.get_parameter('max_angular_speed').value
+        self.max_integral = self.get_parameter('max_integral').value
+        self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
+        self.difference_threshold = self.get_parameter('difference_threshold').value
+        self.ball_colour = self.get_parameter('ball_colour').value
+        
+        # Initialize variables
+        self.linear_error_sum = 0.0
+        self.linear_last_error = 0.0
+        self.angular_error_sum = 0.0
+        self.angular_last_error = 0.0
+        self.tracking_our_ball = False
+        self.difference_error = 0.0
+        self.contour_area_error = 0.0
+        
+        self.cmd_vel_pub = self.create_publisher(Twist, 'nav_vel', 10)
+        self.class_ids_list = []
+        self.contour_areas_list = []
+        self.differences_list = []
+        self.confidences_list = []  
+        self.tracking_ids_list = []
+        self.xyxys_list = []
+        self.xywhs_list = []
+        self.int_error = 0
+        self.reached_event = asyncio.Event()
+        self.closest_our_ball = {
+            'class_id': None,
+            'contour_area': None,
+            'difference': None,
+            'confidence': None,
+            'tracking_id': None,
+            'xyxy': None,
+            'xywh': None
+        }
+        self.our_id = -1
+        self.opp_id = -1
+        self.reached = False
+        self.last_seen_direction = None
+        self.tracking_active = False
+        
+        self.create_service(PerformTask, "ball_tracking_srv", self.ball_tracking_callback)
+        self.yolo_subscriber = None
+        self.timer = None
+        self.yolo_subscriber = self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
+        
+        
+    def ball_tracking_callback(self, request, response):
+        self.reached = False
+        if request.data:
+            self.our_id = 2
+            self.opp_id = 0
+            response.success = True
+            response.message = "Red Ball Tracking Started"
+        else:
+            self.our_id = 0
+            self.opp_id = 2
+            response.success = True
+            response.message = "Blue Ball Tracking Started"
+        
+        self.get_logger().info(response.message)
+        
+        if not self.tracking_active:
+            while self.reached==False :
+                self.timer = self.create_timer(0.1, self.process_yolo_results)
+                self.tracking_active = True
+        
+        # await  self.reached_event.wait()
+        return response
+    
+    def yolo_results_callback(self, msg):
+        self.class_ids_list = msg.class_ids
+        self.contour_areas_list = msg.contour_area
+        self.differences_list = msg.differences
+        self.confidences_list = msg.confidence
+        self.tracking_ids_list = msg.tracking_id
+        self.xyxys_list = [[xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y] for xyxy in msg.xyxy]
+        self.xywhs_list = [[xywh.center_x, xywh.center_y, xywh.width, xywh.height] for xywh in msg.xywh]
+
+    def process_yolo_results(self):
+        if self.reached == 1 or self.our_id == -1 or self.opp_id == -1:
+            return
+        
+        def is_behind_other_ball(our_ball_coords, other_ball_coords):
+            our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
+            other_tl_x, other_tl_y, other_br_x, other_br_y = other_ball_coords
+            return (our_tl_x > other_tl_x and our_tl_y > other_tl_y and our_br_x < other_br_x and our_br_y < other_br_y)
+        
+        def is_inside_silo(our_ball_coords, silo_coords):
+            our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
+            silo_tl_x, silo_tl_y, silo_br_x, silo_br_y = silo_coords
+            return (our_tl_x >= silo_tl_x and our_tl_y >= silo_tl_y and our_br_x <= silo_br_x and our_br_y <= silo_br_y)
+        
+        our_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == self.our_id]
+        silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3]
+        
+        filtered_our_ball_indices = []
+        for i in our_ball_indices:
+            our_ball_coords = self.xyxys_list[i]
+            behind_other_ball = False
+            inside_silo = False
+            
+            for j, class_id in enumerate(self.class_ids_list):
+                if class_id in [1, self.opp_id]:  # Purple or Red ball
+                    other_ball_coords = self.xyxys_list[j]
+                    if is_behind_other_ball(our_ball_coords, other_ball_coords):
+                        behind_other_ball = True
+                        break
+            
+            for k in silo_indices:
+                silo_coords = self.xyxys_list[k]
+                if is_inside_silo(our_ball_coords, silo_coords):
+                    inside_silo = True
+                    break
+            
+            if not behind_other_ball and not inside_silo:
+                filtered_our_ball_indices.append(i)
+        
+        if filtered_our_ball_indices:
+            largest_contour_index = max(filtered_our_ball_indices, key=lambda i: self.contour_areas_list[i])
+            
+            self.closest_our_ball = {
+                'class_id': self.class_ids_list[largest_contour_index],
+                'contour_area': self.contour_areas_list[largest_contour_index],
+                'difference': self.differences_list[largest_contour_index],
+                'confidence': self.confidences_list[largest_contour_index],
+                'tracking_id': self.tracking_ids_list[largest_contour_index] if self.tracking_ids_list else None,
+                'xyxy': self.xyxys_list[largest_contour_index],
+                'xywh': self.xywhs_list[largest_contour_index]
+            }
+            
+            self.get_logger().info(f"Closest our Ball: {self.closest_our_ball}")
+            self.contour_area_error = self.desired_contour_area - self.closest_our_ball['contour_area']
+            self.difference_error = self.closest_our_ball['difference']
+            self.tracking_our_ball = True
+            
+            if self.difference_error < 0:
+                self.last_seen_direction = 'left'
+            else:
+                self.last_seen_direction = 'right'
+            
+            self.move_robot()
+        else:
+            self.sweep_for_ball()
+           
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt, kp):
+        int_error = np.clip(int_error, -self.max_integral, self.max_integral) 
+        control_action = kp * error + ki * int_error + kd * ((error - previous_error) / dt)
+        return control_action
+        
+    def move_robot(self):
+        if self.closest_our_ball['class_id'] is not None:
+            self.get_logger().info(f"Contour Area Error: {self.contour_area_error / 70000}")
+            self.get_logger().info(f"Difference Error: {self.difference_error / 170}")
+            
+            if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
+                twist_msg = Twist()
+                twist_msg.linear.x = 0.0
+                twist_msg.angular.z = 0.0
+                self.cmd_vel_pub.publish(twist_msg)
+                self.reached = True
+                # self.reached_event.set()
+                
+                self.get_logger().info("Reached the ball. Stopping the robot.")
+                return
+    
+            twist_msg = Twist()
+            self.int_error += self.difference_error / 170
+            self.int_error = np.clip(self.int_error, -self.max_integral, self.max_integral)
+            twist_msg.linear.x = self.pid_controller(self.contour_area_error / 70000, 0, 0, 0, 0, 0.1, self.linear_kp)
+            twist_msg.angular.z = -self.pid_controller(self.difference_error / 170, self.angular_last_error, self.int_error, 0, self.angular_kd, 0.1, self.angular_kp)
+    
+            twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
+            twist_msg.angular.z = max(min(twist_msg.angular.z, self.max_angular_speed), -self.max_angular_speed)
+                                            
+            self.angular_last_error = self.difference_error / 170
+            self.cmd_vel_pub.publish(twist_msg)
+            self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
+        
+    def sweep_for_ball(self):
+        twist_msg = Twist()
+        if self.last_seen_direction == 'right':
+            twist_msg.angular.z = -0.8
+        else:
+            twist_msg.angular.z = 0.8
+        twist_msg.linear.x = 0.0
+        
+        self.cmd_vel_pub.publish(twist_msg)
+        self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
+    
+    def get_camera_width(self):
+        # Assuming a fixed camera resolution, e.g., 640x480
+        return 640
+    
+class BallTrackingClient(Node):
+    def __init__(self):
+        super().__init__('ball_tracking_client')
+        self.client = self.create_client(SetBool, 'ball_tracking_srv')
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('Service not available, waiting again...')
+    
+    async def toggle_ball_tracking(self, data):
+        request = SetBool.Request()
+        request.data = data
+        response = await self.client.call_async(request)
+        if response.success:
+            self.get_logger().info(f'Successfully toggled ball tracking: {response.message}')
+        else:
+            self.get_logger().info(f'Failed to toggle ball tracking: {response.message}')
+
+def main(args=None):
+    rclpy.init(args=args)
+    
+    # Initialize nodes
+    ball_tracking_node = BallTrackingNode()
+    ball_tracking_client = BallTrackingClient()
+    
+    # Asynchronously toggle ball tracking on and off
+    asyncio.ensure_future(ball_tracking_client.toggle_ball_tracking(True))  # Turn ball tracking on
+    
+    try:
+        rclpy.spin(ball_tracking_node)
+    except KeyboardInterrupt:
+        pass
+    
+    # Cleanup
+    ball_tracking_node.destroy_node()
+    ball_tracking_client.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

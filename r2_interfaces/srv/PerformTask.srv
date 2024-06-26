@@ -1,0 +1,4 @@
+string srv_name
+string state
+---
+bool success
