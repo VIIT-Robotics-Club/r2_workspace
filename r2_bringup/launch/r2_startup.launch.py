@@ -20,9 +20,16 @@ def generate_launch_description():
     # This is the Node for ball tracking update: Update the version of script to be used
     ball_tracking = Node(
         package='ball_tracking',
-        executable='ball_tracking_sim_v3',
+        executable='ball_tracking_sim_v4',
         name='ball_tracking',
-        parameters=[startup_params],
+        # parameters=[startup_params],
+        output='screen'
+    )
+    silo_tracking = Node(
+        package='silo_tracking',
+        executable='silo_tracking',
+        name='silo_tracking',
+        # parameters=[startup_params],
         output='screen'
     )
     
@@ -108,32 +115,32 @@ def generate_launch_description():
     return LaunchDescription([
         
         # Robot tracks the balls -> Go towards a ball and stop
-        gripper_grab_open,
+        # gripper_grab_open,
         ball_tracking,
         
         #Along with ball tracking node, gripper should also be lowered (When the robot is crossing the slope): Gripper claw should be opened at this point
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=ball_tracking,
-                on_start=gripper_lift_down
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessStart(
+        #         target_action=ball_tracking,
+        #         on_start=gripper_lift_down
+        #     )
+        # ),
 
         # After robot is near the ball, lift the gripper and close it
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=ball_tracking,
-                on_exit=gripper_lift_up_and_close
-            )
-        ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=ball_tracking,
+        #         on_exit=gripper_lift_up_and_close
+        #     )
+        # ),
         
         # Robot sweeps until the robot faces the silo -> Move forward until slope is climbed -> Luna Client is called with optimal silo position
         #                   |
         #                   |--> Whenever 5 silo is detected it will also call the silo decision server to get the optimal silo number for the luna script
         RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=gripper_lift_up,
-                on_start=navigation_server
+            event_handler=OnProcessExit(
+                target_action=ball_tracking,
+                on_exit=silo_tracking
             )
         ),
 
@@ -141,15 +148,15 @@ def generate_launch_description():
         # After the robot is near the silo, open the gripper
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=navigation_server,
-                on_exit=gripper_grab_open
+                target_action=silo_tracking,
+                on_exit=navigation_server
             )
         ),
 
         # After the ball is dropped, rotate the robot towards the ball and move forward
         RegisterEventHandler(
             event_handler=OnProcessExit(
-                target_action=gripper_grab_open,
+                target_action=navigation_server,
                 on_exit=rotate_and_move
             )
         )

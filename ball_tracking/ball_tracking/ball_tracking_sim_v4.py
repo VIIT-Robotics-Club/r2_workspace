@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#fix balls behind area 
 import rclpy
 from rclpy.node import Node
 import tkinter as tk
@@ -20,7 +20,7 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 200000), #change according to camera position
+                ('desired_contour_area', 213000), #change according to camera position
                 ('linear_kp', 0.5),
                 ('linear_ki', 0.0),
                 ('linear_kd', 0.00),
@@ -219,6 +219,7 @@ class BallTrackingNode(Node):
                                         
             self.linearX_last_error = self.contour_area_error/120000
             # self.linearY_last_error = self.difference_error
+            # self.previous_angular_vel=twist_msg
             self.angular_last_error = self.difference_error/170                                
             self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
             if(self.cmd_vel_pub_count >9):
@@ -228,10 +229,10 @@ class BallTrackingNode(Node):
         
     def sweep_for_ball(self):
         twist_msg = Twist()
-        if self.last_seen_direction == 'right':
-            twist_msg.angular.z = -0.4
+        if self.last_seen_direction == 'left':
+            twist_msg.angular.z = 1.0
         else:
-            twist_msg.angular.z = 0.4
+            twist_msg.angular.z = -1.0
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)

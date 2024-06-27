@@ -20,9 +20,9 @@ class OrientAndMoveNode(Node):
         super().__init__('orient_and_move')
         
         # Subscriptions
-        self.create_subscription(Vector3, '/rpy', self.rpy_callback, 10)
+        # self.create_subscription(Vector3, '/rpy', self.rpy_callback, 10)
         self.create_subscription(YoloResults, '/yolo_results', self.yolo_callback, 10)
-        self.create_subscription(Bool, '/robot_altitude_state', self.altitude_callback, 10)
+        # self.create_subscription(Bool, '/robot_altitude_state', self.altitude_callback, 10)
         
         # BestSilo service client - to get the best silo
         self.best_silo_client = self.create_client(BestSilo, '/best_silo')
@@ -84,6 +84,8 @@ class OrientAndMoveNode(Node):
         self.prev_time = self.get_clock().now()                                       # Previous time for PID
 
         self.silo_number_togo = 0                                                     # Silo number to go
+
+
 
     def send_silo_deciding_request(self):           # Send request to best_silo service
         self.get_logger().info('Sending request to best_silo service')
@@ -154,6 +156,9 @@ class OrientAndMoveNode(Node):
             
         if self.logging:
             self.get_logger().info('Silo number to go: %d' % self.silo_number_togo)
+
+        self.send_silo_to_go_request()
+        
             
 
     def altitude_callback(self, msg):
@@ -275,7 +280,7 @@ class OrientAndMoveNode(Node):
             self.get_logger().info('Silo count: %d' % self.silo_count)
         
         # Publish the silo count if it is greater than or equal to 5 - Only once AND Send request to best_silo service
-        if not self.silo_count_published and self.silo_count >= 5:
+        if not self.silo_count_published and self.silo_count >= 1:
             
             if self.logging:
                 self.get_logger().info('Silo count: %d' % self.silo_count)
