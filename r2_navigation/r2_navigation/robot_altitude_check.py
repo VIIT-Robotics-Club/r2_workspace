@@ -52,8 +52,8 @@ class RobotAltitudeCheckNode(Node):
     def subscriber_callback(self, msg):
 
         # Get pitch value
-        pitch = msg.x
-        pitch = msg.x
+        pitch = msg.y
+        # pitch = msg.y
         
         # Append pitch value to history
         self.pitch_history.append(pitch)

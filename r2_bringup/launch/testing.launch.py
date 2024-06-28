@@ -35,7 +35,19 @@ def generate_launch_description():
         PathJoinSubstitution([descShare, "rviz", "config.rviz"])
         ]
     )
-    
+    ball_tracking = Node(
+        package='ball_tracking',
+        executable='ball_tracking_sim_v4',
+        name='ball_tracking',
+        output='screen'
+    )
+
+    silo_tracking = Node(
+        package='silo_tracking',
+        executable='silo_tracking',
+        name='silo_tracking',
+        output='screen'
+    )
     teleop_node = Node(
         package='teleop_twist_joy',
         executable='teleop_node',
@@ -97,13 +109,14 @@ def generate_launch_description():
     
 
     nodes = {
-        # launch arguments,        
+        # launch arguments,    
+        # ball_tracking,
+        # silo_tracking,    
         joy_node,
         teleop_node,
         twist_mux,
         # camera_node,
-        # camStreamDecompress,
-        navigation_server,
+        camStreamDecompress,
         imuFilter
     }
     

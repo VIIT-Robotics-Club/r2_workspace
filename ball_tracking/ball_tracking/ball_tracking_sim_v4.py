@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#fix balls behind area 
 import rclpy
 from rclpy.node import Node
 import tkinter as tk
@@ -20,8 +20,7 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-
-                ('desired_contour_area', 180000),
+                ('desired_contour_area', 213000), #change according to camera position
                 ('linear_kp', 0.5),
                 ('linear_ki', 0.0),
                 ('linear_kd', 0.00),
@@ -32,8 +31,7 @@ class BallTrackingNode(Node):
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 400),
-                ('ball_colour','red')
+                ('difference_threshold', 600)
             ]
         )
         
@@ -229,6 +227,7 @@ class BallTrackingNode(Node):
                                         
             self.linearX_last_error = self.contour_area_error/120000
             # self.linearY_last_error = self.difference_error
+            # self.previous_angular_vel=twist_msg
             self.angular_last_error = self.difference_error/170                                
             self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
             if(self.cmd_vel_pub_count >9):
@@ -239,18 +238,15 @@ class BallTrackingNode(Node):
     def sweep_for_ball(self):
         twist_msg = Twist()
         if self.last_seen_direction == 'right':
-            twist_msg.angular.z = -0.8
+            twist_msg.angular.z = -1.0
         else:
-            twist_msg.angular.z = 0.8
+            twist_msg.angular.z = 1.0
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
         self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
     
-    def get_camera_width(self):
-        # Assuming a fixed camera resolution, e.g., 640x480
-        return 640
-    
+        
 def main(args=None):
     rclpy.init(args=args)
     ball_tracking_node = BallTrackingNode()
