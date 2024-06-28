@@ -330,6 +330,7 @@ class LunaWallAlignNode(Node):
                 self.get_logger().info('Robot is aligned to the goal')
                 self.cmd_vel_publisher.publish(twist)
                 self.active = False
+                sys.exit()
                  
                 if self.service_response:
                     self.service_response.success = True

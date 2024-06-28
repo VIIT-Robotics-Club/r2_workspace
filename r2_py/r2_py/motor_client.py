@@ -4,14 +4,16 @@ import rclpy
 from rclpy.node import Node
 # from example_interfaces.srv import SetBool
 from r2_interfaces.srv import GripperCmd
+# from rv import SetBool
+from std_srv import SetBool
 
 import time
 
 class GripperCmdClient(Node):
     def __init__(self):
         super().__init__('set_bool_client')
-        self.gripper_grab_client = self.create_client(GripperCmd, 'gripper_grab')
-        self.gripper_lift_client = self.create_client(GripperCmd, 'gripper_lift')
+        self.gripper_grab_client = self.create_client(SetBool, 'gripper_grab')
+        self.gripper_lift_client = self.create_client(SetBool, 'gripper_lift')
 
         self.declare_parameters(
             namespace='',

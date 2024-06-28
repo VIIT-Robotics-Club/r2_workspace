@@ -229,10 +229,10 @@ class BallTrackingNode(Node):
         
     def sweep_for_ball(self):
         twist_msg = Twist()
-        if self.last_seen_direction == 'left':
-            twist_msg.angular.z = 1.0
-        else:
+        if self.last_seen_direction == 'right':
             twist_msg.angular.z = -1.0
+        else:
+            twist_msg.angular.z = 1.0
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
