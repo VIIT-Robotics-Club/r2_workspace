@@ -5,12 +5,13 @@ from rclpy.node import Node
 from rclpy.exceptions import ParameterNotDeclaredException
 from rcl_interfaces.msg import ParameterType
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Bool
+from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
 import sys
 import time
 
-class LineFollowerNode(Node):
+class LineFollowerService(Node):
     def __init__(self):
         super().__init__('line_follower')
         self.get_logger().info('Line Follower Node Started')
@@ -21,30 +22,31 @@ class LineFollowerNode(Node):
         self.declare_parameter("Ki", 0.0)                  # Integral gain
         self.declare_parameter("Kd", 0.3)                  # Derivative gain
         self.declare_parameter("base_speed", -2.0)           # Base speed (linear x)
-        self.declare_parameter("retry", False)
-        self.declare_parameter("arena_side", "blue")
+        # self.declare_parameter("retry", False)
+        # self.declare_parameter("arena_side", "blue")
 
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
         self.Ki = self.get_parameter("Ki").value
         self.Kd = self.get_parameter("Kd").value
         self.base_speed = self.get_parameter("base_speed").value
-        self.retry = self.get_parameter("retry").value
-        self.arena_side = self.get_parameter("arena_side").value
+        # self.retry = self.get_parameter("retry").value
+        # self.arena_side = self.get_parameter("arena_side").value
 
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
         # self.state = "FOLLOWING"     # Initial State
         self.nodeCount = 0
-        self.junctionOffset = -1
         self.state = False
         self.delay = 0.01
         self.mulFac = 0.8
 
         self.node_1_state = False
-        self.curr_data = 0
+        self.curr_junction_data = 0
         self.switch = True
-
+        
+        self.execute = False
+        self.retry = False
 
         # Create a publisher for the cmd_vel topic
         self.publisher_ = self.create_publisher(
@@ -66,6 +68,24 @@ class LineFollowerNode(Node):
             self.junction_callback,
             10)
         
+        self.srv = self.create_service(
+            SetBool, 
+            "lf_service", 
+            self.serviceCallback)
+        
+        self.status_pub = self.create_publisher(
+            Bool,
+            "status",
+            10)
+        
+    def serviceCallback(self, request, response):
+        if request.data:
+            self.retry = True
+
+        self.execute = True
+        response.success = True
+        return response
+        
     def calculate_angular_velocity(self, current_sensor_reading):
         # Calculate the error
         error = current_sensor_reading - self.desired_value
@@ -83,16 +103,16 @@ class LineFollowerNode(Node):
         return normalized, error
     
     def junction_callback(self, msg:Int32):
-        diff = msg.data - self.curr_data
+        diff = msg.data - self.curr_junction_data
 
-        if msg.data == self.curr_data:
+        if msg.data == self.curr_junction_data:
             self.switch = False
 
         if diff > 0 and self.switch:
-            self.curr_data = msg.data
+            self.curr_junction_data = msg.data
             self.switch = False
 
-        self.nodeCount = msg.data - self.curr_data
+        self.nodeCount = msg.data - self.curr_junction_data
 
         self.get_logger().info("junction = " + str(self.nodeCount))       
 
@@ -102,15 +122,11 @@ class LineFollowerNode(Node):
 
         # self.get_logger().info('I heard: "%s"' % msg.data)
 
-        # Create a new Twist message
-        twist = Twist()
-
         # Line follower logics
-        if self.retry:
+        if self.retry and self.execute:
             self.retry_callback(current_sensor_reading)
-        else:
+        elif self.execute:
             self.lf_callback(current_sensor_reading)
-
 
         # for testing purpose
 
@@ -157,7 +173,10 @@ class LineFollowerNode(Node):
             twist.linear.x = 0.0
             twist.linear.y = 0.0
             self.publisher_.publish(twist)
-            sys.exit()
+
+            status_msg = Bool()
+            status_msg.data = True
+            self.status_pub.publish(status_msg)
 
         else:
             
@@ -228,7 +247,7 @@ class LineFollowerNode(Node):
     
     def retry_callback(self, data):
         twist = Twist()
-
+        self.get_logger().info("entered retry logic") 
         if self.nodeCount == 1 and data == 255:
             if self.arena_side == "blue":
                 # move right
@@ -277,7 +296,7 @@ class LineFollowerNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    line_follower = LineFollowerNode()
+    line_follower = LineFollowerService()
     rclpy.spin(line_follower)
     line_follower.destroy_node()
     rclpy.shutdown()
