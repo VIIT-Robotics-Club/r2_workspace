@@ -31,7 +31,8 @@ class BallTrackingNode(Node):
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 600)
+                ('difference_threshold', 600),
+                ('ball_colour', 'blue')
             ]
         )
         
@@ -81,7 +82,8 @@ class BallTrackingNode(Node):
         
         self.last_seen_direction = None
         
-            
+        self.our_id = -1
+        self.opp_id = -1    
     
     def parameters_callback(self, params):
         for param in params:
@@ -124,13 +126,14 @@ class BallTrackingNode(Node):
             our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
             silo_tl_x, silo_tl_y, silo_br_x, silo_br_y = silo_coords
             return (our_tl_x >= silo_tl_x and our_tl_y >= silo_tl_y and our_br_x <= silo_br_x and our_br_y <= silo_br_y)
-        if self.ball_colour=="red": 
-            our_id=2
-            opp_id=0
-        elif self.ball_colour=="blue":
-            our_id=2
-            opp_id=0
-        our_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == our_id ]
+        # Update IDs based on ball color
+        if self.ball_colour == "red":
+            self.our_id = 2
+            self.opp_id = 0
+        elif self.ball_colour == "blue":
+            self.our_id = 0
+            self.opp_id = 2
+        our_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == self.our_id ]
         silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3] 
         
         filtered_our_ball_indices = []
@@ -140,7 +143,7 @@ class BallTrackingNode(Node):
             inside_silo = False
             
             for j, class_id in enumerate(self.class_ids_list):
-                if class_id in [1, opp_id]:  # Purple or Red ball
+                if class_id in [1, self.opp_id]:  # Purple and Red ball  or Purple or Blue Ball
                     other_ball_coords = self.xyxys_list[j]
                     if is_behind_other_ball(our_ball_coords, other_ball_coords):
                         behind_other_ball = True
