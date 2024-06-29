@@ -1,10 +1,11 @@
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
-from example_interfaces.srv import SetBool
+from std_srvs.srv import SetBool
 from threading import Thread
 import rclpy
 import time
+from r2_interfaces.srv import SiloToGo
 
 class ControlManager(Node):
     
@@ -19,10 +20,28 @@ class ControlManager(Node):
         self.create_subscription(Bool,'status',self.status_callback, 10)
         
         self.line_follower_client = self.create_client(SetBool,"lf_srv")
+        while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().info('lf_srv Service not available, waiting again...')
+            
         self.ball_tracking_client = self.create_client(SetBool ,"ball_tracking_srv")
+        
+        while not self.ball_tracking_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().info('ball_tracking_srv Service not available, waiting again...')
+        
         self.silo_tracking_client = self.create_client(SetBool ,"silo_tracking_srv")
-        self.luna_align_client = self.create_client(SetBool ,"luna_align_srv")
+        while not self.silo_tracking_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().info('silo_tracking_srv Service not available, waiting again...')
+            
+        self.luna_align_client = self.create_client(SiloToGo ,"luna_align_srv")
+        while not self.luna_align_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().info('luna_align_srv Service not available, waiting again...')
+            
         self.rnm_client = self.create_client(SetBool ,"rnm_srv")
+        # while not self.rnm_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().info('Service not available, waiting again...')
+        
+            
+        
         self.vel_pub = self.create_publisher(Twist,"nav_vel",10)
 
         self.lastStatus = True
@@ -55,7 +74,10 @@ class ControlManager(Node):
         self.response_recvd = True
         
     def runtime(self):
+
         req = SetBool.Request()
+        siloReq = SiloToGo.Request()
+        siloReq.silo_number = 1
         req.data = True
         self.line_follower_client.call_async(req) 
         self.get_logger().info("calling line follower service")
@@ -91,7 +113,7 @@ class ControlManager(Node):
                     self.get_logger().info("calling silo tracking service")
                     
                 elif self.index == 2:
-                    self.luna_align_client.call_async(req)      
+                    self.luna_align_client.call_async(siloReq)      
                     self.get_logger().info("calling luna align service")
                          
                 elif self.index == 3:
@@ -117,7 +139,7 @@ def main():
     rclpy.init()
     cm = ControlManager()
 
-    runThread =Thread(target=lambda : cm.runtime()).start()
+    runThread = Thread(target=lambda : cm.runtime()).start()
 
     rclpy.spin(cm)
     cm.destroy_node()

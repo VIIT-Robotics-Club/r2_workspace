@@ -7,7 +7,7 @@
 2- Red-Ball
 3- silo
 '''
-from example_interfaces.msg import Bool
+from std_msgs.msg import Bool
 
 from rclpy.node import Node
 import rclpy
@@ -22,7 +22,7 @@ from ultralytics import utils
 from r2_interfaces.srv import BestSilo
 from r2_interfaces.srv import SiloToGo
 from geometry_msgs.msg import Twist
-from example_interfaces.srv import SetBool
+from std_srvs.srv import SetBool
 
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CompressedImage
@@ -81,19 +81,19 @@ class SiloDetectionNode(Node):
         self.silos = []
         self.balls = []
 
-        # self.create_subscription(
-        #     YoloResults,
-        #     'yolo_results',
-        #     self.yolo_results_callback,
-        #     10
-        # )
+        self.create_subscription(
+            YoloResults,
+            'yolo_results',
+            self.yolo_results_callback,
+            10
+        )
         
         self.cmd_vel_pub = self.create_publisher(
             Twist, 
             'nav_vel', 
             10
         )
-        self.create_service(SetBool, "silo_tracking_srv", self.silo_tracking_callback)
+        self.create_service(SetBool, "/silo_tracking_srv", self.silo_tracking_callback)
         self.publisher = self.create_publisher(Bool, 'status', 10)
     
         
@@ -109,7 +109,7 @@ class SiloDetectionNode(Node):
        
         
     def silo_tracking_callback(self, request, response):
-        self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
+        self.get_logger().info("silo tracking is active")
         response.success = True
         response.message = "silo tracking started"
         return response

@@ -25,8 +25,9 @@ setup(
             "luna_IMU_full_orient = luna_control.luna_IMU_full_orient:main",
             "luna_align_with_full_imu_data_error = luna_control.luna_align_with_full_imu_data_error:main",
             "luna_align_sim = luna_control.luna_align_sim:main",
-            "line_follower = luna_control.lf_sub:main",
-            "luna_align_srv = luna_control.luna_align_srv:main"
+            # "line_follower = luna_control.lf_sub:main",
+            "luna_align_srv = luna_control.luna_align_srv:main",
+            "lf_sub = luna_control.lf_sub:main"
         ],
     },
 )

@@ -9,7 +9,8 @@ from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
 # from std_msgs.msg import Int64MultiArray
 # from example_interfaces.srv import Trigger
-from example_interfaces.msg import Bool
+from std_srvs.srv import SetBool
+from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Range
 from std_msgs.msg import Int32
@@ -96,11 +97,11 @@ class LunaWallAlignNode(Node):
         # All 6 lunar sensors subscribers
         
         self.luna_fl_subscriber = self.create_subscription(         #Front Left
-            Int32, 'luna_fl', self.luna_fl_callback, 10
+            Int32, '/luna_fl', self.luna_fl_callback, 10
         )
         
         self.luna_fr_subscriber = self.create_subscription(         #Front Right
-            Int32, 'luna_fr', self.luna_fr_callback, 10
+            Int32, '/luna_fr', self.luna_fr_callback, 10
         )
         
         # self.luna_lb_subscriber = self.create_subscription(         #Left Back      
@@ -119,12 +120,12 @@ class LunaWallAlignNode(Node):
         
         
         self.luna_rf_subscriber = self.create_subscription(         #Right Front
-            Int32,   'luna_rf', self.luna_rf_callback, 10
+            Int32,   '/luna_rf', self.luna_rf_callback, 10
         )
         
         
         self.luna_rb_subscriber = self.create_subscription(         #Right Back           
-            Int32, 'luna_rb', self.luna_rb_callback, 10
+            Int32, '/luna_rb', self.luna_rb_callback, 10
         )        
         
 
@@ -132,7 +133,7 @@ class LunaWallAlignNode(Node):
         )
         
     
-        self.create_service( SiloToGo,  'silo_to_go',  self.silo_to_go_callback)
+        self.create_service( SiloToGo,  '/luna_align_srv',  self.silo_to_go_callback)
         self.status_pub = self.create_publisher(Bool,"status",10)
         self.get_logger().info('Service created')
 
@@ -175,6 +176,8 @@ class LunaWallAlignNode(Node):
         return SetParametersResult(successful=True)  
     
     def silo_to_go_callback(self, request, response):
+        self.get_logger().info("luna alignment is active")
+        
         self.silo_number = request.silo_number
         
         if self.silo_number==0:
@@ -183,13 +186,12 @@ class LunaWallAlignNode(Node):
         self.x_goal = self.positions[self.silo_number]['x']
         self.y_goal = self.positions[self.silo_number]['y']
 
-        self.get_logger().info(f'x: {self.x_goal}')
-        self.get_logger().info(f'y: {self.y_goal}')
+        # self.get_logger().info(f'x: {self.x_goal}')
+        # self.get_logger().info(f'y: {self.y_goal}')
 
         self.active = True
         self.correct_angle = True
         self.service_response = response
-        
         self.timer = self.create_timer(0.1, self.align_robot)
         return response
         
@@ -243,8 +245,8 @@ class LunaWallAlignNode(Node):
             print(f"Error in luna_rb_callback: {e}")
             
     def align_robot(self):
-        self.get_logger().info('x: %f' % self.x_goal)
-        self.get_logger().info('y: %f' % self.y_goal)
+        # self.get_logger().info('x: %f' % self.x_goal)
+        # self.get_logger().info('y: %f' % self.y_goal)
         
         if not self.active:
             return
@@ -265,7 +267,7 @@ class LunaWallAlignNode(Node):
             # Check if angular z correction is required
             if abs(x_diff) <= 0.03:  # Or you can use abs(y_diff) <= 3
                 self.correct_angle = False
-                self.get_logger().info('Robot is aligned, adjusting linear velocities')
+                # self.get_logger().info('Robot is aligned, adjusting linear velocities')
 
             # Apply PID controller for angular z
             ang_error = self.luna_fl - self.luna_fr
@@ -280,15 +282,15 @@ class LunaWallAlignNode(Node):
             else:
                 twist.angular.z = -abs(twist.angular.z) 
 
-            self.get_logger().info('Angular z: %f' % twist.angular.z)
+            # self.get_logger().info('Angular z: %f' % twist.angular.z)
         
         else:
-            self.get_logger().info('Entered linear velocity adjustment')
+            # self.get_logger().info('Entered linear velocity adjustment')
 
             if (abs(x_avg - self.x_goal) >= 0.05) or (abs(y_avg - self.y_goal) >= 0.05):
-                self.get_logger().info("x_avg - self.x_goal = " + str(abs(x_avg - self.x_goal)))
-                self.get_logger().info("x_goal : " + str(self.x_goal))
-                self.get_logger().info("y_goal : " + str(self.y_goal))
+                # self.get_logger().info("x_avg - self.x_goal = " + str(abs(x_avg - self.x_goal)))
+                # self.get_logger().info("x_goal : " + str(self.x_goal))
+                # self.get_logger().info("y_goal : " + str(self.y_goal))
                 dt = 0.2
                 prev_lin_error_x = 0
                 prev_lin_error_y = 0
@@ -297,11 +299,11 @@ class LunaWallAlignNode(Node):
                 self.int_error_linear_x += lin_error_x
                 self.int_error_linear_y += lin_error_y
 
-                self.get_logger().info("self.y_goal - y_avg = " + str(abs(self.y_goal - y_avg)))
+                # self.get_logger().info("self.y_goal - y_avg = " + str(abs(self.y_goal - y_avg)))
 
                 ang_error = self.luna_fl - self.luna_fr
                 self.int_error_angular_z += ang_error
-                self.get_logger().info("ang_error = " + str(ang_error))
+                # self.get_logger().info("ang_error = " + str(ang_error))
 
                 twist.linear.x = self.pid_controller(lin_error_x, prev_lin_error_x, self.int_error_linear_x, self.kp_linear_x, self.ki_linear_x, self.kd_linear_x, dt)
                 twist.linear.y = self.pid_controller(lin_error_y, prev_lin_error_y, self.int_error_linear_y, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
@@ -309,7 +311,7 @@ class LunaWallAlignNode(Node):
                 self.prev_ang_error = ang_error
                 prev_lin_error_x, prev_lin_error_y = lin_error_x, lin_error_y
 
-                self.get_logger().info('angular z: %f' % twist.angular.z)
+                # self.get_logger().info('angular z: %f' % twist.angular.z)
 
                 twist.linear.x = -max(min(twist.linear.x, self.linear_x_max), self.linear_x_min) 
                 twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) 
@@ -317,14 +319,14 @@ class LunaWallAlignNode(Node):
 
                 if abs(y_avg - self.y_goal) <= 0.06:
                     twist.linear.y = 0.0
-                    self.get_logger().info('abs(y_avg - self.y_goal) %f' % abs(y_avg - self.y_goal))
+                    # self.get_logger().info('abs(y_avg - self.y_goal) %f' % abs(y_avg - self.y_goal))
                 if abs(x_avg - self.x_goal) <= 0.06:
-                    self.get_logger().info('abs(x_avg - self.x_goal) %f' % abs(x_avg - self.x_goal))
+                    # self.get_logger().info('abs(x_avg - self.x_goal) %f' % abs(x_avg - self.x_goal))
                     twist.linear.x = 0.0
                     twist.angular.z = 0.0
 
-                self.get_logger().info('Linear x: %f' % twist.linear.x)
-                self.get_logger().info('Linear y: %f' % twist.linear.y)
+                # self.get_logger().info('Linear x: %f' % twist.linear.x)
+                # self.get_logger().info('Linear y: %f' % twist.linear.y)
                 # self.get_logger().info('angular z: %f' % twist.linear.z)
 
             else:

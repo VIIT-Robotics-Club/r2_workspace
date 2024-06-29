@@ -44,4 +44,5 @@ silo_deciding_server:
 yolo_results:
   ros__parameters:
     deviation: 170
+    
     logging: False  

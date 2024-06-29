@@ -8,7 +8,6 @@ from rcl_interfaces.msg import ParameterType
 from std_msgs.msg import Int32, Bool
 from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
-import sys
 import time
 
 class LineFollowerService(Node):
@@ -23,7 +22,7 @@ class LineFollowerService(Node):
         self.declare_parameter("Kd", 0.3)                  # Derivative gain
         self.declare_parameter("base_speed", -2.0)           # Base speed (linear x)
         # self.declare_parameter("retry", False)
-        # self.declare_parameter("arena_side", "blue")
+        self.declare_parameter("arena_side", "blue")
 
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
@@ -31,7 +30,7 @@ class LineFollowerService(Node):
         self.Kd = self.get_parameter("Kd").value
         self.base_speed = self.get_parameter("base_speed").value
         # self.retry = self.get_parameter("retry").value
-        # self.arena_side = self.get_parameter("arena_side").value
+        self.arena_side = self.get_parameter("arena_side").value
 
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
@@ -47,6 +46,7 @@ class LineFollowerService(Node):
         
         self.execute = False
         self.retry = False
+        self.active = True
 
         # Create a publisher for the cmd_vel topic
         self.publisher_ = self.create_publisher(
@@ -70,7 +70,7 @@ class LineFollowerService(Node):
         
         self.srv = self.create_service(
             SetBool, 
-            "lf_service", 
+            "/lf_srv", 
             self.serviceCallback)
         
         self.status_pub = self.create_publisher(
@@ -79,8 +79,10 @@ class LineFollowerService(Node):
             10)
         
     def serviceCallback(self, request, response):
-        if request.data:
-            self.retry = True
+        self.get_logger().info("line follower is active")
+        
+        # if request.data:
+        #     self.retry = True
 
         self.execute = True
         response.success = True
@@ -105,16 +107,20 @@ class LineFollowerService(Node):
     def junction_callback(self, msg:Int32):
         diff = msg.data - self.curr_junction_data
 
-        if msg.data == self.curr_junction_data:
-            self.switch = False
+        # self.get_logger().info("execute: " + str(self.execute))
+        if self.execute:
+            if msg.data == self.curr_junction_data:
+                self.switch = False
 
-        if diff > 0 and self.switch:
-            self.curr_junction_data = msg.data
-            self.switch = False
+            if diff > 0 and self.switch:
+                self.curr_junction_data = msg.data
+                self.switch = False
+                
+            # self.get_logger().info("junction callback")
 
-        self.nodeCount = msg.data - self.curr_junction_data
+            self.nodeCount = msg.data - self.curr_junction_data
 
-        self.get_logger().info("junction = " + str(self.nodeCount))       
+        # self.get_logger().info("junction = " + str(self.nodeCount))       
 
     def lsa_callback(self, msg):
         # This method is called when a new message is received on the lsa_08 topic
@@ -174,14 +180,16 @@ class LineFollowerService(Node):
             twist.linear.y = 0.0
             self.publisher_.publish(twist)
 
-            status_msg = Bool()
-            status_msg.data = True
-            self.status_pub.publish(status_msg)
+            if self.active:
+                status_msg = Bool()
+                status_msg.data = True
+                self.status_pub.publish(status_msg)
+                self.active = False
 
         else:
             
             if self.node_1_state:
-                self.get_logger().info("entered")
+                # self.get_logger().info("entered")
                 self.moveRight(0.7)
                 self.node_1_state = False
 
@@ -196,7 +204,7 @@ class LineFollowerService(Node):
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
-        self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+        # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
         # Update the last error
         # self.last_error = error
@@ -212,7 +220,7 @@ class LineFollowerService(Node):
 
             # Publish the new Twist message
             self.publisher_.publish(twist)
-            self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+            # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
         twist.angular.z = 0.0
         twist.linear.x = 0.0
@@ -220,7 +228,7 @@ class LineFollowerService(Node):
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
-        self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+        # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
 
     def moveForward(self, delay):
@@ -234,7 +242,7 @@ class LineFollowerService(Node):
 
             # Publish the new Twist message
             self.publisher_.publish(twist)
-            self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+            # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
         twist.angular.z = 0.0
         twist.linear.x = 0.0
@@ -242,7 +250,7 @@ class LineFollowerService(Node):
 
         # Publish the new Twist message
         self.publisher_.publish(twist)
-        self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+        # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
     
     def retry_callback(self, data):
@@ -288,7 +296,7 @@ class LineFollowerService(Node):
         
         # Publish the new Twist message
         self.publisher_.publish(twist)
-        self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
+        # self.get_logger().info('Published nav_vel: linear.x = "%s", angular.z = "%s"' % (twist.linear.x, twist.angular.z))
 
         # Update the last error
         self.last_error = error

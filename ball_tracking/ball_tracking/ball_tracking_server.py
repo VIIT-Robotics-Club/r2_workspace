@@ -4,10 +4,10 @@ import rclpy
 from rclpy.node import Node
 import numpy as np
 from rcl_interfaces.msg import SetParametersResult
-from example_interfaces.srv import SetBool
+from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
 from r2_interfaces.msg import YoloResults
-from example_interfaces.msg import Bool
+from std_msgs.msg import Bool
 
 class BallTrackingNode(Node):
     def __init__(self):
@@ -80,11 +80,12 @@ class BallTrackingNode(Node):
         self.reached = 0
         self.last_seen_direction = None
         
-        self.create_service(SetBool, "ball_tracking_srv", self.ball_tracking_callback)
+        self.create_service(SetBool, "/ball_tracking_srv", self.ball_tracking_callback)
         self.add_on_set_parameters_callback(self.parameters_callback)
+        self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
 
     def ball_tracking_callback(self, request, response):
-        self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
+        self.get_logger().info("ball tracking is active")
         response.success = True
         response.message = "Ball tracking started"
         return response
@@ -201,12 +202,13 @@ class BallTrackingNode(Node):
 
             if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
                 twist_msg = Twist()
-                bool_msg = Bool()
-                bool_msg.data = True
-                self.publisher.publish(bool_msg)
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
+                
+                bool_msg = Bool()
+                bool_msg.data = True
+                self.publisher.publish(bool_msg)
                 self.reached = 1
                 self.get_logger().info("Reached the ball. Stopping the robot.")
 

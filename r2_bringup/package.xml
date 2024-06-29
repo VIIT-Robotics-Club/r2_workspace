@@ -18,6 +18,7 @@
   <exec_depend>r2_py</exec_depend>
   <exec_depend>r2_interfaces</exec_depend>
   <exec_depend>gripper_srvs</exec_depend>
+  <exec_depend>controls</exec_depend>
   <!-- <exec_depend>turtlesim</exec_depend> -->
 
 
