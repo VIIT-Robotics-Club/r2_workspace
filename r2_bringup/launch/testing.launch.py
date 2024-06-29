@@ -123,7 +123,7 @@ def generate_launch_description():
     otherNode = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
-                share, 'launch/system.launch.py'
+                share, 'launch/plex_system.launch.py'
             ])]))
 
     nodes.add(otherNode)

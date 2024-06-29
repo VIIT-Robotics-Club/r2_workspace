@@ -20,8 +20,8 @@ class ControlManager(Node):
         self.create_subscription(Bool,'status',self.status_callback, 10)
         
         self.line_follower_client = self.create_client(SetBool,"lf_srv")
-        while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().info('lf_srv Service not available, waiting again...')
+        # while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().info('lf_srv Service not available, waiting again...')
             
         self.ball_tracking_client = self.create_client(SetBool ,"ball_tracking_srv")
         
@@ -29,12 +29,12 @@ class ControlManager(Node):
             self.get_logger().info('ball_tracking_srv Service not available, waiting again...')
         
         self.silo_tracking_client = self.create_client(SetBool ,"silo_tracking_srv")
-        while not self.silo_tracking_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().info('silo_tracking_srv Service not available, waiting again...')
+        # while not self.silo_tracking_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().info('silo_tracking_srv Service not available, waiting again...')
             
         self.luna_align_client = self.create_client(SiloToGo ,"luna_align_srv")
-        while not self.luna_align_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().info('luna_align_srv Service not available, waiting again...')
+        # while not self.luna_align_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().info('luna_align_srv Service not available, waiting again...')
             
         self.rnm_client = self.create_client(SetBool ,"rnm_srv")
         # while not self.rnm_client.wait_for_service(timeout_sec=0.2):
@@ -79,7 +79,8 @@ class ControlManager(Node):
         siloReq = SiloToGo.Request()
         siloReq.silo_number = 1
         req.data = True
-        self.line_follower_client.call_async(req) 
+        # self.line_follower_client.call_async(req) 
+        self.response_recvd = True
         self.get_logger().info("calling line follower service")
         
         
@@ -99,6 +100,7 @@ class ControlManager(Node):
             
             
 
+            self.get_logger().info("index = " + str(self.index))
             if self.response_recvd :
                 
                 self.index = (self.index + 1) % 3
@@ -123,7 +125,7 @@ class ControlManager(Node):
                     
                 self.response_recvd = False
             
-            time.sleep(0.1)
+            time.sleep(1)
         
     def generic_response_callback(self,future,service_name : str):
         try:

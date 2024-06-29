@@ -64,7 +64,7 @@ class SiloDetectionNode(Node):
         self.angular_kp = self.get_parameter('angular_kp').value
         self.angular_ki = self.get_parameter('angular_ki').value
         self.angular_kd = self.get_parameter('angular_kd').value
-        
+        self.active=False
         self.max_linear_speed = self.get_parameter('max_linear_speed').value
         self.max_angular_speed = self.get_parameter('max_angular_speed').value
         self.max_integral = self.get_parameter('max_integral').value
@@ -95,8 +95,8 @@ class SiloDetectionNode(Node):
         )
         self.create_service(SetBool, "/silo_tracking_srv", self.silo_tracking_callback)
         self.publisher = self.create_publisher(Bool, 'status', 10)
-    
         
+        self.reached=0
         self.class_ids_list = []
         self.xyxys_list = []
         self.contour_areas_list = []
@@ -109,46 +109,47 @@ class SiloDetectionNode(Node):
        
         
     def silo_tracking_callback(self, request, response):
+        self.active=True
         self.get_logger().info("silo tracking is active")
         response.success = True
         response.message = "silo tracking started"
         return response
       
     def yolo_results_callback(self, msg):
-        self.get_logger().info("Yolo Results Received")
-        
-        self.class_ids_list.clear()
-        self.xyxys_list.clear()
-        self.contour_areas_list.clear()
-        self.differences_list.clear()
-        
-        self.class_ids_list.extend(msg.class_ids)
-        for xyxy in msg.xyxy:
-            self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
-        self.contour_areas_list.extend(msg.contour_area)
-        self.differences_list.extend(msg.differences)
-        
-        self.get_logger().info(f"Class IDs: {self.class_ids_list}")
-        self.get_logger().info(f"XyXys: {self.xyxys_list}")
-        self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
-        self.get_logger().info(f"Differences: {self.differences_list}")
-        
-        self.silos = [self.xyxys_list[i] for i in range(len(self.class_ids_list)) if self.class_ids_list[i] == 3]
-        self.balls = [(self.class_ids_list[i], self.xyxys_list[i]) for i in range(len(self.class_ids_list)) if self.class_ids_list[i] in [0, 1, 2]]
-
-        self.get_logger().info(f"Silos: {self.silos}")
-        self.get_logger().info(f"Balls: {self.balls}")
-        self.silo_count = self.class_ids_list.count(3)
-        
-        
+        if self.active:
+            self.get_logger().info("Yolo Results Received")
+            self.class_ids_list.clear()
+            self.xyxys_list.clear()
+            self.contour_areas_list.clear()
+            self.differences_list.clear()
             
-            # Sleep for 2 seconds 
-            # time.sleep(2)
-        if len(self.silos) >= 2:
-            # self.stop_robot()
-            self.move_to_middle_silo()
-        else:
-            self.sweep_for_silos()
+            self.class_ids_list.extend(msg.class_ids)
+            for xyxy in msg.xyxy:
+                self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
+            self.contour_areas_list.extend(msg.contour_area)
+            self.differences_list.extend(msg.differences)
+            
+            self.get_logger().info(f"Class IDs: {self.class_ids_list}")
+            self.get_logger().info(f"XyXys: {self.xyxys_list}")
+            self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
+            self.get_logger().info(f"Differences: {self.differences_list}")
+            
+            self.silos = [self.xyxys_list[i] for i in range(len(self.class_ids_list)) if self.class_ids_list[i] == 3]
+            self.balls = [(self.class_ids_list[i], self.xyxys_list[i]) for i in range(len(self.class_ids_list)) if self.class_ids_list[i] in [0, 1, 2]]
+
+            self.get_logger().info(f"Silos: {self.silos}")
+            self.get_logger().info(f"Balls: {self.balls}")
+            self.silo_count = self.class_ids_list.count(3)
+            
+            
+                
+                # Sleep for 2 seconds 
+                # time.sleep(2)
+            if len(self.silos) >= 2:
+                # self.stop_robot()
+                self.move_to_middle_silo()
+            else:
+                self.sweep_for_silos()
 
     def move_to_middle_silo(self):
         # Assuming the middle silo is the 3rd one in the list of 5 silos
@@ -166,28 +167,32 @@ class SiloDetectionNode(Node):
         self.get_logger().info(f"Contour Area Error: {contour_area_error}")
         self.get_logger().info(f"Deviation Error: {deviation_error}")
 
-        if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
+        # if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
+        # if (contour_area_error) < self.contour_area_threshold:
+        if (contour_area_error) < 30000:
             # self.stop_robot()
             twist_msg = Twist()
             twist_msg.linear.x = 0.0
             twist_msg.angular.z = 0.0
             
             self.cmd_vel_pub.publish(twist_msg)
+            self.active =False
+
             bool_msg = Bool()
             bool_msg.data = True
             self.publisher.publish(bool_msg)
             # self.send_silo_to_go_request()
             self.get_logger().info("Reached the middle silo. Stopping the robot.")
             # sys.exit()
-
             return
+
         contour_area_error=contour_area_error/15000
         deviation_error=deviation_error/170
         self.linear_error_sum += contour_area_error
         self.angular_error_sum += contour_area_error
 
         linear_x, self.linear_error_sum = self.PID_controller(contour_area_error, self.linear_error_sum, self.linear_last_error,
-                                                              self.linear_kp, self.linear_ki, self.linear_kd)
+                                                            self.linear_kp, self.linear_ki, self.linear_kd)
         
         angular_z, self.angular_error_sum = self.PID_controller(deviation_error, self.angular_error_sum, self.angular_last_error,
                                                                 self.angular_kp, self.angular_ki, self.angular_kd)
@@ -204,9 +209,7 @@ class SiloDetectionNode(Node):
 
         self.cmd_vel_pub.publish(twist_msg)
         self.get_logger().info(f"Moving towards middle silo: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
-        bool_msg = Bool()
-        bool_msg.data = False
-        self.publisher.publish(bool_msg)
+
     def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
         P = kp * error
         error_sum = np.clip(error_sum, -self.max_integral, self.max_integral)
@@ -222,9 +225,6 @@ class SiloDetectionNode(Node):
         
         self.cmd_vel_pub.publish(twist_msg)
         self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
-        bool_msg = Bool()
-        bool_msg.data = False
-        self.publisher.publish(bool_msg)
 
     def stop_robot(self):
         twist_msg = Twist()

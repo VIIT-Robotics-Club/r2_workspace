@@ -46,9 +46,8 @@ class LineFollowerService(Node):
         
         self.execute = False
         self.retry = False
-        self.active = True
 
-        # Create a publisher for the cmd_vel topic
+        # Create a publisher for the nav_vel topic
         self.publisher_ = self.create_publisher(
             Twist,
             '/nav_vel', 
@@ -132,7 +131,7 @@ class LineFollowerService(Node):
         if self.retry and self.execute:
             self.retry_callback(current_sensor_reading)
         elif self.execute:
-            self.lf_callback(current_sensor_reading)
+            self.vel_ctrl(current_sensor_reading)
 
         # for testing purpose
 
@@ -150,7 +149,7 @@ class LineFollowerService(Node):
         # # Update the last error
         # self.last_error = error
 
-    def lf_callback(self, data):
+    def vel_ctrl(self, data):
         twist = Twist()
 
         # first junction
@@ -173,18 +172,19 @@ class LineFollowerService(Node):
                     twist.linear.x = 0.0
                     twist.linear.y = self.base_speed*self.mulFac
         
-        # second junction
-        elif self.nodeCount >= 4:  # update for node in area 3
+        # fourth junction (reached 3rd zone)
+        elif self.nodeCount >= 4:  # update this condition
             twist.angular.z = 0.0
             twist.linear.x = 0.0
             twist.linear.y = 0.0
             self.publisher_.publish(twist)
 
-            if self.active:
-                status_msg = Bool()
-                status_msg.data = True
-                self.status_pub.publish(status_msg)
-                self.active = False
+            # publishing status : True when reached 3rd zone
+            status_msg = Bool()
+            status_msg.data = True
+
+            self.status_pub.publish(status_msg)
+            self.execute = False
 
         else:
             

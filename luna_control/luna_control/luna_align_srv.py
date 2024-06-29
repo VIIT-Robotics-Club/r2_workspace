@@ -60,7 +60,7 @@ class LunaWallAlignNode(Node):
                 ]
         )
 
-        self. linear_x_max = self.get_parameter('linear_x_max').value
+        self.linear_x_max = self.get_parameter('linear_x_max').value
         self.linear_y_max = self.get_parameter('linear_y_max').value
         self.linear_x_min = self.get_parameter('linear_x_min').value
         self.linear_y_min = self.get_parameter('linear_y_min').value
@@ -192,7 +192,6 @@ class LunaWallAlignNode(Node):
         self.active = True
         self.correct_angle = True
         self.service_response = response
-        self.timer = self.create_timer(0.1, self.align_robot)
         return response
         
         
@@ -207,7 +206,9 @@ class LunaWallAlignNode(Node):
             self.luna_fl = float(msg.data)
         except Exception as e:
             self.get_logger().error(f"Error in luna_fl_callback: {e}")
-            
+        
+        if self.active:
+            align_robot()
         
     def luna_fr_callback(self, msg: Int32):
         try:
@@ -247,9 +248,6 @@ class LunaWallAlignNode(Node):
     def align_robot(self):
         # self.get_logger().info('x: %f' % self.x_goal)
         # self.get_logger().info('y: %f' % self.y_goal)
-        
-        if not self.active:
-            return
 
         # Calculate the difference between the sensor readings
         x_diff = self.luna_fl - self.luna_fr
@@ -282,7 +280,7 @@ class LunaWallAlignNode(Node):
             else:
                 twist.angular.z = -abs(twist.angular.z) 
 
-            # self.get_logger().info('Angular z: %f' % twist.angular.z)
+            self.get_logger().info('Angular z: %f' % twist.angular.z)
         
         else:
             # self.get_logger().info('Entered linear velocity adjustment')
@@ -325,9 +323,9 @@ class LunaWallAlignNode(Node):
                     twist.linear.x = 0.0
                     twist.angular.z = 0.0
 
-                # self.get_logger().info('Linear x: %f' % twist.linear.x)
-                # self.get_logger().info('Linear y: %f' % twist.linear.y)
-                # self.get_logger().info('angular z: %f' % twist.linear.z)
+                self.get_logger().info('Linear x: %f' % twist.linear.x)
+                self.get_logger().info('Linear y: %f' % twist.linear.y)
+                self.get_logger().info('angular z: %f' % twist.linear.z)
 
             else:
                 twist.linear.x = 0.0
@@ -337,15 +335,8 @@ class LunaWallAlignNode(Node):
                 msg.data = True 
                 self.status_pub.publish(msg)
                 self.get_logger().info('Robot is aligned to the goal')
-                self.cmd_vel_publisher.publish(twist)
                 self.active = False
                 # sys.exit()
-                 
-                if self.service_response:
-                    self.service_response.success = True
-                    self.get_logger().info('Sending response')
-                    self.timer.cancel()
-                    self.service_response = None
                
 
         # Publish the Twist message
