@@ -29,7 +29,8 @@ class BallTrackingNode(Node):
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
                 ('difference_threshold', 600),
-                ('ball_colour', 'blue')
+                ('ball_colour', 'blue'),
+                ('logging', False)
             ]
         )
         
@@ -46,6 +47,7 @@ class BallTrackingNode(Node):
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
         self.ball_colour = self.get_parameter('ball_colour').value
+        self.logging = self.get_parameter("logging").value
 
         self.linear_error_sum = 0.0
         self.linear_last_error = 0.0
@@ -102,7 +104,8 @@ class BallTrackingNode(Node):
 
     def yolo_results_callback(self, msg):
         if self.active :
-            self.get_logger().info("Yolo Results Received")
+            if self.logging:
+                self.get_logger().info("Yolo Results Received")
 
             self.class_ids_list.clear()
             self.contour_areas_list.clear()
@@ -177,8 +180,8 @@ class BallTrackingNode(Node):
                     'xyxy': self.xyxys_list[largest_contour_index],
                     'xywh': self.xywhs_list[largest_contour_index]
                 }
-
-                self.get_logger().info(f"Closest our Ball: {self.closest_our_ball}")
+                if self.logging:
+                    self.get_logger().info(f"Closest our Ball: {self.closest_our_ball}")
                 self.contour_area_error = self.desired_contour_area - self.closest_our_ball['contour_area']
                 self.difference_error = self.closest_our_ball['difference']
                 self.tracking_our_ball = True
@@ -192,20 +195,20 @@ class BallTrackingNode(Node):
             else:
                 self.sweep_for_ball()
 
-    def pid_controller(self, error, previous_error, int_error, kp, ki, kd, dt):
-        int_error += error * dt
-        int_error = np.clip(int_error, -self.max_integral, self.max_integral)
-        derivative = (error - previous_error) / dt
-        control_action = kp * error + ki * int_error + kd * derivative
-        return control_action, int_error
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt,linear_kp):
+        # print(previous_error,error)
+        int_error = np.clip(int_error, -self.max_integral, self.max_integral) 
+        control_action = linear_kp * error + ki * int_error + kd * ((error - previous_error))
+        return control_action
         
     def move_robot(self):
         if self.closest_our_ball['class_id'] is not None:
-            self.get_logger().info(f"Contour Area Error: {self.contour_area_error/70000}")
-            self.get_logger().info(f"Difference Error: {self.difference_error/170}")
-
-            # if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
-            if self.contour_area_error/70000 < 2.7:
+            if self.logging:
+                self.get_logger().info(f"Contour Area Error: {self.contour_area_error/70000}")
+                self.get_logger().info(f"Difference Error: {self.difference_error/170}")
+            
+            if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
+            # if self.contour_area_error/70000 < 2.7:
                 twist_msg = Twist()
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
@@ -215,9 +218,10 @@ class BallTrackingNode(Node):
                 bool_msg = Bool()
                 bool_msg.data = True
                 self.publisher.publish(bool_msg)
-                    
                 self.get_logger().info("Reached the ball. Stopping the robot.")
 
+                # self.tracking_our_ball = False
+  
                 self.tracking_our_ball = False
                 self.closest_our_ball = {
                     'class_id': None,
@@ -229,52 +233,46 @@ class BallTrackingNode(Node):
                     'xywh': None
                 }
                 return
-
             twist_msg = Twist()
-
-            self.int_error += self.difference_error / 170
-            self.int_error = np.clip(self.int_error, -self.max_integral, self.max_integral)
-            self.get_logger().info(f"Int Error: {self.int_error}")
-
-            linear_control_action, _ = self.pid_controller(self.contour_area_error / 70000, 0, 0, self.linear_kp, self.linear_ki, self.linear_kd, 0.1)
-            angular_control_action, self.int_error = self.pid_controller(self.difference_error / 170, self.angular_last_error, self.int_error, self.angular_kp, self.angular_ki, self.angular_kd, 0.1)
-
-            twist_msg.linear.x = float(linear_control_action)
-            twist_msg.angular.z = -float(angular_control_action)
+            self.int_error += self.difference_error/170
+            self.int_error = np.clip(self.int_error, -self.max_integral, self.max_integral)  
+            print(self.int_error)
+            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/70000,0,0,0,0,0.1,self.linear_kp))
+            # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
+            # twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
 
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
+            # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
             twist_msg.angular.z = max(min(twist_msg.angular.z, self.max_angular_speed), -self.max_angular_speed)
-
-            self.linear_last_error = self.contour_area_error / 70000
-            self.angular_last_error = self.difference_error / 170
-
-            self.cmd_vel_pub_count += 1
-            if self.cmd_vel_pub_count > 9:
+                                        
+            self.linearX_last_error = self.contour_area_error/120000
+            # self.linearY_last_error = self.difference_error
+            # self.previous_angular_vel=twist_msg
+            self.angular_last_error = self.difference_error/170                                
+            self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
+            if(self.cmd_vel_pub_count >9):
                 self.cmd_vel_pub.publish(twist_msg)
-                self.cmd_vel_pub_count = 0
-
-            self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
-            # bool_msg = Bool()
-            # bool_msg.data = False
-            # self.publisher.publish(bool_msg)
-
+                self.cmd_vel_pub_count=0
+            if self.logging:      
+                self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z} ,linear_y= {twist_msg.linear.y}")
+        
     def sweep_for_ball(self):
         twist_msg = Twist()
         if self.last_seen_direction == 'right':
-            twist_msg.angular.z = -0.8
+            twist_msg.angular.z = 1.0
         else:
-            twist_msg.angular.z = 0.8
+            twist_msg.angular.z = -1.0
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
+        if self.logging:  
+            self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
         # bool_msg = Bool()
         # bool_msg.data = False
         # self.publisher.publish(bool_msg)
     
-    def get_camera_width(self):
-        # Assuming a fixed camera resolution, e.g., 640x480
-        return 640
+    
     
 def main(args=None):
     rclpy.init(args=args)

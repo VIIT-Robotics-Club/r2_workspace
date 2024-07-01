@@ -23,6 +23,8 @@ from r2_interfaces.srv import BestSilo
 from r2_interfaces.srv import SiloToGo
 from geometry_msgs.msg import Twist
 from std_srvs.srv import SetBool
+from rcl_interfaces.msg import SetParametersResult
+
 
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CompressedImage
@@ -51,9 +53,13 @@ class SiloDetectionNode(Node):
                 ('max_angular_speed', 1.0),
                 ('max_integral', 10.0),
                 ('contour_area_threshold', 3000),
-                ('difference_threshold', 400)
+                ('difference_threshold', 400),
+                ('logging', False)
                 ]
         )
+        
+        self.add_on_set_parameters_callback(self.parameters_callback)
+        
         
         self.desired_contour_area = self.get_parameter('desired_contour_area').value
                 
@@ -71,7 +77,8 @@ class SiloDetectionNode(Node):
         
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
-        
+        self.logging = self.get_parameter("logging").value
+
         self.linear_error_sum = 0.0
         self.linear_last_error = 0.0
         
@@ -104,7 +111,13 @@ class SiloDetectionNode(Node):
        
               
         #Publisher
-        
+    
+    def parameters_callback(self, params):
+        for param in params:
+            param_name = param.name
+            param_value = param.value
+            setattr(self, param_name, param_value)
+        return SetParametersResult(successful=True)
       
        
         
@@ -117,7 +130,8 @@ class SiloDetectionNode(Node):
       
     def yolo_results_callback(self, msg):
         if self.active:
-            self.get_logger().info("Yolo Results Received")
+            if self.logging:
+                self.get_logger().info("Yolo Results Received")
             self.class_ids_list.clear()
             self.xyxys_list.clear()
             self.contour_areas_list.clear()
@@ -129,23 +143,23 @@ class SiloDetectionNode(Node):
             self.contour_areas_list.extend(msg.contour_area)
             self.differences_list.extend(msg.differences)
             
-            self.get_logger().info(f"Class IDs: {self.class_ids_list}")
-            self.get_logger().info(f"XyXys: {self.xyxys_list}")
-            self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
-            self.get_logger().info(f"Differences: {self.differences_list}")
+            # self.get_logger().info(f"Class IDs: {self.class_ids_list}")
+            # self.get_logger().info(f"XyXys: {self.xyxys_list}")
+            # self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
+            # self.get_logger().info(f"Differences: {self.differences_list}")
             
             self.silos = [self.xyxys_list[i] for i in range(len(self.class_ids_list)) if self.class_ids_list[i] == 3]
             self.balls = [(self.class_ids_list[i], self.xyxys_list[i]) for i in range(len(self.class_ids_list)) if self.class_ids_list[i] in [0, 1, 2]]
 
-            self.get_logger().info(f"Silos: {self.silos}")
-            self.get_logger().info(f"Balls: {self.balls}")
+            # self.get_logger().info(f"Silos: {self.silos}")
+            # self.get_logger().info(f"Balls: {self.balls}")
             self.silo_count = self.class_ids_list.count(3)
             
             
                 
                 # Sleep for 2 seconds 
                 # time.sleep(2)
-            if len(self.silos) >= 2:
+            if len(self.silos) >= 3:
                 # self.stop_robot()
                 self.move_to_middle_silo()
             else:
@@ -157,19 +171,19 @@ class SiloDetectionNode(Node):
         middle_silo = self.silos[middle_silo_index]
         target_contour_area = self.contour_areas_list[middle_silo_index]
         deviation = self.differences_list[middle_silo_index]
-
-        self.get_logger().info(f"Target Contour Area: {target_contour_area}")
-        self.get_logger().info(f"Deviation: {deviation}")
+        if self.logging:
+            self.get_logger().info(f"Target Contour Area: {target_contour_area}")
+            self.get_logger().info(f"Deviation: {deviation}")
 
         contour_area_error = self.desired_contour_area - target_contour_area
         deviation_error = deviation
+        if self.logging:    
+            self.get_logger().info(f"Contour Area Error: {contour_area_error}")
+            self.get_logger().info(f"Deviation Error: {deviation_error}")
 
-        self.get_logger().info(f"Contour Area Error: {contour_area_error}")
-        self.get_logger().info(f"Deviation Error: {deviation_error}")
-
-        # if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
+        if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
         # if (contour_area_error) < self.contour_area_threshold:
-        if (contour_area_error) < 30000:
+        # if (contour_area_error) < 30000:
             # self.stop_robot()
             twist_msg = Twist()
             twist_msg.linear.x = 0.0
@@ -208,7 +222,8 @@ class SiloDetectionNode(Node):
         twist_msg.angular.z = -angular_z
 
         self.cmd_vel_pub.publish(twist_msg)
-        self.get_logger().info(f"Moving towards middle silo: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
+        if self.logging:
+            self.get_logger().info(f"Moving towards middle silo: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
 
     def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
         P = kp * error
@@ -224,7 +239,8 @@ class SiloDetectionNode(Node):
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
+        if self.logging:
+            self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
 
     def stop_robot(self):
         twist_msg = Twist()

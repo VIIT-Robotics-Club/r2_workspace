@@ -17,12 +17,13 @@ class LineFollowerService(Node):
 
         # Declare and get parameters
         self.declare_parameter("desired_value", 35.0)       # The desired sensor reading
-        self.declare_parameter("Kp", 0.9)                  # Proportional gain  0.7
+        self.declare_parameter("Kp", 0.8)                  # Proportional gain  0.7
         self.declare_parameter("Ki", 0.0)                  # Integral gain
         self.declare_parameter("Kd", 0.3)                  # Derivative gain
         self.declare_parameter("base_speed", -2.0)           # Base speed (linear x)
         # self.declare_parameter("retry", False)
         self.declare_parameter("arena_side", "blue")
+        self.declare_parameter('logging', False)
 
         self.desired_value = self.get_parameter("desired_value").value
         self.Kp = self.get_parameter("Kp").value
@@ -31,21 +32,33 @@ class LineFollowerService(Node):
         self.base_speed = self.get_parameter("base_speed").value
         # self.retry = self.get_parameter("retry").value
         self.arena_side = self.get_parameter("arena_side").value
+        self.logging = self.get_parameter("logging").value
+
 
         self.error_sum = 0           # Sum of errors (for integral term)
         self.last_error = 0          # Last error (for derivative term)
         # self.state = "FOLLOWING"     # Initial State
+        
         self.nodeCount = 0
+        self.pitch = 0.6
+        self.prev_junction_data = self.nodeCount
+        self.curr_junction_time = self.pitch
+        self.prev_junction_time = 0.0
+        self.new_data = False
+
         self.state = False
         self.delay = 0.01
         self.mulFac = 0.8
 
         self.node_1_state = False
-        self.curr_junction_data = 0
+        self.curr_junction_data = 0     # 0
         self.switch = True
         
         self.execute = False
         self.retry = False
+
+        # to see all logs
+        # self.logging = True
 
         # Create a publisher for the nav_vel topic
         self.publisher_ = self.create_publisher(
@@ -104,7 +117,16 @@ class LineFollowerService(Node):
         return normalized, error
     
     def junction_callback(self, msg:Int32):
+        # self.curr_junction_time = time.time()
         diff = msg.data - self.curr_junction_data
+
+        # check whether new junction data
+        if diff > 0:
+            self.curr_junction_time = time.time()
+            self.curr_junction_data = msg.data
+            # self.new_data = False
+        # else:
+        #     self.new_data = False
 
         # self.get_logger().info("execute: " + str(self.execute))
         if self.execute:
@@ -116,10 +138,14 @@ class LineFollowerService(Node):
                 self.switch = False
                 
             # self.get_logger().info("junction callback")
+            if (self.curr_junction_time - self.prev_junction_time) >= self.pitch:
+                self.nodeCount = msg.data - self.curr_junction_data
 
-            self.nodeCount = msg.data - self.curr_junction_data
+        self.prev_junction = self.nodeCount
+        self.prev_junction_time = self.curr_junction_time
 
-        # self.get_logger().info("junction = " + str(self.nodeCount))       
+        if self.logging and self.execute:
+            self.get_logger().info("junction = " + str(self.nodeCount))       
 
     def lsa_callback(self, msg):
         # This method is called when a new message is received on the lsa_08 topic
@@ -190,7 +216,7 @@ class LineFollowerService(Node):
             
             if self.node_1_state:
                 # self.get_logger().info("entered")
-                self.moveRight(0.7)
+                self.moveRight(0.6)
                 self.node_1_state = False
 
             # Calculate the control output
@@ -215,7 +241,7 @@ class LineFollowerService(Node):
         current_time = time.time()
         while(time.time() - current_time < delay):
             twist.angular.z = self.base_speed
-            twist.linear.x = self.base_speed*0.6
+            twist.linear.x = self.base_speed*0.8
             twist.linear.y = -self.base_speed*self.mulFac
 
             # Publish the new Twist message

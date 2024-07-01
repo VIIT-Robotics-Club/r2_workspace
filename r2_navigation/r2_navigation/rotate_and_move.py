@@ -3,6 +3,9 @@
 import rclpy
 from rclpy.node import Node
 
+from std_srvs.srv import SetBool
+from std_msgs.msg import Bool
+
 from geometry_msgs.msg import Vector3, Twist
 import math
 import numpy as np
@@ -16,9 +19,9 @@ class RotateAndMoveNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('logging', True),              # Enable/disable logging
-                ('linear_speed', 0.7),          # Linear speed for forward movement
-                ('move_duration', 3.0),         # Duration of forward movement in seconds
+                ('logging', False),              # Enable/disable logging
+                ('linear_speed', -2.0),          # Linear speed for forward movement
+                ('move_duration', 2.0),         # Duration of forward movement in seconds
                 ('angular_kp', 4.1),            # Proportional gain for angular PID controller
                 ('angular_ki', 0.05),           # Integral gain for angular PID controller
                 ('angular_kd', 0.00),          # Derivative gain for angular PID controller
@@ -30,6 +33,7 @@ class RotateAndMoveNode(Node):
         )
 
         #Retrieve parameters
+        self.get_logger().info("node started")
         self.logging = self.get_parameter('logging').get_parameter_value().bool_value
         self.linear_speed = self.get_parameter('linear_speed').get_parameter_value().double_value
         self.move_duration = self.get_parameter('move_duration').get_parameter_value().double_value
@@ -43,38 +47,194 @@ class RotateAndMoveNode(Node):
 
         self.current_yaw = 0.0
         self.target_yaw = None
-        self.rotation_completed = False
-        self.moving_forward = False
-
+        self.rotation_completed = True
+        self.moving_forward = True
+        self.active=False
+        self.create_service(SetBool, "/rnm_srv", self.rnm_callback)
+        self.status_publisher = self.create_publisher(Bool, 'status', 10)
         self.angular_error_sum = 0.0
         self.angular_last_error = 0.0
+        self.curr_time = time.time()
+        self.curr_time_status = False
 
-        self.subscription = self.create_subscription(Vector3, 'rpy', self.rpy_callback, 10)
         self.publisher = self.create_publisher(Twist, 'nav_vel', 10)
-        self.timer = self.create_timer(0.1, self.timer_callback)
+        # self.timer = self.create_timer(0.1, self.timer_callback)
 
         # Convert rotation angle from degrees to radians
         self.rotation_angle_rad = self.rotation_angle * (math.pi / 180)  
-
+        self.create_subscription(Vector3, 'rpy', self.rpy_callback, 10)
+        
         self.start_time = None
+        
 
+    def rnm_callback(self, request, response):
+        self.active=True
+        response.success = True
+        response.message = "rnm started"
+        
+        # twist = Twist()
+        # twist.linear.x = 0.0
+        # self.publisher.publish(twist)
+        self.rotate_360()
+        return response
+    
+    def rotate_360(self):
+        if self.logging:  
+            self.get_logger().info('Rotation started. ')
+        
+        twist_msg = Twist()
+        
+        curr_time = time.time()
+        while (time.time() - curr_time <= 0.6):
+            twist_msg.linear.x = -2.0
+            self.publisher.publish(twist_msg) 
+        
+        twist_msg.linear.x = 0.0
+        
+        curr_time = time.time()
+        while (time.time() - curr_time <= 1.6):
+            twist_msg.angular.z = 2.0
+            self.publisher.publish(twist_msg) 
+            
+        
+        curr_time = time.time()
+        while (time.time() - curr_time <= 1.0):
+            self.publisher.publish(Twist()) 
+            
+        # twist_msg.angular.z = 0.0
+        # twist_msg.linear.x = 0.0
+        
+        bool_msg = Bool()
+        bool_msg.data = True
+        self.status_publisher.publish(bool_msg)
+
+        if self.logging:  
+            self.get_logger().info('Rotation ended. ')
+    
     def rpy_callback(self, msg):
+        if self.active:
+            # Update current yaw in radians 
+            # self.current_yaw = msg.z * (math.pi / 180)  # Convert degrees to radians
+            # self.get_logger().info(f'Current Yaw (degrees): {msg.z}')
 
-        # Update current yaw in radians 
-        self.current_yaw = msg.z * (math.pi / 180)  # Convert degrees to radians
-        self.get_logger().info(f'Current Yaw (degrees): {msg.z}')
+
+            # # If target yaw is not set, set it
+            # if self.target_yaw is None:
+
+            #     # Set target yaw to current yaw plus rotation angle
+            #     self.target_yaw = self.normalize_angle(self.current_yaw + self.rotation_angle_rad)  # Add 180 degrees in radians
+            #     self.get_logger().info(f'Target Yaw (radians) Normalized: {self.target_yaw}')
+
+            # if self.logging:
+            #     self.get_logger().info(f'Current Yaw (radians): {self.current_yaw}')
+            #     self.get_logger().info(f'Target Yaw (radians): {self.target_yaw}')
+            # if self.target_yaw is None: # If target yaw is not set
+            #     return
 
 
-        # If target yaw is not set, set it
-        if self.target_yaw is None:
+            # If rotation is not completed
+            
 
-            # Set target yaw to current yaw plus rotation angle
-            self.target_yaw = self.normalize_angle(self.current_yaw + self.rotation_angle_rad)  # Add 180 degrees in radians
-            self.get_logger().info(f'Target Yaw (radians) Normalized: {self.target_yaw}')
 
-        if self.logging:
-            self.get_logger().info(f'Current Yaw (radians): {self.current_yaw}')
-            self.get_logger().info(f'Target Yaw (radians): {self.target_yaw}')
+            if not self.moving_forward:
+
+                twist_msg = Twist()
+                twist_msg.linear.x = self.linear_speed # Set linear speed for forward movement
+
+                self.publisher.publish(twist_msg)       # Publish forward movement command
+                self.get_logger().info('Moving forward.')
+
+
+                # Move forward for move_duration seconds 
+                time.sleep(self.move_duration)
+                self.moving_forward = True  # Set moving forward flag to True
+                self.get_logger().info('Sleeping for 5 seconds.')
+
+                # Linear speed for stopping executed after {move_duration} seconds
+                twist_msg2 = Twist()
+                twist_msg2.linear.x = 0.0
+                
+                self.publisher.publish(twist_msg2)  # Stop moving forward
+                self.get_logger().info('Movement completed. Stopping.')
+                # self.moving_forward = True
+                # bool_msg = Bool()
+                # bool_msg.data = False
+                # self.publisher.publish(bool_msg)
+                # Exit the node
+                # sys.exit()
+            elif not self.rotation_completed:
+
+                # Calculate the yaw error
+                # yaw_error = self.normalize_angle(self.target_yaw - self.current_yaw)
+
+                # # Calculate angular velocity using PID controller
+                # angular_z, self.angular_error_sum = self.PID_controller(yaw_error, self.angular_error_sum, self.angular_last_error,
+                #                                                         self.angular_kp, self.angular_ki, self.angular_kd)      
+                
+
+                # self.angular_last_error = yaw_error     # Update last error
+
+                # Clip angular velocity to maximum angular speed
+                # angular_z = np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed)
+                
+                if self.logging:  
+                    self.get_logger().info('Rotation started. ')  
+                
+                twist_msg = Twist()
+                # twist_msg.angular.z = 2.0
+                # self.publisher.publish(twist_msg)  
+                
+                # curr_time = time.time()
+                # if time.time() - curr_time > 2.0:
+                #     self.rotation_completed = True
+                #     twist_msg.angular.z = 0.0
+                
+                # curr_time = time.time()
+                # while (time.time() - curr_time <= 2.0):
+                #     twist_msg.angular.z = 2.0
+                #     self.publisher.publish(twist_msg) 
+                
+                # if not self.curr_time_status:
+                #     self.curr_time = time.time()
+                #     self.curr_time_status = True
+                    
+                # if (time.time() - self.curr_time <= 2.0):
+                #     twist_msg.angular.z = 2.0
+                #     # self.publisher.publish(twist_msg) 
+                
+                # # time.sleep(2.0)
+                
+                # else:
+                #     twist_msg.angular.z = 0.0
+                # Publish angular velocity
+                self.publisher.publish(twist_msg)   
+                self.rotation_completed = True
+                self.active = False
+                
+                # bool_msg = Bool()
+                # bool_msg.data = False
+                # self.publisher.publish(bool_msg)
+
+                # Check if rotation is completed
+                # if abs(yaw_error) < self.yaw_error_threshold:  
+
+                #     # self.rotation_completed = True  # Set rotation completed flag to True
+
+                #     self.publisher.publish(Twist())  # Stop rotation
+                bool_msg = Bool()
+                bool_msg.data = True
+                self.status_publisher.publish(bool_msg)
+                #     self.active=False
+                if self.logging:  
+                    self.get_logger().info('Rotation completed. ')
+
+    def normalize_angle(self, angle):
+        """Normalize the angle to the range [-pi, pi]."""
+        while angle > math.pi:
+            angle -= 2 * math.pi
+        while angle < -math.pi:
+            angle += 2 * math.pi
+        return angle    
 
     def PID_controller(self, error, error_sum, last_error, kp, ki, kd):
         '''PID controller for angular velocity control.'''
@@ -86,80 +246,8 @@ class RotateAndMoveNode(Node):
         control = P + I + D
         return control, error_sum
 
-    def timer_callback(self):
-        '''Timer callback for controlling robot rotation and movement.'''
 
-        if self.target_yaw is None: # If target yaw is not set
-            return
-
-
-        # If rotation is not completed
-        if not self.rotation_completed:
-
-            # Calculate the yaw error
-            yaw_error = self.normalize_angle(self.target_yaw - self.current_yaw)
-
-            # Calculate angular velocity using PID controller
-            angular_z, self.angular_error_sum = self.PID_controller(yaw_error, self.angular_error_sum, self.angular_last_error,
-                                                                    self.angular_kp, self.angular_ki, self.angular_kd)      
-            
-
-            self.angular_last_error = yaw_error     # Update last error
-
-            # Clip angular velocity to maximum angular speed
-            angular_z = np.clip(angular_z, -self.max_angular_speed, self.max_angular_speed)
-
-
-            # Publish angular velocity
-            twist_msg = Twist()
-            twist_msg.angular.z = angular_z
-            self.publisher.publish(twist_msg)   
-
-
-            # Check if rotation is completed
-            if abs(yaw_error) < self.yaw_error_threshold:  
-
-                self.rotation_completed = True  # Set rotation completed flag to True
-
-                self.publisher.publish(Twist())  # Stop rotation
-
-                if self.logging:
-                    self.get_logger().info('Rotation completed. Moving forward.')
-
-
-        # If rotation is completed and forward movement is not started
-        elif not self.moving_forward:
-
-            twist_msg = Twist()
-            twist_msg.linear.x = self.linear_speed  # Set linear speed for forward movement
-
-            self.publisher.publish(twist_msg)       # Publish forward movement command
-            self.get_logger().info('Moving forward.')
-
-
-            # Move forward for move_duration seconds 
-            time.sleep(self.move_duration)
-            self.moving_forward = True  # Set moving forward flag to True
-            self.get_logger().info('Sleeping for 5 seconds.')
-
-            # Linear speed for stopping executed after {move_duration} seconds
-            twist_msg2 = Twist()
-            twist_msg2.linear.x = 0.0
-
-            self.publisher.publish(twist_msg2)  # Stop moving forward
-            self.get_logger().info('Movement completed. Stopping.')
-
-            # Exit the node
-            sys.exit()
-            
-
-    def normalize_angle(self, angle):
-        """Normalize the angle to the range [-pi, pi]."""
-        while angle > math.pi:
-            angle -= 2 * math.pi
-        while angle < -math.pi:
-            angle += 2 * math.pi
-        return angle
+        
 
 
 def main(args=None):
