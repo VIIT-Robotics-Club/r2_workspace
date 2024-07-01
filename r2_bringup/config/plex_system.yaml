@@ -1,0 +1,115 @@
+/control_manager:
+  ros__parameters:
+    enableLineFollowing: false
+    enableBallTracking: true
+    enablesiloDetection: false
+    enableLunaAlignment: false
+    enableRnm: false
+    use_sim_time: false
+
+
+
+/line/line_follower:
+  ros__parameters:
+    Kd: 0.3
+    Ki: 0.0
+    Kp: 0.8
+    arena_side: blue
+    base_speed: -2.0
+    desired_value: 35.0
+    logging: false
+    use_sim_time: false
+
+
+
+/ball/ball_tracking_server:
+  ros__parameters:
+    angular_kd: 1.8
+    angular_ki: 7.0e-05
+    angular_kp: 0.2
+    ball_colour: blue
+    contour_area_threshold: 3000
+    desired_contour_area: 215000
+    difference_threshold: 600
+    linear_kd: 0.0
+    linear_ki: 0.0
+    linear_kp: 0.5
+    logging: false
+    max_angular_speed: 1.0
+    max_integral: 10.0
+    max_linear_speed: 2.0
+    use_sim_time: false
+
+
+
+/luna/luna_allignment_server:
+  ros__parameters:
+    angular_z_max: 2.0
+    angular_z_min: -2.0
+    kd_angular: 0.0
+    kd_linear_x: 0.0
+    kd_linear_y: 0.0
+    ki_angular: 0.0028
+    ki_linear_x: 0.0068
+    ki_linear_y: 0.0068
+    kp_angular: 0.08
+    kp_linear_x: 1.8
+    kp_linear_y: 1.8
+    linear_x_max: 2.0
+    linear_x_min: -2.0
+    linear_y_max: 2.0
+    linear_y_min: -2.0
+    logging: false
+    silo_1_x: 0.10
+    silo_1_y: 3.12
+    silo_2_x: 0.10
+    silo_2_y: 2.4
+    silo_3_x: 0.10
+    silo_3_y: 1.66
+    silo_4_x: 0.10
+    silo_4_y: 0.98
+    silo_5_x: 0.10
+    silo_5_y: 0.25
+    use_sim_time: false
+
+
+/silo/silo_tracking_server:
+  ros__parameters:
+    angular_kd: 0.0
+    angular_ki: 0.0
+    angular_kp: 0.1
+    contour_area_threshold: 3000
+    desired_contour_area: 47000
+    difference_threshold: 400
+    linear_kd: 0.0
+    linear_ki: 0.0
+    linear_kp: 1.0
+    logging: false
+    max_angular_speed: 1.0
+    max_integral: 10.0
+    max_linear_speed: 2.0
+    use_sim_time: false
+
+
+/silo_deciding_server:
+  ros__parameters:
+    logging: false
+    our_ball_color: b
+    use_sim_time: false
+
+
+
+
+/rnm/rotate_and_move_node:
+  ros__parameters:
+    angular_kd: 0.0
+    angular_ki: 0.05
+    angular_kp: 4.1
+    linear_speed: -2.0
+    logging: false
+    max_angular_speed: 4.0
+    max_integral: 10.0
+    move_duration: 2.0
+    rotation_angle: 180.0
+    use_sim_time: false
+    yaw_error_threshold: 0.1

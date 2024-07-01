@@ -16,7 +16,7 @@ import os
 
 def generate_launch_description():
 
-    system_params = os.path.join(get_package_share_directory('r2_bringup'),'config','r2_system_params.yaml')
+    system_params = os.path.join(get_package_share_directory('r2_bringup'),'config','plex_system.yaml')
     
     yolo_results = Node(
         package="ball_tracking",
@@ -101,14 +101,22 @@ def generate_launch_description():
         parameters=[system_params]
     )
     
+    
+    rnm = Node(
+        package='r2_navigation',
+        executable='rotate_and_move',
+        namespace="rnm",
+        remappings=[
+            ("status", "/status")],
+        parameters=[system_params]
+    )
+    
     return LaunchDescription([
-        # yolo_results,
-        # quaternion_to_rpy,
-        # robot_altitude_check,
-        # luna_allignment_server,
-        # silo_deciding_server,
+        luna_allignment_server,
+        silo_deciding_server,
         lineFollowerService,
         controller,
         siloTrackingServer,
-        ballTrackingServer
+        ballTrackingServer,
+        rnm
     ])

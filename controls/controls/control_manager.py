@@ -1,53 +1,105 @@
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Int32
+from rcl_interfaces.msg import SetParametersResult
 from std_srvs.srv import SetBool
 from threading import Thread
 import rclpy
 import time
-from r2_interfaces.srv import SiloToGo
+from r2_interfaces.srv import SiloToGo, BestSilo
 
 class ControlManager(Node):
     
     def __init__(self):
         super().__init__('control_manager')
         self.get_logger().info("control manager initialized")
+        
+        
+        # parameters to enable and disable sections 
+        self.declare_parameter("enableLineFollowing", True)
+        self.enableLineFollowing =self.get_parameter("enableLineFollowing").value
+        self.declare_parameter("enableBallTracking", True)
+        self.enableBallTracking =self.get_parameter("enableBallTracking").value
+        self.declare_parameter("enablesiloDetection", True)
+        self.enablesiloDetection =self.get_parameter("enablesiloDetection").value
+        self.declare_parameter("enableLunaAlignment", True)
+        self.enableLunaAlignment =self.get_parameter("enableLunaAlignment").value
+        self.declare_parameter("enableRnm", True)
+        self.enableRnm =self.get_parameter("enableRnm").value
+
+        self.add_on_set_parameters_callback(self.parameters_callback)
+
+
+        # velocities from each individual sections
         self.create_subscription(Twist,'line/nav_vel',self.line_follow_vel_callback, 10)
         self.create_subscription(Twist,'ball/nav_vel',self.ball_vel_callback, 10)
         self.create_subscription(Twist,'luna/nav_vel',self.luna_vel_callback, 10)
         self.create_subscription(Twist,'silo/nav_vel',self.silo_vel_callback, 10)
         self.create_subscription(Twist,'rnm/nav_vel',self.rnm_vel_callback, 10)
-        self.create_subscription(Bool,'status',self.status_callback, 10)
+        self.vel_pub = self.create_publisher(Twist,"nav_vel",10)
         
+
+        self.create_subscription(Bool,'status',self.status_callback, 10)
+        self.create_subscription(Int32,'best_silo',self.best_silo_callback, 10)
+        
+        # create clients to activated individual services
         self.line_follower_client = self.create_client(SetBool,"lf_srv")
-        # while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
-        #     self.get_logger().info('lf_srv Service not available, waiting again...')
+        while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('lf_srv Service not available, waiting !!')
             
         self.ball_tracking_client = self.create_client(SetBool ,"ball_tracking_srv")
-        
         while not self.ball_tracking_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().info('ball_tracking_srv Service not available, waiting again...')
+            self.get_logger().warn('ball_tracking_srv Service not available, waiting !!')
         
         self.silo_tracking_client = self.create_client(SetBool ,"silo_tracking_srv")
-        # while not self.silo_tracking_client.wait_for_service(timeout_sec=0.2):
-        #     self.get_logger().info('silo_tracking_srv Service not available, waiting again...')
+        while not self.silo_tracking_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('silo_tracking_srv Service not available, waiting !!')
             
         self.luna_align_client = self.create_client(SiloToGo ,"luna_align_srv")
-        # while not self.luna_align_client.wait_for_service(timeout_sec=0.2):
-        #     self.get_logger().info('luna_align_srv Service not available, waiting again...')
+        while not self.luna_align_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('luna_align_srv Service not available, waiting !!')
             
-        self.rnm_client = self.create_client(SetBool ,"rnm_srv")
-        # while not self.rnm_client.wait_for_service(timeout_sec=0.2):
-        #     self.get_logger().info('Service not available, waiting again...')
+        self.rnm_client = self.create_client(SetBool ,"/rnm_srv")
+        while not self.rnm_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('rotate and move service not available, waiting !!')
         
-            
+        self.gripper_lift_client = self.create_client(SetBool ,"gripper_lift")
+        while not self.gripper_lift_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('gripper_lift Service not available, waiting !!')
         
-        self.vel_pub = self.create_publisher(Twist,"nav_vel",10)
+        self.gripper_grab_client = self.create_client(SetBool ,"gripper_grab")
+        while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('gripper grab Service not available, waiting !!')    
+    
 
+        self.best_silo_client = self.create_client(BestSilo ,"best_silo",)
+        while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('best silo service not available, waiting !!')    
+
+
+
+        self.bestSiloNum = 0
         self.lastStatus = True
         self.response_recvd = False
         self.index = -1
         
+
+    def parameters_callback(self, params):
+        for param in params:
+            param_name = param.name
+            param_value = param.value
+            setattr(self, param_name, param_value)
+        return SetParametersResult(successful=True)
+    
+
+    def best_silo_callback(self,msg):
+        self.bestSiloNum = msg.data
+
+        
+    def updateBestSilo(self):
+        self.bestSiloNum = 0
+        response = self.best_silo_client.call(BestSilo.Request())
+    
     def line_follow_vel_callback(self,msg: Twist):
         if(self.index ==  -1):
             self.vel_pub.publish(msg)
@@ -73,57 +125,79 @@ class ControlManager(Node):
         self.lastStatus = msg.data
         self.response_recvd = True
         
+    def setGripperConfiguration(self, lift : bool, grab : bool):
+        liftMsg = SetBool.Request()
+        grabMsg = SetBool.Request()
+        
+        liftMsg.data = lift
+        grabMsg.data = grab
+
+        self.gripper_grab_client.call_async(grabMsg)
+        time.sleep(1)
+        self.gripper_lift_client.call_async(liftMsg)
+        time.sleep(1)
+        
+        
+        
     def runtime(self):
 
         req = SetBool.Request()
-        siloReq = SiloToGo.Request()
-        siloReq.silo_number = 1
         req.data = True
-        # self.line_follower_client.call_async(req) 
-        self.response_recvd = True
-        self.get_logger().info("calling line follower service")
         
+                            
+        if self.enableLineFollowing:
+            self.line_follower_client.call_async(req) 
+            self.get_logger().info("calling line follower service")
+        else:
+            self.response_recvd = True
         
         while True:
-           
-            # self.ball_tracking_future = self.ball_tracking_client.call_async(req)
-            # # self.ball_tracking_client.add_done_callback(self.generic_response_callback("ball_tracking_srv"))
-            
-            # self.silo_tracking_future.call_async(req)
-            # # self.ball_tracking_client.add_done_callback(self.generic_response_callback("silo_tracking_srv"))
-            
-            # self.luna_align_future.call_async(req)           
-            # # self.ball_tracking_client.add_done_callback(self.generic_response_callback("luna_align_srv"))
-            
-            # self.rnm_future.call_async(req)
-            # # self.ball_tracking_client.add_done_callback(self.generic_response_callback("rnm_srv"))
-            
-            
 
-            self.get_logger().info("index = " + str(self.index))
             if self.response_recvd :
+                self.index = (self.index + 1) % 4
+                self.get_logger().info("index = " + str(self.index))
+
                 
-                self.index = (self.index + 1) % 3
-                
-                if self.index == 0:
+                if self.enableBallTracking and self.index == 0:
+                    
+                    
+                    # move gripper down and open configuration
+                    self.setGripperConfiguration(False, False)
                     self.ball_tracking_client.call_async(req)
                     self.get_logger().info("calling ball tracking service")
+                    self.response_recvd = False
                     
                 
-                elif self.index == 1:
+                elif  self.enablesiloDetection and self.index == 1:
+                    self.setGripperConfiguration(True, True)
                     self.silo_tracking_client.call_async(req)
+                    # time.sleep(1)
                     self.get_logger().info("calling silo tracking service")
+                    self.updateBestSilo()
+                    self.response_recvd = False
+
                     
-                elif self.index == 2:
+                    
+                elif self.enableLunaAlignment and self.index == 2:
+                    siloReq = SiloToGo.Request()
+                    siloReq.silo_number = self.bestSiloNum
                     self.luna_align_client.call_async(siloReq)      
+                    self.get_logger().info("going to silo " + str(self.bestSiloNum))
                     self.get_logger().info("calling luna align service")
+                    self.response_recvd = False
                          
-                elif self.index == 3:
+                elif self.enableRnm and self.index == 3:
+
+                    self.setGripperConfiguration(True, False)
                     self.rnm_client.call_async(req)
                     self.get_logger().info("calling rotate and move service")
                     
+                    self.response_recvd = False
+
+                else:
+                    self.response_recvd = True
                     
-                self.response_recvd = False
+                    
             
             time.sleep(1)
         
