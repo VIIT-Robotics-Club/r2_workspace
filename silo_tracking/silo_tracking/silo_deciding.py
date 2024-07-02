@@ -19,7 +19,8 @@ from geometry_msgs.msg import Twist
 from r2_interfaces.msg import YoloResults
 from r2_interfaces.srv import BestSilo
 from std_msgs.msg import Int32
-import sys
+from rcl_interfaces.msg import SetParametersResult
+
 
 class SiloDetectionNode(Node):
     def __init__(self):
@@ -55,6 +56,8 @@ class SiloDetectionNode(Node):
         self.declare_parameter('our_ball_color', 'b')
         self.our_ball_color = self.get_parameter('our_ball_color').value
         
+        self.add_on_set_parameters_callback(self.parameters_callback)
+        
         # Set opponent's ball color
         self.opponent_ball_color = 'r' if self.our_ball_color == 'b' else 'b'
         
@@ -88,6 +91,15 @@ class SiloDetectionNode(Node):
         print('init done')
         
         
+    def parameters_callback(self, params):
+        for param in params:
+            param_name = param.name
+            param_value = param.value
+            setattr(self, param_name, param_value)
+        return SetParametersResult(successful=True)
+
+
+
     def best_silo_callback(self, request, response):
         
         if self.logging:
@@ -196,24 +208,24 @@ class SiloDetectionNode(Node):
         best_silo = self.silo_decision()
         BestSiloNum = int()
         if best_silo == 's1':
-            bestSiloNum = 5
+            BestSiloNum = 1
         
         elif best_silo == 's2':
-            bestSiloNum = 4
+            BestSiloNum = 2
             
         elif best_silo == 's3':
-            bestSiloNum = 3
+            BestSiloNum = 3
         
         elif best_silo == 's4':
-            bestSiloNum = 2
+            BestSiloNum = 4
 
         elif best_silo == 's5':
-            bestSiloNum = 1
+            BestSiloNum = 5
 
         msg = Int32()
-        msg.data = bestSiloNum
+        msg.data = BestSiloNum
         self.best_silo_pub.publish(msg)
-        self.active = False
+        # self.active = False
         
         
     def get_silo_pts_diff(self):

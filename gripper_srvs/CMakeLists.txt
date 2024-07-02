@@ -17,6 +17,7 @@ add_executable(gripper_service src/gripperSrvs.cpp)
 ament_target_dependencies(gripper_service 
   rclcpp
   trajectory_msgs
+  std_msgs
   sensor_msgs
   r2_interfaces
 )

@@ -48,19 +48,19 @@
     <material>Gazebo/Silver</material>
   </gazebo>
   
-  <gazebo reference="lidar_fl_1">
+  <gazebo reference="luna_fl">
     <material>Gazebo/Silver</material>
   </gazebo>
   
-  <gazebo reference="lidar_fr_1">
+  <gazebo reference="luna_fr">
     <material>Gazebo/Silver</material>
   </gazebo>
   
-  <gazebo reference="lidar_rf_1">
+  <gazebo reference="luna_rf">
     <material>Gazebo/Silver</material>
   </gazebo>
   
-  <gazebo reference="lidar_rb_1">
+  <gazebo reference="luna_rb">
     <material>Gazebo/Silver</material>
   </gazebo>
   

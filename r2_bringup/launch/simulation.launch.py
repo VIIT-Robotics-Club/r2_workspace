@@ -20,6 +20,9 @@ def generate_launch_description():
     sim_only = LaunchConfiguration("sim_only")
     
     
+    # simulation config
+    sim_params = PathJoinSubstitution([share, 'config', 'sim_config.yaml'])
+    
     # gazebo world 
     world_name_arg = DeclareLaunchArgument("world", default_value="ballsinSilo.world")
     world_name = LaunchConfiguration("world")
@@ -73,7 +76,7 @@ def generate_launch_description():
         package="twist_mux",
         executable="twist_mux",
         remappings=[
-            ('/cmd_vel_out', '/cmd_vel')
+            ('/cmd_vel_out', '/sim_vel')
         ],
         parameters= [PathJoinSubstitution([share, "config", "twist_mux.yaml"])]
     )
@@ -94,7 +97,7 @@ def generate_launch_description():
     )
     
     
-    # start joint state broadcaster controller
+    # start joint state brohsadcaster controller
     joint_state_broad = Node(
         package="controller_manager",
         executable="spawner",
@@ -138,6 +141,14 @@ def generate_launch_description():
                           remappings=[("traject_out", "joint_trajectory_controller/joint_trajectory")])
 
     
+    velocityScaler = Node(package="r2_py",
+                          executable="velocity_scalar",
+                          remappings=[("/cmd_vel", "/sim_vel"),
+                                    ("/cmd_vel_scaled", "/cmd_vel"),
+                                      ],
+                            parameters=[sim_params],
+                          )
+
     nodes = {
         # launch arguments,
         sim_only_arg,
@@ -146,7 +157,7 @@ def generate_launch_description():
         gazebo,
         gazebo_spawn,
         robot_state_pub,
-        rviz,
+        # rviz,
         
         joy_node,
         teleop_node,
@@ -158,7 +169,8 @@ def generate_launch_description():
         # pos_controller,
         effort_controller,
         # sliders,
-        gripperService
+        gripperService,
+        velocityScaler
 
     }
     
@@ -168,7 +180,7 @@ def generate_launch_description():
                 share,
                 'launch/system.launch.py'
             ])]))
-
-    nodes.add(otherNode)
+cd
+    # nodes.add(otherNode)
 
     return LaunchDescription(nodes)

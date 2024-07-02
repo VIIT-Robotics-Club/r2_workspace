@@ -28,6 +28,7 @@ setup(
             "cmd_vel_slow_pub = r2_py.cmd_vel_slow_pub:main",
             "joint_controllers = r2_py.joint_controllers:main",
             "robot_altitude_check = r2_py.robot_altitude_check:main",
+            "velocity_scalar = r2_py.velocity_scalar:main",
         ],
     },
 )

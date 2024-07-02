@@ -164,6 +164,8 @@ class ControlManager(Node):
                     # move gripper down and open configuration
                     self.setGripperConfiguration(False, False)
                     self.ball_tracking_client.call_async(req)
+                    req.data = False
+                    self.grab_client.call_async(req)
                     self.get_logger().info("calling ball tracking service")
                     self.response_recvd = False
                     
@@ -179,12 +181,20 @@ class ControlManager(Node):
                     
                     
                 elif self.enableLunaAlignment and self.index == 2:
+
+                    # decrement index so that next iteration calls luna again
+                    if self.bestSiloNum == 0:
+                        self.index = self.index - 1
+                    
                     siloReq = SiloToGo.Request()
                     siloReq.silo_number = self.bestSiloNum
                     self.luna_align_client.call_async(siloReq)      
                     self.get_logger().info("going to silo " + str(self.bestSiloNum))
                     self.get_logger().info("calling luna align service")
                     self.response_recvd = False
+                    
+                    # force wait for best silo update for next ball iteration
+                    self.bestSiloNum = 0
                          
                 elif self.enableRnm and self.index == 3:
 

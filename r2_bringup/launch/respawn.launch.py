@@ -20,7 +20,7 @@ def generate_launch_description():
 
 
     ld = LaunchDescription({
-        gazebo_spawn
+        # gazebo_spawn
     })
     
     ld.add_action(

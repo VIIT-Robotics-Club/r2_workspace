@@ -7,17 +7,11 @@ import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 from rcl_interfaces.msg import SetParametersResult
-# from std_msgs.msg import Int64MultiArray
-# from example_interfaces.srv import Trigger
-from std_srvs.srv import SetBool
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Range
 from std_msgs.msg import Int32
 from r2_interfaces.srv import SiloToGo
 
-import sys
-import os
 
 class LunaWallAlignNode(Node):
     def __init__(self):
@@ -46,7 +40,9 @@ class LunaWallAlignNode(Node):
                 ('kd_angular', 0.0),          
                 # ('x_goal', 13.0),
                 # ('y_goal', 250.0),
-                # ('silo_number', 1),    
+                # ('silo_number', 1),
+                ('capture_x', 1.5),
+                ('capture_y', 1.5),    
                 ('silo_1_x', 0.090),
                 ('silo_1_y', 3.120),
                 ('silo_2_x', 0.090),
@@ -82,6 +78,8 @@ class LunaWallAlignNode(Node):
         # self.y_goal = self.get_parameter('y_goal').value
         # self.silo_number = self.get_parameter('silo_number').value
 
+        self.capture_x = self.get_parameter('capture_x').value
+        self.capture_y = self.get_parameter('capture_y').value
         self.silo_1_x = self.get_parameter('silo_1_x').value
         self.silo_1_y = self.get_parameter('silo_1_y').value
         self.silo_2_x = self.get_parameter('silo_2_x').value
@@ -156,6 +154,7 @@ class LunaWallAlignNode(Node):
         self.int_error_angular_z = 0.0
 
         self.positions = {
+            0: {'x': self.capture_x, 'y': self.capture_y},
             1: {'x': self.silo_1_x, 'y': self.silo_1_y},
             2: {'x': self.silo_2_x, 'y': self.silo_2_y},
             3: {'x': self.silo_3_x, 'y': self.silo_3_y},
@@ -180,9 +179,6 @@ class LunaWallAlignNode(Node):
         self.get_logger().info("luna alignment is active")
         
         self.silo_number = request.silo_number
-        
-        if self.silo_number==0:
-            self.silo_number = 1
         
         self.x_goal = self.positions[self.silo_number]['x']
         self.y_goal = self.positions[self.silo_number]['y']
@@ -298,6 +294,10 @@ class LunaWallAlignNode(Node):
                     self.get_logger().info("x_avg - self.x_goal = " + str(abs(x_avg - self.x_goal)))
                     self.get_logger().info("x_goal : " + str(self.x_goal))
                     self.get_logger().info("y_goal : " + str(self.y_goal))
+                    
+                    self.get_logger().info("x_avg : " + str(x_avg))
+                    self.get_logger().info("y_avg : " + str(y_avg))
+
                 dt = 0.2
                 prev_lin_error_x = 0
                 prev_lin_error_y = 0

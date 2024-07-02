@@ -39,12 +39,12 @@ def generate_launch_description():
         parameters=[system_params]
     )   
     
-    luna_allignment_server = Node(
-        package='luna_control',
-        name='luna_allignment_server',
-        executable='luna_align_sim',
-        parameters=[system_params]
-    )
+    # luna_allignment_server = Node(
+    #     package='luna_control',
+    #     name='luna_allignment_server',
+    #     executable='luna_align_srv',
+    #     parameters=[system_params]
+    # )
     
     silo_deciding_server = Node(   
         package='silo_tracking',
@@ -54,10 +54,22 @@ def generate_launch_description():
     )
     
     
+    
+    luna_allignment_server = Node(
+        package='luna_control',
+        name='luna_allignment_server',
+        executable='luna_align_srv',
+        namespace="luna",
+        remappings=[
+            ("/nav_vel", "/luna/nav_vel"),
+            ("status", "/status")],
+        parameters=[system_params]
+    )
+    
     return LaunchDescription([
         yolo_results,
-        quaternion_to_rpy,
-        # robot_altitude_check,
         # luna_allignment_server, 
-        silo_deciding_server
+        # quaternion_to_rpy,
+        # robot_altitude_check,
+        # silo_deciding_server
     ])

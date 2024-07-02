@@ -155,7 +155,7 @@
             </collision>
           </link>
           
-          <link name="lidar_fl_1">
+          <link name="luna_fl">
             <inertial>
               <origin xyz="0.005000000000005944 2.326098280241995e-07 5.689893001203927e-16" rpy="0 0 0"/>
               <mass value="0.03139999999999999"/>
@@ -164,19 +164,19 @@
             <visual>
               <origin xyz="-0.205 -0.115382 0.086" rpy="0 0 0"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_fl_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_fl.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
               <origin xyz="-0.205 -0.115382 0.086" rpy="0 0 0"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_fl_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_fl.stl" scale="0.001 0.001 0.001"/>
               </geometry>
             </collision>
           </link>
           
-          <link name="lidar_fr_1">
+          <link name="luna_fr">
             <inertial>
               <origin xyz="0.005000000000008192 -3.275974437833007e-07 4.996003610813204e-16" rpy="0 0 0"/>
               <mass value="0.031400000000000025"/>
@@ -185,19 +185,19 @@
             <visual>
               <origin xyz="-0.205 0.152509 0.086" rpy="0 0 0"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_fr_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_fr.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
               <origin xyz="-0.205 0.152509 0.086" rpy="0 0 0"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_fr_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_fr.stl" scale="0.001 0.001 0.001"/>
               </geometry>
             </collision>
           </link>
           
-          <link name="lidar_rf_1">
+          <link name="luna_rf">
             <inertial>
               <origin xyz="-2.0882421542661733e-07 -0.004999999999998284 1.942890293094024e-15" rpy="0 0 0"/>
               <mass value="0.030899737839751147"/>
@@ -206,19 +206,19 @@
             <visual>
               <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_rf_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_rf.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
               <origin xyz="-0.052465 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_rf_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_rf.stl" scale="0.001 0.001 0.001"/>
               </geometry>
             </collision>
           </link>
           
-          <link name="lidar_rb_1">
+          <link name="luna_rb">
             <inertial>
               <origin xyz="-2.0882421544743401e-07 -0.004999999999999394 2.040034807748725e-15" rpy="0 0 0"/>
               <mass value="0.03140000000000011"/>
@@ -227,14 +227,14 @@
             <visual>
               <origin xyz="0.047535 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_rb_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_rb.stl" scale="0.001 0.001 0.001"/>
               </geometry>
               <material name="silver"/>
             </visual>
             <collision>
               <origin xyz="0.047535 0.19 0.0745" rpy="0 0 -${pi/2}"/>
               <geometry>
-                <mesh filename="file://$(find r2_description)/meshes/lidar_rb_1.stl" scale="0.001 0.001 0.001"/>
+                <mesh filename="file://$(find r2_description)/meshes/luna_rb.stl" scale="0.001 0.001 0.001"/>
               </geometry>
             </collision>
           </link>
@@ -365,25 +365,25 @@
           <joint name="lidar_fl" type="fixed">
             <origin xyz="0.205 0.115382 -0.086" rpy="0 0 0"/>
             <parent link="base_link"/>
-            <child link="lidar_fl_1"/>
+            <child link="luna_fl"/>
           </joint>
           
           <joint name="lidar_fr" type="fixed">
             <origin xyz="0.205 -0.152509 -0.086" rpy="0 0 0"/>
             <parent link="base_link"/>
-            <child link="lidar_fr_1"/>
+            <child link="luna_fr"/>
           </joint>
           
           <joint name="lidar_rf" type="fixed">
             <origin xyz="0.052465 -0.19 -0.0745" rpy="0 0 -${pi/2}"/>
             <parent link="base_link"/>
-            <child link="lidar_rf_1"/>
+            <child link="luna_rf"/>
           </joint>
           
           <joint name="lidar_rb" type="fixed">
             <origin xyz="-0.047535 -0.19 -0.0745" rpy="0 0 -${pi/2}"/>
             <parent link="base_link"/>
-            <child link="lidar_rb_1"/>
+            <child link="luna_rb"/>
           </joint>
           
           <joint name="lift_base_link" type="prismatic">

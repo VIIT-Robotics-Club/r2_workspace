@@ -22,7 +22,16 @@
             <odometryRate>100.0</odometryRate>
             <robotBaseFrame>base_footprint</robotBaseFrame>
         </plugin>
-  </gazebo>
+
+
+        <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+            <ros>
+              <namespace>/demo</namespace>
+              <argument>model_states:=model_states_demo</argument>
+            </ros>
+            <update_rate>1.0</update_rate>
+        </plugin>
+    </gazebo>
 
   <xacro:macro name="luna" params="prefix">
     <gazebo reference="${prefix}">
@@ -59,7 +68,7 @@
             </ray>
             <plugin name="${prefix}" filename="libgazebo_ros_ray_sensor.so">
                 <ros>
-                    <namespace>distance</namespace>
+                    <namespace>/</namespace>
                     <remapping>~/out:=${prefix}</remapping>
                 </ros>
                 <output_type>sensor_msgs/Range</output_type>
