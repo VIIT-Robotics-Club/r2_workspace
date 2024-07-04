@@ -1,0 +1,27 @@
+services:
+  micro-ros-agent:
+    image: microros/micro-ros-agent:humble
+    privileged: true
+    network_mode: host
+    ipc : host
+    command: [ "multiserial", "--devs",  "/dev/ttyUSB0", "/dev/ttyACM0",  "-b", "460800"]
+    logging:
+      driver: none
+    volumes:
+    - /dev:/dev
+
+
+  ros-system:
+    image: viitrobotics/r2ws:testing
+    privileged: true
+    network_mode: host
+    ipc : host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+    - /dev:/dev
