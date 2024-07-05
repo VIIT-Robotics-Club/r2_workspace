@@ -60,8 +60,8 @@
     linear_y_max: 2.0
     linear_y_min: -2.0
     logging: false
-    capture_x: 1.5
-    capture_y: 1.5
+    capture_x: 1.9
+    capture_y: 1.8
     silo_1_x: 0.10
     silo_1_y: 3.12
     silo_2_x: 0.10

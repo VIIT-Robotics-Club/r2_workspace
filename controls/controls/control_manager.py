@@ -28,7 +28,7 @@ class ControlManager(Node):
         self.enableRnm =self.get_parameter("enableRnm").value
 
         self.add_on_set_parameters_callback(self.parameters_callback)
-
+        self.active=False
 
         # velocities from each individual sections
         self.create_subscription(Twist,'line/nav_vel',self.line_follow_vel_callback, 10)
@@ -79,6 +79,7 @@ class ControlManager(Node):
 
 
         self.bestSiloNum = 0
+        self.siloUpdated = False
         self.lastStatus = True
         self.response_recvd = False
         self.index = -1
@@ -93,6 +94,7 @@ class ControlManager(Node):
     
 
     def best_silo_callback(self,msg):
+        self.siloUpdated = True
         self.bestSiloNum = msg.data
 
         
@@ -115,6 +117,7 @@ class ControlManager(Node):
     def luna_vel_callback(self,msg : Twist):
         if(self.index ==  2):
             self.vel_pub.publish(msg)
+
             
     def rnm_vel_callback(self,msg : Twist):
         if(self.index ==  3):
@@ -187,22 +190,41 @@ class ControlManager(Node):
                         self.index = self.index - 1
                     
                     siloReq = SiloToGo.Request()
+                    
+                    if not self.siloUpdated:
+                        # go to recapture position and wait for next healthy frame
+                        siloReq.silo_number = 0
+                        self.luna_align_client.call_async(siloReq)  
+                                                
+                        self.get_logger().info("going to recapture point ")
+                        while not self.siloUpdated:
+                            time.sleep(1)
+
+                    # goto target silo
                     siloReq.silo_number = self.bestSiloNum
-                    self.luna_align_client.call_async(siloReq)      
+                    self.luna_align_client.call_async(siloReq)    
+                    self.response_recvd = False
+                    self.siloUpdated = False
+                        
                     self.get_logger().info("going to silo " + str(self.bestSiloNum))
                     self.get_logger().info("calling luna align service")
-                    self.response_recvd = False
-                    
-                    # force wait for best silo update for next ball iteration
-                    self.bestSiloNum = 0
+
                          
                 elif self.enableRnm and self.index == 3:
-
+                    # if self.valid_silo:
                     self.setGripperConfiguration(True, False)
-                    self.rnm_client.call_async(req)
+                    self.rnm_client.call_async(req) 
                     self.get_logger().info("calling rotate and move service")
                     
                     self.response_recvd = False
+                    # else:
+                    #     # goto silo to right, fifth silo is mapped to first silo
+                        
+                    #     self.bestSiloNum= (self.bestSiloNum+1) % 5
+                    #     siloReq.silo_number = self.bestSiloNum
+                    #     self.luna_align_client.call_async(siloReq)   
+                         
+    
 
                 else:
                     self.response_recvd = True

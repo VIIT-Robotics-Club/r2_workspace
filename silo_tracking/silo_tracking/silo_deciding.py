@@ -26,7 +26,6 @@ class SiloDetectionNode(Node):
     def __init__(self):
         super().__init__('silo_detection_node')
         self.get_logger().info("Silo Detection Node has been started")
-    
         self.create_subscription(
             YoloResults,
             'yolo_results',
@@ -84,9 +83,9 @@ class SiloDetectionNode(Node):
             "s5": []
         }
 
-        self.active = False
         #Silo Pt Difference: [No of silo pts of ours - No of silo pts of opponent]
         self.silo_pts_diff = 0
+        self.healthyFrameCount = 0
         
         print('init done')
         
@@ -106,7 +105,6 @@ class SiloDetectionNode(Node):
             self.get_logger().info("Best Silo Service Requested")
 
 
-        self.active = True
         # best_silo = self.silo_decision()
         # response.best_silo = best_silo
         
@@ -116,56 +114,56 @@ class SiloDetectionNode(Node):
         
     def yolo_results_callback(self, msg):
         
-        if self.active:
-                
-            if self.logging:
-                self.get_logger().info("Yolo Results Received")
-            
-            # Clear Previous Values
-            self.class_ids_list.clear()
-            self.contour_areas_list.clear()
-            self.differences_list.clear()
-            self.confidences_list.clear()
-            self.tracking_ids_list.clear()
-            self.xyxys_list.clear()
-            self.xywhs_list.clear()
-            
-            # Store the values from the message
-            self.class_ids_list.extend(msg.class_ids)
-            self.contour_areas_list.extend(msg.contour_area)
-            self.differences_list.extend(msg.differences)
-            self.confidences_list.extend(msg.confidence)
-            self.tracking_ids_list.extend(msg.tracking_id)
-            
-            # Loop through the XyXy and Xywh data in the message
-            for xyxy, xywh in zip(msg.xyxy, msg.xywh):
-                # Append the data to the lists
-                self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
-                self.xywhs_list.append([xywh.center_x, xywh.center_y, xywh.width, xywh.height])
+        if self.logging:
+            self.get_logger().info("Yolo Results Received")
         
+        # Clear Previous Values
+        self.class_ids_list.clear()
+        self.contour_areas_list.clear()
+        self.differences_list.clear()
+        self.confidences_list.clear()
+        self.tracking_ids_list.clear()
+        self.xyxys_list.clear()
+        self.xywhs_list.clear()
         
-            # Log the received values       
-            if self.logging:
-                self.get_logger().info(f"Class IDs: {self.class_ids_list}")
-                # self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
-                # self.get_logger().info(f"Differences: {self.differences_list}")
-                # self.get_logger().info(f"Confidences: {self.confidences_list}")
-                # self.get_logger().info(f"Tracking IDs: {self.tracking_ids_list}")
-                # self.get_logger().info(f"XyXys: {self.xyxys_list}")
-                # self.get_logger().info(f"Xywhs: {self.xywhs_list}")
-            
+        # Store the values from the message
+        self.class_ids_list.extend(msg.class_ids)
+        self.contour_areas_list.extend(msg.contour_area)
+        self.differences_list.extend(msg.differences)
+        self.confidences_list.extend(msg.confidence)
+        self.tracking_ids_list.extend(msg.tracking_id)
+        
+        # Loop through the XyXy and Xywh data in the message
+        for xyxy, xywh in zip(msg.xyxy, msg.xywh):
+            # Append the data to the lists
+            self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
+            self.xywhs_list.append([xywh.center_x, xywh.center_y, xywh.width, xywh.height])
+    
+    
+        # Log the received values       
+        if self.logging:
+            self.get_logger().info(f"Class IDs: {self.class_ids_list}")
+            # self.get_logger().info(f"Contour Areas: {self.contour_areas_list}")
+            # self.get_logger().info(f"Differences: {self.differences_list}")
+            # self.get_logger().info(f"Confidences: {self.confidences_list}")
+            # self.get_logger().info(f"Tracking IDs: {self.tracking_ids_list}")
+            # self.get_logger().info(f"XyXys: {self.xyxys_list}")
+            # self.get_logger().info(f"Xywhs: {self.xywhs_list}")
+        
 
-            # Call the function to find balls in silos
-            self.find_balls_in_silos()
+        # Call the function to find balls in silos
+        self.find_balls_in_silos()
 
 
     def find_balls_in_silos(self):
         # Indices for balls and silos
         self.silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3]
         
-        # update best silo only when all silos are visible
-        if len(self.silo_indices) < 5:
+        # update best silo only when all silos are visible and total items are more or equal to items seen in lastHealthyFrame 
+        if len(self.silo_indices) < 5 or len(self.class_ids_list) < self.healthyFrameCount:
             return
+        
+        self.healthyFrameCount = len(self.class_ids_list)
         
         self.blue_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 0]
         self.red_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 2]
