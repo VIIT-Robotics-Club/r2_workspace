@@ -37,8 +37,8 @@ class YoloObjectTrackingNode(Node):
         #Loads the current script directory
         current_script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        #Loads the model
-        model_path = os.path.join(current_script_dir, 'weights/model_sim_v2.pt')
+        # Loads the model
+        model_path = os.path.join(current_script_dir, 'weights/model_sim3-1.pt')
         # model_path = os.path.join(current_script_dir, 'weights/model_sim.pt')
 
         self.model = YOLO(model_path)
@@ -46,10 +46,10 @@ class YoloObjectTrackingNode(Node):
        
         self.declare_parameter('deviation', 170)
         self.declare_parameter('logging', False)
-        
+
         # Set the IOU and Confidence threshold
         self.iou = 0.5
-        self.conf = 0.0
+        self.conf = 0.15
 
         # Subscribe to the camera image topic
         self.create_subscription(
@@ -58,28 +58,26 @@ class YoloObjectTrackingNode(Node):
             self.image_callback,
             10
         )
-        
+
         self.create_subscription(
             CompressedImage,
             '/camera/image_raw/compressed',
             self.image_callback,
             10
         )
-        
+
         # Publish the annotated image
         self.publisher = self.create_publisher(
-                                Image,
-                                'camera/image_raw/annotated',
-                                10
-                            )
+            Image,
+            'camera/image_raw/annotated',
+            10
+        )
         # Publish the YOLO results
         self.yolo_result_publisher = self.create_publisher(
-                                YoloResults,
-                                'yolo_results',
-                                10
-                            )
-
-
+            YoloResults,
+            'yolo_results',
+            10
+        )
 
     def image_callback(self, msg):
         """
@@ -89,86 +87,98 @@ class YoloObjectTrackingNode(Node):
             msg: The image message received.
 
         Converts the image message to a cv2 image and processes it using the YOLO model.
-        
+
         """
-        
+
         if self.get_parameter('logging').value:
             self.get_logger().info("Image received")
-            
+
         bridge = cv_bridge.CvBridge()
         img = bridge.compressed_imgmsg_to_cv2(msg, desired_encoding='passthrough')
-        # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) 
+        # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        
         self.deviation = self.get_parameter('deviation').value
-
 
         # cv2.imshow('image', img)
         # cv2.waitKey(1)
 
         self.yolo_object_detect(img)
 
-
     def yolo_object_detect(self, img):
         '''
         Function to detect objects in the image using the YOLO model.
-        
+
         Plot the annotated image and publish the results.
-        
+
         Results are published in the YoloResults message format.
         '''
-        
-        # Perform object detection and stores the results
+
+        # Perform object detection and store the results
         results = self.model.track(img, persist=True, conf=self.conf, iou=self.iou)
-        
+
         # Create a YoloResults message to store the results
-        yolo_result_msg = YoloResults() 
-        
+        yolo_result_msg = YoloResults()
+
         # List to store contour areas
         contour_areas = []
         # List to store differences
         differences = []
-        
+
         line_x = img.shape[1] // 2 + self.deviation
-        
+
         for result in results:
-            
-            xywh_list = result.boxes.xywh.tolist() 
-            
-            for xywh in xywh_list:
+            xywh_list = result.boxes.xywh.tolist()
+            cls_list = result.boxes.cls.tolist()
+
+            print(f"Class list: {cls_list}")  # Debug print to see the class IDs
+
+            for i, xywh in enumerate(xywh_list):
                 xywh_msg = Xywh()
                 xywh_msg.center_x = xywh[0]
                 xywh_msg.center_y = xywh[1]
                 xywh_msg.width = xywh[2]
                 xywh_msg.height = xywh[3]
-                
+
                 yolo_result_msg.xywh.append(xywh_msg)
-                
-                # Calculate contour area
-                contour_area = xywh[2] * xywh[3]
+
+                # Calculate contour area based on class ID
+                cls_id = int(cls_list[i])
+                # self.get_logger().info(cls_id)
+
+                if cls_id == 3:  # Silo
+                    contour_area = xywh[2] * xywh[3]  # Width * Height
+                    self.get_logger().info(f"the contour area of silo is {contour_area} and its height :{xywh[3]}and width is {xywh[2]} ")
+                else:  # Balls
+                    contour_area = xywh[2] * xywh[2]  # Width * Width
+                    self.get_logger().info(f"the contour area of balls is {contour_area} and its height :{xywh[3]}and width is {xywh[2]} ")
+
+                # contour_area = xywh[2] * xywh[3]  # Width * Height
                 contour_areas.append(contour_area)
-                
+
                 # Calculate difference
                 difference = (xywh[0] - line_x)
                 differences.append(difference)
 
-            xyxy_list = result.boxes.xyxy.tolist() 
-            
+            xyxy_list = result.boxes.xyxy.tolist()
+
             for xyxy in xyxy_list:
                 xyxy_msg = XyXy()
                 xyxy_msg.tl_x = xyxy[0]
                 xyxy_msg.tl_y = xyxy[1]
                 xyxy_msg.br_x = xyxy[2]
                 xyxy_msg.br_y = xyxy[3]
-                
+
                 yolo_result_msg.xyxy.append(xyxy_msg)
-        
+
         # Class ids: 0- Blue-ball, 1- Purple-ball, 2- Red-Ball, 3- silo        
         cls_list = [int(cls) for cls in result.boxes.cls.tolist()]
+        self.get_logger().info(f"cls list {cls_list}")
         yolo_result_msg.class_ids.extend(cls_list)
         
         # Confidence values
         conf_list = result.boxes.conf.tolist()
         yolo_result_msg.confidence.extend(conf_list)
-        
+
         # Tracking ids
         if result.boxes.id is not None:
             ids_list = result.boxes.id.tolist()
@@ -187,48 +197,50 @@ class YoloObjectTrackingNode(Node):
             cv2.circle(annotated_frame, (int(center_x), int(center_y)), 5, (0, 0, 255), -1)
 
             # Put the contour area text
-            cv2.putText(annotated_frame, f'Area: {int(contour_area)}', 
-                        (int(center_x), int(center_y) - 10), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.5, 
-                        (0, 255, 0), 
+            cv2.putText(annotated_frame, f'Area: {int(contour_area)}',
+                        (int(center_x), int(center_y) - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 255, 0),
                         2)
 
             # Draw the difference line
             cv2.line(annotated_frame, (int(center_x), int(center_y)), (line_x, int(center_y)), (255, 0, 0), 2)
 
             # Put the difference text
-            cv2.putText(annotated_frame, f'Diff: {int(difference)}', 
-                        (int(center_x), int(center_y) + 20), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 
-                        0.5, 
-                        (255, 0, 0), 
+            cv2.putText(annotated_frame, f'Diff: {int(difference)}',
+                        (int(center_x), int(center_y) + 20),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (255, 0, 0),
                         2)
 
         # Add contour areas and differences to the YoloResults message
         yolo_result_msg.contour_area.extend(contour_areas)
         yolo_result_msg.differences.extend(differences)
+                
 
-        cv2.line(annotated_frame, (line_x, 0), (line_x, img.shape[0]), (0, 255, 0), 2) 
-        
+        cv2.line(annotated_frame, (line_x, 0), (line_x, img.shape[0]), (0, 255, 0), 2)
+
         cv2.imshow('YOLOv8 Tracking', annotated_frame)
         cv2.waitKey(1)
 
         # Convert the annotated image to a ROS message
         bridge = cv_bridge.CvBridge()
         annotated_frame_msg = bridge.cv2_to_imgmsg(annotated_frame, encoding="bgr8")
-        
-        # Publish the results        
+
+        # Publish the results
         self.yolo_result_publisher.publish(yolo_result_msg)
         self.publisher.publish(annotated_frame_msg)
-        
-    
+
+
 def main(args=None):
     rclpy.init(args=args)
     yolo_object_tracking_node = YoloObjectTrackingNode()
     rclpy.spin(yolo_object_tracking_node)
     yolo_object_tracking_node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
