@@ -11,7 +11,7 @@ from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Int32
 from r2_interfaces.srv import SiloToGo
-
+import queue
 
 class LunaWallAlignNode(Node):
     def __init__(self):
@@ -30,17 +30,14 @@ class LunaWallAlignNode(Node):
                 ('angular_z_max', 2.0),
                 ('angular_z_min', -2.0),
                 ('kp_linear_x', 1.8),
-                ('ki_linear_x', 0.0068),
-                ('kd_linear_x', 0.0),
+                ('ki_linear_x', 0.05),
+                ('kd_linear_x', 0.03),
                 ('kp_linear_y', 1.8),
-                ('ki_linear_y', 0.0068),
-                ('kd_linear_y', 0.0),
+                ('ki_linear_y', 0.05),
+                ('kd_linear_y', 0.03),
                 ('kp_angular', 0.08),
                 ('ki_angular', 0.0028),
                 ('kd_angular', 0.0),          
-                # ('x_goal', 13.0),
-                # ('y_goal', 250.0),
-                # ('silo_number', 1),
                 ('capture_x', 1.5),
                 ('capture_y', 1.5),    
                 ('silo_1_x', 0.090),
@@ -92,7 +89,6 @@ class LunaWallAlignNode(Node):
         self.silo_5_y = self.get_parameter('silo_5_y').value
         self.add_on_set_parameters_callback(self.param_callback)
 
-        
         # All 6 lunar sensors subscribers
         
         self.luna_fl_subscriber = self.create_subscription(         #Front Left
@@ -294,7 +290,7 @@ class LunaWallAlignNode(Node):
                 else:
                     twist.angular.z = -abs(twist.angular.z) 
 
-                self.get_logger().info('Angular z: %f' % twist.angular.z)
+                self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
         
         else:
             if self.logging:
