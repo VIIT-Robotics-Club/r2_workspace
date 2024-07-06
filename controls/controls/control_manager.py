@@ -41,12 +41,17 @@ class ControlManager(Node):
 
         self.create_subscription(Bool,'status',self.status_callback, 10)
         self.create_subscription(Int32,'best_silo',self.best_silo_callback, 10)
+        self.create_subscription(Bool,'valid_silo',self.valid_silo_callback, 10)
         
         # create clients to activated individual services
         self.line_follower_client = self.create_client(SetBool,"lf_srv")
         while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
             self.get_logger().warn('lf_srv Service not available, waiting !!')
-            
+        
+        
+        self.retry_service = self.create_service(SetBool, "/retry", self.retry_service_callback)
+        
+        
         self.ball_tracking_client = self.create_client(SetBool ,"ball_tracking_srv")
         while not self.ball_tracking_client.wait_for_service(timeout_sec=0.2):
             self.get_logger().warn('ball_tracking_srv Service not available, waiting !!')
@@ -84,6 +89,12 @@ class ControlManager(Node):
         self.response_recvd = False
         self.index = -1
         
+    
+    def retry_service_callback(self, request, response):
+        
+        
+        return response
+
 
     def parameters_callback(self, params):
         for param in params:
@@ -96,6 +107,11 @@ class ControlManager(Node):
     def best_silo_callback(self,msg):
         self.siloUpdated = True
         self.bestSiloNum = msg.data
+        
+
+    def valid_silo_callback(self,msg):
+        # self.siloUpdated = True
+        self.valid_silo = msg.data
 
         
     def updateBestSilo(self):
@@ -158,6 +174,7 @@ class ControlManager(Node):
 
             if self.response_recvd :
                 self.index = (self.index + 1) % 4
+
                 self.get_logger().info("index = " + str(self.index))
 
                 
