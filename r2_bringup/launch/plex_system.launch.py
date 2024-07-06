@@ -12,24 +12,34 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 
 def generate_launch_description():
 
-    system_params = os.path.join(get_package_share_directory('r2_bringup'),'config','plex_system.yaml')
+    plex_params = os.path.join(get_package_share_directory('r2_bringup'),'config','plex_system.yaml')
     
+    
+    # launch simulation only, exclude any other nodes
+    blueSide_arg = DeclareLaunchArgument(
+        'blueSide', default_value=TextSubstitution(text='True')
+    )
+        
     yolo_results = Node(
         package="ball_tracking",
         name='yolo_results',
         executable="ball_detect_sim",
-        parameters=[system_params]
+        parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     quaternion_to_rpy = Node(
         package="r2_py",
         name='quaternion_to_rpy',
         executable="quat_to_rpy",
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
 
     )
     
@@ -37,7 +47,8 @@ def generate_launch_description():
         package="r2_navigation",
         name='robot_altitude_check',
         executable="robot_altitude_check",
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )   
     
     luna_allignment_server = Node(
@@ -48,14 +59,16 @@ def generate_launch_description():
         remappings=[
             ("/nav_vel", "/luna/nav_vel"),
             ("status", "/status")],
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     silo_deciding_server = Node(   
         package='silo_tracking',
         name='silo_deciding_server',
         executable='silo_deciding',
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     lineFollowerService = Node(
@@ -65,14 +78,16 @@ def generate_launch_description():
         remappings=[
             ("/nav_vel", "/line/nav_vel"),
             ("status", "/status")],
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     
     controller = Node(
         package='controls',
         executable='control_manager',
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     siloTrackingServer = Node(
@@ -85,7 +100,8 @@ def generate_launch_description():
             ("/silo/yolo_results", "/yolo_results"),
             
             ("status", "/status")],
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     
@@ -98,7 +114,8 @@ def generate_launch_description():
             ("/nav_vel", "/ball/nav_vel"),
             ("/ball/yolo_results", "/yolo_results"),
             ("status", "/status")],
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     
@@ -108,10 +125,13 @@ def generate_launch_description():
         namespace="rnm",
         remappings=[
             ("status", "/status")],
-        parameters=[system_params]
+                parameters=[plex_params, 
+                    {'blueSide': LaunchConfiguration('blueSide')}]
     )
     
     return LaunchDescription([
+        blueSide_arg,        
+
         luna_allignment_server,
         silo_deciding_server,
         lineFollowerService,
