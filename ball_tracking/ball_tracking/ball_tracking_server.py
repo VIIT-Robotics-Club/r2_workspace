@@ -8,7 +8,9 @@ from std_srvs.srv import SetBool
 from geometry_msgs.msg import Twist
 from r2_interfaces.msg import YoloResults
 from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 
+import time
 class BallTrackingNode(Node):
     def __init__(self):
         super().__init__('ball_tracking_node')
@@ -17,20 +19,22 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 213000), #change according to camera position
-                ('linear_kp', 0.5),
-                ('linear_ki', 0.0),
-                ('linear_kd', 0.00),
-                ('angular_kp', 0.2),
-                ('angular_ki', 0.00007),
+                ('desired_contour_area', 385000), #change according to camera position
+                ('linear_kp', 0.50),
+                ('linear_ki', 0.000),
+                ('linear_kd', 0.0),
+                ('angular_kp', 0.17),
+                ('angular_ki', 0.00000),
                 ('angular_kd', 1.8),
                 ('max_linear_speed', 2.0),
+                ('max_integral', 100.0),
                 ('max_angular_speed', 1.0),
-                ('max_integral', 10.0),
-                ('contour_area_threshold', 3000),
+                ('contour_area_threshold', 0000),
                 ('difference_threshold', 600),
-                ('ball_colour', 'blue'),
-                ('logging', False)
+                ('ball_condition', False),
+                ('logging', True),
+                ('contour_area_fluctuation_threshold', 6000),  # New parameter for fluctuation threshold
+                # ('set_contour_area', 6000)  # New parameter for fluctuation threshold
             ]
         )
         
@@ -46,28 +50,35 @@ class BallTrackingNode(Node):
         self.max_integral = self.get_parameter('max_integral').value
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
-        self.ball_colour = self.get_parameter('ball_colour').value
+        self.ball_condition = self.get_parameter('ball_condition').value
         self.logging = self.get_parameter("logging").value
+        self.contour_area_fluctuation_threshold = self.get_parameter('contour_area_fluctuation_threshold').value  # New parameter
+        # self.set_error_area = self.get_parameter('set_error_area').value  # New parameter
 
         self.linear_error_sum = 0.0
-        self.linear_last_error = 0.0
+        self.linearX_last_error = 0.0
         self.angular_error_sum = 0.0
         self.angular_last_error = 0.0
         self.tracking_our_ball = False
         self.difference_error = 0.0
         self.contour_area_error = 0.0
-
+        self.previous_contour_area = None  # New attribute to store the previous contour area
+        self.contour_area=0
         self.publisher = self.create_publisher(Bool, 'status', 10)
         self.cmd_vel_pub = self.create_publisher(Twist, 'nav_vel', 10)
         self.cmd_vel_pub_count = 0
+        self.counter=0
         self.class_ids_list = []
         self.contour_areas_list = []
+        self.contour_areas_list_2 = []
         self.differences_list = []
         self.confidences_list = []
         self.tracking_ids_list = []
         self.xyxys_list = []
         self.xywhs_list = []
-        self.int_error = 0
+        self.wall_dist=10
+        self.wall_dist_align=80
+        self.int_error_diff = 0
         self.closest_our_ball = {
             'class_id': None,
             'contour_area': None,
@@ -78,21 +89,78 @@ class BallTrackingNode(Node):
             'xywh': None
         }
         self.our_id = -1
+        self.current_contour_area=0
         self.opp_id = -1
         self.reached = True
         self.last_seen_direction = None
-        self.active=False
-        
+        self.active = False
+        self.luna_rf=0
+        self.int_error_area=0
+        self.enableEdgeCases = False
+        # self.center_aligned = False 
+
         self.create_service(SetBool, "/ball_tracking_srv", self.ball_tracking_callback)
         self.add_on_set_parameters_callback(self.parameters_callback)
+
         self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
+        # self.create_timer()
+        self.luna_rf_subscriber = self.create_subscription(         #Right Front
+            Int32,   'luna_rf', self.luna_rf_callback, 10
+        )
+        
+        
+        self.luna_rb_subscriber = self.create_subscription(         #Right Back           s
+            Int32, 'luna_rb', self.luna_rb_callback, 10
+        ) 
+        
+        self.luna_rf_subscriber = self.create_subscription(         #Right Front
+            Int32,   'luna_lf', self.luna_lf_callback, 10
+        )
+        
+        
+        self.luna_rb_subscriber = self.create_subscription(         #Right Back           s
+            Int32, 'luna_lb', self.luna_lb_callback, 10
+        )        
+        
+
+
+    def luna_lb_callback(self, msg: Int32):
+        try:
+            self.luna_lb = float(msg.data)
+            # print(self.luna_lb)
+        except Exception as e:
+            print(f"Error in luna_lb_callback: {e}")
+
+    def luna_lf_callback(self, msg: Int32):
+        try:
+            self.luna_lf = float(msg.data)
+            # print(self.luna_lf)
+        except Exception as e:
+            print(f"Error in luna_lf_callback: {e}")
+
+    def luna_rf_callback(self, msg: Int32):
+        try:
+            self.luna_rf = float(msg.data)
+            # print(self.luna_rf)
+        except Exception as e:
+            print(f"Error in luna_rf_callback: {e}")
+
+    def luna_rb_callback(self, msg: Int32):
+        try:
+            self.luna_rb = float(msg.data)
+            # print(self.luna_rb)
+        except Exception as e:
+            print(f"Error in luna_rb_callback: {e}")
+            
+
 
     def ball_tracking_callback(self, request, response):
-        
-        self.active=True
-        self.get_logger().info("ball tracking is active")
+        self.active = True  
+        self.get_logger().info("Ball tracking is active")
         response.success = True
         response.message = "Ball tracking started"
+        # self.center_aligned = False # Flag to activate center alignment during ball tracking using Lunas
+        # self.center_yaw_aligned = False 
         return response
 
     def parameters_callback(self, params):
@@ -103,12 +171,13 @@ class BallTrackingNode(Node):
         return SetParametersResult(successful=True)
 
     def yolo_results_callback(self, msg):
-        if self.active :
+        if self.active:
             if self.logging:
                 self.get_logger().info("Yolo Results Received")
 
             self.class_ids_list.clear()
             self.contour_areas_list.clear()
+            self.contour_areas_list_2.clear()
             self.differences_list.clear()
             self.confidences_list.clear()
             self.tracking_ids_list.clear()
@@ -121,9 +190,11 @@ class BallTrackingNode(Node):
             self.confidences_list.extend(msg.confidence)
             self.tracking_ids_list.extend(msg.tracking_id)
 
+
             for xyxy, xywh in zip(msg.xyxy, msg.xywh):
                 self.xyxys_list.append([xyxy.tl_x, xyxy.tl_y, xyxy.br_x, xyxy.br_y])
                 self.xywhs_list.append([xywh.center_x, xywh.center_y, xywh.width, xywh.height])
+
 
             def is_behind_other_ball(our_ball_coords, other_ball_coords):
                 our_tl_x, our_tl_y, our_br_x, our_br_y = our_ball_coords
@@ -136,21 +207,26 @@ class BallTrackingNode(Node):
                 return (our_tl_x >= silo_tl_x and our_tl_y >= silo_tl_y and our_br_x <= silo_br_x and our_br_y <= silo_br_y)
 
             # Update IDs based on ball color
-            if self.ball_colour == "red":
+            if self.ball_condition :
                 self.our_id = 2
                 self.opp_id = 0
-            elif self.ball_colour == "blue":
+            elif self.ball_condition ==False:
                 self.our_id = 0
                 self.opp_id = 2
 
             our_ball_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == self.our_id]
             silo_indices = [i for i, class_id in enumerate(self.class_ids_list) if class_id == 3]
-
+            
             filtered_our_ball_indices = []
             for i in our_ball_indices:
                 our_ball_coords = self.xyxys_list[i]
                 behind_other_ball = False
                 inside_silo = False
+                # self.contour_area=self.xywhs_list[2]*self.xywhs_list[2]
+                # self.contour_areas_list_2.extend(self.contour_area)
+
+                
+
 
                 for j, class_id in enumerate(self.class_ids_list):
                     if class_id in [1, self.opp_id]:  # Purple and Red ball  or Purple or Blue Ball
@@ -170,6 +246,14 @@ class BallTrackingNode(Node):
 
             if filtered_our_ball_indices:
                 largest_contour_index = max(filtered_our_ball_indices, key=lambda i: self.contour_areas_list[i])
+                devia = min(filtered_our_ball_indices, key=lambda i: self.differences_list[i])
+
+                self.current_contour_area = self.contour_areas_list[largest_contour_index]
+
+                # if self.previous_contour_area is None or abs(current_contour_area - self.previous_contour_area) < self.contour_area_fluctuation_threshold:
+                #     self.previous_contour_area = current_contour_area
+                # else:
+                #     current_contour_area = self.previous_contour_area
 
                 self.closest_our_ball = {
                     'class_id': self.class_ids_list[largest_contour_index],
@@ -195,33 +279,81 @@ class BallTrackingNode(Node):
             else:
                 self.sweep_for_ball()
 
-    def pid_controller(self, error, previous_error, int_error, ki, kd, dt,linear_kp):
-        # print(previous_error,error)
-        int_error = np.clip(int_error, -self.max_integral, self.max_integral) 
+    def pid_controller(self, error, previous_error, int_error, ki, kd, dt, linear_kp):
+        int_error = np.clip(int_error, -self.max_integral, self.max_integral)
+        # self.get_logger().info("Intertial Error "+ str(int_error))
         control_action = linear_kp * error + ki * int_error + kd * ((error - previous_error))
         return control_action
-        
+    
+    def move_afar(self, twist_msg):
+        if self.luna_rf <= self.wall_dist_align:
+            self.get_logger().info(f"luna {self.luna_rf}")
+
+            # twist_msg.angular.z = 0.0
+            # self.cmd_vel_pub.publish(twist_msg)
+        # self.get_logger().info("aligned")
+
+    # def move_to_center(self):
+    #     # Bot is on slope going downwards , time to align
+    #     if self.luna_lb <= 400 and self.luna_rb <= 400:
+    #         if not self.center_aligned: # If center 
+    #             msg = Twist()
+    #             # Consider any side luna readings and align yaw 
+    #             if abs(self.luna_rb - self.luna_rf) <= 5:
+    #                 self.center_yaw_aligned = True
+    #             else:
+    #                 if self.luna_rb < self.luna_rf :
+    #                     msg.angular.z = -0.5
+    #                 else:
+    #                     msg.angular.z = 0.5
+    #                 self.center_yaw_aligned = False
+                
+    #             # Align to reach to center area of slope
+    #             if self.luna_rf <= 125 and self.luna_rb <= 125:
+    #                 msg.linear.y = 0.5
+    #             else:# Flag to activate center alignment during ball tracking using Lunas
+    #                 if self.center_yaw_aligned :
+    #                     self.center_aligned = True
+
+    #             self.cmd_vel_pub.publish(msg)
+
     def move_robot(self):
+        twist_msg = Twist()
+        if self.enableEdgeCases and self.luna_rf >= self.wall_dist and self.luna_rf <= 34:
+            self.get_logger().info(f"entered")
+            twist_msg.linear.y = 0.5
+
+            # self.move_afar(twist_msg)
+        
         if self.closest_our_ball['class_id'] is not None:
             if self.logging:
-                self.get_logger().info(f"Contour Area Error: {self.contour_area_error/70000}")
-                self.get_logger().info(f"Difference Error: {self.difference_error/170}")
+                self.get_logger().info(f"Contour Area Error: {self.contour_area_error / 70000}")
+                self.get_logger().info(f"Difference Error: {self.difference_error / 170}")
+                
+            # if self.previous_contour_area != None and abs(self.contour_area_error - self.previous_contour_area) < self.set_error_area :
+            #     self.counter =self.counter+1
+            #     if self.counter> 50 :
+            #         self.counter=0
+            #         twist_msg=Twist()
+            #         twist_msg.linear.x = 0.0
+            #         twist_msg.angular.z = 0.7
+            #         self.cmd_vel_pub.publish(twist_msg)
+            #         time.sleep(1.5)
+            # self.previous_contour_area=self.contour_area_error        
             
-            if self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
-            # if self.contour_area_error/70000 < 2.7:
+
+            if  self.contour_area_error < self.contour_area_threshold and abs(self.difference_error) < self.difference_threshold:
                 twist_msg = Twist()
                 twist_msg.linear.x = 0.0
                 twist_msg.angular.z = 0.0
                 self.cmd_vel_pub.publish(twist_msg)
-                self.active=False
+                self.active = False
 
                 bool_msg = Bool()
                 bool_msg.data = True
                 self.publisher.publish(bool_msg)
                 self.get_logger().info("Reached the ball. Stopping the robot.")
 
-                # self.tracking_our_ball = False
-  
                 self.tracking_our_ball = False
                 self.closest_our_ball = {
                     'class_id': None,
@@ -233,46 +365,42 @@ class BallTrackingNode(Node):
                     'xywh': None
                 }
                 return
-            twist_msg = Twist()
-            self.int_error += self.difference_error/170
-            self.int_error = np.clip(self.int_error, -self.max_integral, self.max_integral)  
-            print(self.int_error)
-            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error/70000,0,0,0,0,0.1,self.linear_kp))
-            # twist_msg.linear.y =-float(self.pid_controller((self.difference_error/600),0,0,0,0,0.1))
-            twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
-            # twist_msg.angular.z = -float(self.pid_controller((self.difference_error/170),self.angular_last_error,self.int_error,0,self.angular_kd,0.1,self.angular_kp))
+
+            # twist_msg = Twist()
+            self.int_error_area += self.contour_area_error/14000000
+            self.int_error_diff += self.difference_error / 17000
+
+            # self.int_error_diff = np.clip(self.int_error_diff, -self.max_integral, self.max_integral)
+            twist_msg.linear.x = float(self.pid_controller(self.contour_area_error / 215000, self.linearX_last_error, self.int_error_area, self.linear_ki, self.linear_kd, 0.1, self.linear_kp))
+            twist_msg.angular.z = -float(self.pid_controller((self.difference_error / 170), self.angular_last_error, self.int_error_diff, self.angular_ki, self.angular_kd, 0.1, self.angular_kp))
+            # twist_msg.linear.y = float(self.pid_controller((self.difference_error / 170), self.angular_last_error, self.int_error_diff, self.angular_ki, self.angular_kd, 0.1, self.angular_kp))
 
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
-            # twist_msg.linear.y = max(min(twist_msg.linear.y, self.max_angular_speed), -self.max_angular_speed)
             twist_msg.angular.z = max(min(twist_msg.angular.z, self.max_angular_speed), -self.max_angular_speed)
-                                        
-            self.linearX_last_error = self.contour_area_error/120000
-            # self.linearY_last_error = self.difference_error
-            # self.previous_angular_vel=twist_msg
-            self.angular_last_error = self.difference_error/170                                
-            self.cmd_vel_pub_count=self.cmd_vel_pub_count+1
-            if(self.cmd_vel_pub_count >9):
+            # twist_msg.linear.y = max(min(twist_msg.angular.y, self.max_angular_speed), -self.max_angular_speed)
+            if self.current_contour_area <50000:
+                twist_msg.linear.x=abs(twist_msg.angular.z) + twist_msg.linear.x       
+            self.linearX_last_error = self.contour_area_error / 120000
+            self.angular_last_error = self.difference_error / 170
+            self.cmd_vel_pub_count += 1
+            if self.cmd_vel_pub_count > 9:
                 self.cmd_vel_pub.publish(twist_msg)
-                self.cmd_vel_pub_count=0
-            if self.logging:      
-                self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z} ,linear_y= {twist_msg.linear.y}")
-        
+                self.cmd_vel_pub_count = 0
+
+            if self.logging:
+                self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")
+
     def sweep_for_ball(self):
         twist_msg = Twist()
         if self.last_seen_direction == 'right':
-            twist_msg.angular.z = 1.0
-        else:
             twist_msg.angular.z = -1.0
+        else:
+            twist_msg.angular.z = 1.0
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        if self.logging:  
+        if self.logging:
             self.get_logger().info(f"Sweeping for ball: angular_z = {twist_msg.angular.z}")
-        # bool_msg = Bool()
-        # bool_msg.data = False
-        # self.publisher.publish(bool_msg)
-    
-    
     
 def main(args=None):
     rclpy.init(args=args)
