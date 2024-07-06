@@ -27,7 +27,8 @@ setup(
             "luna_align_sim = luna_control.luna_align_sim:main",
             # "line_follower = luna_control.lf_sub:main",
             "luna_align_srv = luna_control.luna_align_srv:main",
-            "lf_sub = luna_control.lf_sub:main"
+            "lf_sub = luna_control.lf_sub:main",
+            "lf_sub_m2 = luna_control.lf_sub_mark2:main"
         ],
     },
 )

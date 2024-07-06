@@ -21,6 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             "silo_deciding=silo_tracking.silo_deciding:main",
+            "silo_deciding_near_silo=silo_tracking.silo_deciding_near_silo:main",
+
             "silo_tracking=silo_tracking.silo_tracking_sim_old:main",
             "silo_tracking_server=silo_tracking.silo_tracking_server:main",
 
