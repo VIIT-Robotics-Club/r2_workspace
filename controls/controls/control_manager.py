@@ -43,6 +43,9 @@ class ControlManager(Node):
         self.create_subscription(Int32,'best_silo',self.best_silo_callback, 10)
         self.create_subscription(Bool,'valid_silo',self.valid_silo_callback, 10)
         
+        self.create_service(SetBool, "/reset", self.resetCallback)
+        self.halt_pub = self.create_publisher(Bool,"halt",10)
+        
         # create clients to activated individual services
         self.line_follower_client = self.create_client(SetBool,"lf_srv")
         while not self.line_follower_client.wait_for_service(timeout_sec=0.2):
@@ -69,17 +72,17 @@ class ControlManager(Node):
             self.get_logger().warn('rotate and move service not available, waiting !!')
         
         self.gripper_lift_client = self.create_client(SetBool ,"gripper_lift")
-        while not self.gripper_lift_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().warn('gripper_lift Service not available, waiting !!')
+        # while not self.gripper_lift_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().warn('gripper_lift Service not available, waiting !!')
         
         self.gripper_grab_client = self.create_client(SetBool ,"gripper_grab")
-        while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().warn('gripper grab Service not available, waiting !!')    
+        # while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().warn('gripper grab Service not available, waiting !!')    
     
 
         self.best_silo_client = self.create_client(BestSilo ,"best_silo",)
-        while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
-            self.get_logger().warn('best silo service not available, waiting !!')    
+        # while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
+        #     self.get_logger().warn('best silo service not available, waiting !!')    
 
 
 
@@ -88,13 +91,32 @@ class ControlManager(Node):
         self.lastStatus = True
         self.response_recvd = False
         self.index = -1
-        
-    
-    def retry_service_callback(self, request, response):
-        
-        
-        return response
+        self.reset = False
 
+    
+    def resetCallback(self, request, response):
+        
+        # halt runtime execution
+        self.index = -1
+
+        # publish on halt topic to notify any active node to halt
+        haltMsg = Bool()
+        haltMsg.data = True
+        self.halt_pub.publish(haltMsg)
+
+        # wait for nodes to end execution
+        time.sleep(1)
+
+        # start line following with reset configuration
+        if self.enableLineFollowing:
+            lfClientMsg = SetBool.Request()
+            lfClientMsg.data = True
+            self.line_follower_client.call(lfClientMsg)
+        else:
+            self.response_recvd = True
+
+        response.success = True
+        return response
 
     def parameters_callback(self, params):
         for param in params:
@@ -161,11 +183,10 @@ class ControlManager(Node):
     def runtime(self):
 
         req = SetBool.Request()
-        req.data = True
-        
                             
         if self.enableLineFollowing:
-            self.line_follower_client.call_async(req) 
+            req.data = False
+            self.line_follower_client.call_async(req)
             self.get_logger().info("calling line follower service")
         else:
             self.response_recvd = True
@@ -174,18 +195,22 @@ class ControlManager(Node):
 
             if self.response_recvd :
                 self.index = (self.index + 1) % 4
-
+                
                 self.get_logger().info("index = " + str(self.index))
+                
+                # halt state do nothing
+                if self.index == -1:
+                    self.response_recvd = False
+                    time.sleep(1)
+                    continue
 
                 
-                if self.enableBallTracking and self.index == 0:
+                elif self.enableBallTracking and self.index == 0:
                     
                     
                     # move gripper down and open configuration
                     self.setGripperConfiguration(False, False)
                     self.ball_tracking_client.call_async(req)
-                    req.data = False
-                    self.grab_client.call_async(req)
                     self.get_logger().info("calling ball tracking service")
                     self.response_recvd = False
                     
@@ -202,10 +227,6 @@ class ControlManager(Node):
                     
                 elif self.enableLunaAlignment and self.index == 2:
 
-                    # decrement index so that next iteration calls luna again
-                    if self.bestSiloNum == 0:
-                        self.index = self.index - 1
-                    
                     siloReq = SiloToGo.Request()
                     
                     if not self.siloUpdated:
@@ -241,13 +262,9 @@ class ControlManager(Node):
                     #     siloReq.silo_number = self.bestSiloNum
                     #     self.luna_align_client.call_async(siloReq)   
                          
-    
-
                 else:
                     self.response_recvd = True
-                    
-                    
-            
+
             time.sleep(1)
         
     def generic_response_callback(self,future,service_name : str):
