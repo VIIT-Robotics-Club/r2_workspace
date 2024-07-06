@@ -2,9 +2,9 @@
   ros__parameters:
     enableLineFollowing: false
     enableBallTracking: true
-    enablesiloDetection: false
-    enableLunaAlignment: false
-    enableRnm: false
+    enablesiloDetection: true
+    enableLunaAlignment: true
+    enableRnm: true
     use_sim_time: false
 
 
@@ -17,26 +17,26 @@
     arena_side: blue
     base_speed: -2.0
     desired_value: 35.0
-    logging: false
+    logging: true
     use_sim_time: false
 
 
 
 /ball/ball_tracking_server:
   ros__parameters:
-    angular_kd: 1.8
-    angular_ki: 7.0e-05
-    angular_kp: 0.2
+    angular_kd: 1.8 #some values that have worked nicely 1.9
+    angular_ki: 0.0000 #some values that have worked nicely 0.008
+    angular_kp: 0.20 #some values that have worked nicely 0.265
     ball_colour: blue
-    contour_area_threshold: 3000
-    desired_contour_area: 215000
+    contour_area_threshold: 0
+    desired_contour_area: 385000
     difference_threshold: 600
     linear_kd: 0.0
-    linear_ki: 0.0
-    linear_kp: 0.5
+    linear_ki: 0.00
+    linear_kp: 0.5 #some values that have worked nicely 0.5
     logging: false
     max_angular_speed: 1.0
-    max_integral: 10.0
+    max_integral: 100.0
     max_linear_speed: 2.0
     use_sim_time: false
 

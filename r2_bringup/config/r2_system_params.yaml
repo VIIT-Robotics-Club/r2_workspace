@@ -1,34 +1,4 @@
-luna_allignment_server:
-  ros__parameters:
-    linear_x_max: 2.0
-    linear_y_max: 2.0
-    linear_x_min: -2.0
-    linear_y_min: -2.0
-    angular_z_max: 1.0
-    angular_z_min: -1.0
-    kp_linear_x: 1.8
-    ki_linear_x: 0.01
-    kd_linear_x: 0.0
-    kp_linear_y: 1.8
-    ki_linear_y: 0.01
-    kd_linear_y: 0.0
-    kp_angular: 0.08
-    ki_angular: 0.0
-    kd_angular: 0.0
-    silo_1_x: 0.120
-    silo_1_y: 3.120
-    silo_2_x: 0.120
-    silo_2_y: 2.400
-    silo_3_x: 0.120
-    silo_3_y: 1.660
-    silo_4_x: 0.120
-    silo_4_y: 0.980
-    silo_5_x: 0.120
-    silo_5_y: 0.250
-  
-# quaternion_to_rpy:
-#   ros__parameters:
-
+    maintainer='adyansh04',
 robot_altitude_check:
   ros__parameters:
     pitch_threshold: 7.0                   # Pitch threshold for detecting climb/descent
@@ -43,6 +13,6 @@ silo_deciding_server:
 
 yolo_results:
   ros__parameters:
-    deviation: 170
+    deviation: 300
     
     logging: False  

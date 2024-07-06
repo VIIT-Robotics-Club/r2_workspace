@@ -66,7 +66,7 @@ class SiloDetectionNode(Node):
         self.linear_kp = self.get_parameter('linear_kp').value
         self.linear_ki = self.get_parameter('linear_ki').value
         self.linear_kd = self.get_parameter('linear_kd').value
-        
+        self.seen=False
         self.angular_kp = self.get_parameter('angular_kp').value
         self.angular_ki = self.get_parameter('angular_ki').value
         self.angular_kd = self.get_parameter('angular_kd').value
@@ -180,7 +180,7 @@ class SiloDetectionNode(Node):
         if self.logging:    
             self.get_logger().info(f"Contour Area Error: {contour_area_error}")
             self.get_logger().info(f"Deviation Error: {deviation_error}")
-
+        self.seen=True
         if (contour_area_error) < self.contour_area_threshold and abs(deviation_error) < self.difference_threshold:
         # if (contour_area_error) < self.contour_area_threshold:
         # if (contour_area_error) < 30000:
@@ -235,13 +235,17 @@ class SiloDetectionNode(Node):
 
     def sweep_for_silos(self):
         twist_msg = Twist()
-        twist_msg.angular.z = 1.20
+        twist_msg.angular.z = 0.80
         twist_msg.linear.x = 0.0
         
         self.cmd_vel_pub.publish(twist_msg)
-        if self.logging:
-            self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
+        if self.seen:
+            twist_msg.angular.z = 0.
+            twist_msg.linear.x = 1.0
+        
+            self.cmd_vel_pub.publish(twist_msg)
 
+        self.get_logger().info(f"Sweeping for silos: angular_z = {twist_msg.angular.z}")
     def stop_robot(self):
         twist_msg = Twist()
         twist_msg.linear.x = 0.0
