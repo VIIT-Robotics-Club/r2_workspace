@@ -36,6 +36,7 @@ class ControlManager(Node):
         self.create_subscription(Twist,'luna/nav_vel',self.luna_vel_callback, 10)
         self.create_subscription(Twist,'silo/nav_vel',self.silo_vel_callback, 10)
         self.create_subscription(Twist,'rnm/nav_vel',self.rnm_vel_callback, 10)
+        self.create_subscription(Bool,'gotcha',self.gotchaCallback, 10)
         self.vel_pub = self.create_publisher(Twist,"nav_vel",10)
         
 
@@ -80,9 +81,14 @@ class ControlManager(Node):
         #     self.get_logger().warn('gripper grab Service not available, waiting !!')    
     
 
-        self.best_silo_client = self.create_client(BestSilo ,"best_silo",)
-        # while not self.gripper_grab_client.wait_for_service(timeout_sec=0.2):
-        #     self.get_logger().warn('best silo service not available, waiting !!')    
+        self.best_silo_client = self.create_client(BestSilo ,"best_silo")
+        while not self.best_silo_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('best silo service not available, waiting !!')    
+
+
+        self.yaw_align_client = self.create_client(SetBool ,"yaw_align_srv")
+        while not self.yaw_align_client.wait_for_service(timeout_sec=0.2):
+            self.get_logger().warn('yaw align service not available, waiting !!')    
 
 
 
@@ -91,6 +97,7 @@ class ControlManager(Node):
         self.lastStatus = True
         self.response_recvd = False
         self.index = -1
+        self.gotcha = False
         self.reset = False
 
     
@@ -135,11 +142,13 @@ class ControlManager(Node):
         # self.siloUpdated = True
         self.valid_silo = msg.data
 
-        
-    def updateBestSilo(self):
-        self.bestSiloNum = 0
-        response = self.best_silo_client.call(BestSilo.Request())
+
     
+    def gotchaCallback(self, msg: Bool):
+        self.gotcha = msg.data
+
+            
+
     def line_follow_vel_callback(self,msg: Twist):
         if(self.index ==  -1):
             self.vel_pub.publish(msg)
@@ -178,7 +187,27 @@ class ControlManager(Node):
         self.gripper_lift_client.call_async(liftMsg)
         time.sleep(1)
         
+    
+    def waitTillResponse(self):
+        while not self.response_recvd:
+            time.sleep(0.5)
+                            
+
+        self.response_recvd = False
         
+    
+    def moveBack(self):
+        # block all channels
+        self.index = -1
+        
+        vel = Twist()
+
+        vel.linear.x = -1
+        self.vel_pub.publish(vel)
+        time.sleep(1)
+        vel.linear.x = 0
+        self.vel_pub.publish(vel)
+
         
     def runtime(self):
 
@@ -216,13 +245,34 @@ class ControlManager(Node):
                     
                 
                 elif  self.enablesiloDetection and self.index == 1:
+                    self.setGripperConfiguration(False, True)
+                    
+                    self.moveBack()
+                    self.index = 1
+                    
+                    
                     self.setGripperConfiguration(True, True)
                     self.silo_tracking_client.call_async(req)
-                    # time.sleep(1)
                     self.get_logger().info("calling silo tracking service")
-                    self.updateBestSilo()
                     self.response_recvd = False
 
+                
+                elif not self.gotcha and self.index == 2:
+                    siloReq = SiloToGo.Request()
+                    siloReq.silo_number = 0
+                    
+                    self.get_logger().info("no ball detected !! retrying ball tracking")
+                    self.luna_align_client.call(siloReq)
+                    self.waitTillResponse()
+
+                    req.data = False
+                    self.rnm_client.call(req)
+                    self.waitTillResponse()
+                    
+                    yawReq = Bool()
+                    yawReq.data = True
+                    self.yaw_align_client.call(yawReq)
+                    self.waitTillResponse()
                     
                     
                 elif self.enableLunaAlignment and self.index == 2:
@@ -251,6 +301,7 @@ class ControlManager(Node):
                 elif self.enableRnm and self.index == 3:
                     # if self.valid_silo:
                     self.setGripperConfiguration(True, False)
+                    req.data = True
                     self.rnm_client.call_async(req) 
                     self.get_logger().info("calling rotate and move service")
                     
