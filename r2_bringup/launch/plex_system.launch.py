@@ -73,7 +73,7 @@ def generate_launch_description():
     
     lineFollowerService = Node(
         package='luna_control',
-        executable='lf_sub',
+        executable='lf_sub_m2',
         namespace="line",
         remappings=[
             ("/nav_vel", "/line/nav_vel"),
@@ -132,6 +132,7 @@ def generate_launch_description():
     return LaunchDescription([
         blueSide_arg,        
 
+        # yolo_results,
         luna_allignment_server,
         silo_deciding_server,
         lineFollowerService,

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-
 '''
  Class names:
 0- Blue-ball
 1- Purple-ball
 2- Red-Ball
 3- silo
-
 '''
 
 from rclpy.node import Node
@@ -38,7 +36,7 @@ class YoloObjectTrackingNode(Node):
         current_script_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Loads the model
-        model_path = os.path.join(current_script_dir, 'weights/model_sim3-1.pt')
+        model_path = os.path.join(current_script_dir, 'weights/robo_model3.pt')
         # model_path = os.path.join(current_script_dir, 'weights/model_sim.pt')
 
         self.model = YOLO(model_path)
@@ -49,7 +47,7 @@ class YoloObjectTrackingNode(Node):
 
         # Set the IOU and Confidence threshold
         self.iou = 0.5
-        self.conf = 0.15
+        self.conf = 0.0
 
         # Subscribe to the camera image topic
         self.create_subscription(
@@ -130,7 +128,7 @@ class YoloObjectTrackingNode(Node):
             xywh_list = result.boxes.xywh.tolist()
             cls_list = result.boxes.cls.tolist()
 
-            print(f"Class list: {cls_list}")  # Debug print to see the class IDs
+            # print(f"Class list: {cls_list}")  # Debug print to see the class IDs
 
             for i, xywh in enumerate(xywh_list):
                 xywh_msg = Xywh()
@@ -172,7 +170,7 @@ class YoloObjectTrackingNode(Node):
 
         # Class ids: 0- Blue-ball, 1- Purple-ball, 2- Red-Ball, 3- silo        
         cls_list = [int(cls) for cls in result.boxes.cls.tolist()]
-        self.get_logger().info(f"cls list {cls_list}")
+        # self.get_logger().info(f"cls list {cls_list}")
         yolo_result_msg.class_ids.extend(cls_list)
         
         # Confidence values
@@ -244,5 +242,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
-

@@ -51,7 +51,7 @@ class Scatter(Node):
                 ('kp_linear_y', 0.7),
                 ('ki_linear_y', 0.05),
                 ('kd_linear_y', 0.03),
-                ('kp_angular', 0.01),
+                ('kp_angular', 0.1),
                 ('ki_angular', 0.00), # 0.0028
                 ('kd_angular', 0.03),          
                 ('capture_x', 1.5),
@@ -67,7 +67,7 @@ class Scatter(Node):
                 ('silo_5_x', 0.090),
                 ('silo_5_y', 0.250),    
                 ('logging', True),
-                ('blue_side', False)
+                ('blue_side', True)
                 ]
         )
         
@@ -88,12 +88,14 @@ class Scatter(Node):
         self.kd_angular = self.get_parameter('kd_angular').value
         self.logging = self.get_parameter("logging").value
         self.blue_side = self.get_parameter('blue_side').value
-        self.target_y_dist = 100# cm   
-        self.target_x_dist = 150 # cm    
-        self.linear_x_time = 2.0 # seconds
-        self.push_time = 0.5
+        self.target_y_dist = 100 # cm   
+        self.target_x_dist = 250 # cm    
+        self.linear_x_time = 3.5 # seconds
+        self.push_time = 1.0
         self.active = False
-        self.y_diff=0
+        self.y_diff = 0.0
+        self.y_err=0.0
+        self.loop_once = 0
         # Initialize the luna data
         self.luna_rb = 0.00     #Right Back
         self.luna_rf = 0.00     #Right Front
@@ -112,11 +114,16 @@ class Scatter(Node):
         self.lin_y_aligned = None
         self.lin_x_aligned = None
         self.x_push = None
+        self.lin_y_diff = 1 # Diff between two lunas on same side
+        self.left_avg = None
+        self.y_push_dist = 250.0
 
         self.int_x_diff = 0
         self.int_y_diff = 0
         self.prev_x_diff = 0
         self.prev_y_diff = 0
+        self.int_y_err = 0
+        self.prev_y_err = 0
 
 
 
@@ -176,7 +183,7 @@ class Scatter(Node):
             self.yaw_and_linear_y_fix()
         elif not self.lin_x_aligned :
             self.linear_x_fix()
-        else:
+        elif not self.x_push:
             self.push()
          
     def scatter_service_callback(self,request,response):
@@ -221,58 +228,62 @@ class Scatter(Node):
         # Blue Side
         if self.blue_side:
             ang_error = self.luna_lf - self.luna_lb
-            if abs(ang_error) <= 10 and self.y_diff <0:  # Or you can use abs(y_diff) <= 3
-                self.get_logger().info('Robot Yaw aligned for scatter')
-                self.yaw_aligned = True
-           
-            # Yaw Alignment 
-            self.int_error_angular_z += ang_error
-            twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
-            self.prev_ang_error = ang_error
+            if self.y_diff < 0:  # Or you can use abs(y_diff) <= 3
+                if abs(ang_error) <= self.lin_y_diff:
+                    # self.yaw_and_lin_y_aligned = True
+                    self.get_logger().info('Robot Yaw aligned for scatter')
+                    self.yaw_aligned = True
+                    self.get_logger().info('Linear Y alignment Successful for Scatter')
 
-            twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
-            if ang_error < 0: 
-                twist.angular.z = -abs(twist.angular.z) # Rotate Clockwise
+                # Yaw Alignment 
+                self.int_error_angular_z += ang_error
+                twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
+                self.prev_ang_error = ang_error
+
+                twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+                if ang_error < 0: 
+                    twist.angular.z = -abs(twist.angular.z)  # Rotate Clockwise
+                else:
+                    twist.angular.z = abs(twist.angular.z) 
+                if self.logging:
+                    self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
             else:
-                twist.angular.z = abs(twist.angular.z) 
-            if self.logging:
-                self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
-                
-            # Linear Y fix
-            left_avg = (self.luna_lf + self.luna_lb) / 2.0
-            self.y_diff = left_avg - self.target_y_dist
-            self.int_y_diff += self.y_diff
-            print(self.y_diff)
-            twist.linear.y = self.pid_controller(self.y_diff, self.prev_y_diff, self.int_y_diff, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
-            self.prev_y_diff = self.y_diff
-            twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) # Consider negative value of linear y for Red side 
-            if self.logging:
-                self.get_logger().info('Linear Y: %f' % twist.linear.y) #Apply PID controller for angular z
-            # self.cmd_vel_pub.publish(twist)
+                # Linear Y fix
+                left_avg = (self.luna_lf + self.luna_lb) / 2.0
+                self.y_diff = left_avg - self.target_y_dist
+                self.int_y_diff += self.y_diff
+                print(self.y_diff)
+                twist.linear.y = self.pid_controller(self.y_diff, self.prev_y_diff, self.int_y_diff, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
+                self.prev_y_diff = self.y_diff
+                twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) # Consider negative value of linear y for Red side 
+                if self.logging:
+                    self.get_logger().info('Linear Y: %f' % twist.linear.y) #Apply PID controller for angular Z
    
         # Red Side 
         else:
             ang_error = self.luna_rf - self.luna_rb
-            if abs(ang_error) <= 10 and self.y_diff < 0:  # Or you can use abs(y_diff) <= 3
-                # self.yaw_and_lin_y_aligned = True
-                self.get_logger().info('Robot Yaw aligned for scatter')
-                self.yaw_aligned = True
-                self.get_logger().info('Linear Y alignment Successful for Scatter')
-                # self.lin_y_aligned = True
+            if self.y_diff < 0:  # Or you can use abs(y_diff) <= 3
+                if abs(ang_error) <= self.lin_y_diff :
+                    # self.yaw_and_lin_y_aligned = True
+                    self.get_logger().info('Robot Yaw aligned for scatter')
+                    self.yaw_aligned = True
+                    self.get_logger().info('Linear Y alignment Successful for Scatter')
+
+                # Yaw Alignment 
+                self.int_error_angular_z += ang_error
+                twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
+                self.prev_ang_error = ang_error
+
+                twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+                if ang_error < 0: 
+                    twist.angular.z = -abs(twist.angular.z)  # Rotate Clockwise
+                else:
+                    twist.angular.z = abs(twist.angular.z) 
+                if self.logging:
+                    self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
+
         
-            # # Yaw Alignment 
-            self.int_error_angular_z += ang_error
-            twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
-            self.prev_ang_error = ang_error
-
-            twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
-            if ang_error < 0: 
-                twist.angular.z = -abs(twist.angular.z)  # Rotate Clockwise
-            else:
-                twist.angular.z = abs(twist.angular.z) 
-            if self.logging:
-                self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
-
+            
             # Linear Y fix
             right_avg = (self.luna_rf + self.luna_rb) / 2.0
             self.y_diff = right_avg - self.target_y_dist
@@ -292,12 +303,47 @@ class Scatter(Node):
         twist = Twist()
 
         curr_time = time.time()
-        while (time.time() - curr_time <= self.linear_x_time):
-            self.get_logger().info("Going Forwards")
-            twist.linear.x = 1.0
-            self.cmd_vel_pub.publish(twist)
+        if self.loop_once == 0:
+            while (time.time() - curr_time <= self.linear_x_time):
+                self.get_logger().info("Going Forwards")
+                twist.linear.x = 2.0
+                self.cmd_vel_pub.publish(twist)
+            self.loop_once = 1
 
-        # # Now align according to Front Luna Distance
+        ang_error = self.luna_rf - self.luna_rb
+        if self.y_diff < 0:  # Or you can use abs(y_diff) <= 3
+            if abs(ang_error) <= self.lin_y_diff :
+                # self.yaw_and_lin_y_aligned = True
+                self.get_logger().info('Robot Yaw aligned for scatter')
+                self.yaw_aligned = True
+                self.get_logger().info('Linear Y alignment Successful for Scatter')
+
+        # Yaw Alignment 
+        # self.int_error_angular_z += ang_error
+        # twist.angular.z = self.pid_controller(ang_error, self.prev_ang_error, self.int_error_angular_z, self.kp_angular, self.ki_angular, self.kd_angular, dt)
+        # self.prev_ang_error = ang_error
+
+        # twist.angular.z = max(min(twist.angular.z, self.angular_z_max), self.angular_z_min)
+        # if ang_error < 0: 
+        #     twist.angular.z = -abs(twist.angular.z)  # Rotate Clockwise
+        # else:
+        #     twist.angular.z = abs(twist.angular.z) 
+        # if self.logging:
+        #     self.get_logger().info('Angular z: %f' % twist.angular.z) #Apply PID controller for angular z
+
+        
+        # # Linear Y fix
+        # right_avg = (self.luna_rf + self.luna_rb) / 2.0
+        # self.y_diff = right_avg - self.target_y_dist
+        # self.int_y_diff += self.y_diff
+        # print(self.y_diff)
+        # twist.linear.y = self.pid_controller(self.y_diff, self.prev_y_diff, self.int_y_diff, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
+        # self.prev_y_diff = self.y_diff
+        # twist.linear.y = -max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) # Consider negative value of linear y for Red side 
+        # if self.logging:
+        #     self.get_logger().info('Linear Y: %f' % twist.linear.y) #Apply PID controller for angular Z
+
+        # Linear X Fix
         front_avg = (self.luna_fl + self.luna_fr)/ 2.0
         if front_avg < self.target_x_dist :
             self.lin_x_aligned = True
@@ -311,29 +357,53 @@ class Scatter(Node):
             if self.logging:
                 self.get_logger().info('Linear X: %f' % twist.linear.x) #Apply PID controller for angular z
 
+        # if self.blue_side:
+
+        # else:
+            
         # Publish Velocity
         self.cmd_vel_pub.publish(twist)
                     
     def push(self):
         if not self.x_push:
+            dt = 0.2  # Assuming fixed sample rate of 10 Hz
             self.get_logger().info("Entered Push")
             twist = Twist()
+            print(self.y_err)
 
-            curr_time = time.time()
-            while (time.time() - curr_time <= self.push_time):
-                print(time.time() - curr_time)
-                self.get_logger().info("Pushing")
-                if self.blue_side :
-                    twist.linear.y = -1.0
-                else:
-                    twist.linear.y = 1.0
+            if self.y_err >= 0.0: 
+            # Linear Y fix for Blue
+                self.left_avg = (self.luna_lf + self.luna_lb) / 2.0
+                self.y_err =  self.y_push_dist - self.left_avg
+                self.int_y_err += self.y_err
+                print(self.y_err)
+                twist.linear.y = self.pid_controller(self.y_err, self.prev_y_err, self.int_y_err, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
+                self.prev_y_err = self.y_err
+                twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) # Consider negative value of linear y for Red side 
+                if self.logging:
+                    self.get_logger().info('Linear Y: %f' % twist.linear.y) #Apply PID controller for angular Z
+
                 self.cmd_vel_pub.publish(twist)
+            else:    
+                twist.linear.y = 0.0
+                self.cmd_vel_pub.publish(twist)
+                self.x_push = True
+                self.get_logger().info("Pushing Done")
+            # curr_time = time.time()
+            # while (time.time() - curr_time <= self.push_time):
+            #     print(time.time() - curr_time)
+            #     # self.get_logger().info("Pushing")
+            #     if self.blue_side :
+            #         twist.linear.y = -2.0
+            #     else:
+            #         twist.linear.y = 2.0
+            #     self.cmd_vel_pub.publish(twist)
 
-            # Pushing Balls done
-            twist.linear.y = 0.0
-            self.cmd_vel_pub_once.publish(twist)
-            self.get_logger().info("Pushing Done")
-            self.x_push = True
+            # # # Pushing Balls done
+            # twist.linear.y = 0.0
+            # self.cmd_vel_pub.publish(twist)
+            # self.get_logger().info("Pushing Done")
+            # self.x_push = True
 
             
 def main(args=None):

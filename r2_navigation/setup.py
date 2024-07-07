@@ -23,7 +23,8 @@ setup(
         "robot_altitude_check = r2_navigation.robot_altitude_check:main",
         "navigation_server = r2_navigation.navigation_server:main",
         "rotate_and_move = r2_navigation.rotate_and_move:main",
-        "scatter_balls = r2_navigation.scatter_balls:main"
+        "scatter_balls = r2_navigation.scatter_balls:main",
+        "scatter_balls_m2 = r2_navigation.scatter_mark2:main"
         ],
     },
 )

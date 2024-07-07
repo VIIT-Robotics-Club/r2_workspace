@@ -52,7 +52,7 @@ class ControlManager(Node):
             self.get_logger().warn('lf_srv Service not available, waiting !!')
         
         
-        self.retry_service = self.create_service(SetBool, "/retry", self.retry_service_callback)
+        self.retry_service = self.create_service(SetBool, "/retry", self.resetCallback)
         
         
         self.ball_tracking_client = self.create_client(SetBool ,"ball_tracking_srv")
@@ -96,6 +96,7 @@ class ControlManager(Node):
     
     def resetCallback(self, request, response):
         
+        self.get_logger().warn("retry called starting linefollower from retry logic")
         # halt runtime execution
         self.index = -1
 
@@ -173,10 +174,10 @@ class ControlManager(Node):
         liftMsg.data = lift
         grabMsg.data = grab
 
-        self.gripper_grab_client.call_async(grabMsg)
-        time.sleep(1)
-        self.gripper_lift_client.call_async(liftMsg)
-        time.sleep(1)
+        isBallCaptured = self.gripper_grab_client.call(grabMsg)
+        self.gripper_lift_client.call(liftMsg)
+
+        return isBallCaptured
         
         
         
@@ -216,6 +217,13 @@ class ControlManager(Node):
                     
                 
                 elif  self.enablesiloDetection and self.index == 1:
+                    # grab the gripper to check whether ball is capture
+                    if not self.setGripperConfiguration(False, True):
+                        # set index previous to ball tracking. will be incremented in next iteration
+                        self.get_logger().warn("ball not detected in gripper, restarting ball tracking")
+                        self.index = -1
+                        continue
+                    
                     self.setGripperConfiguration(True, True)
                     self.silo_tracking_client.call_async(req)
                     # time.sleep(1)

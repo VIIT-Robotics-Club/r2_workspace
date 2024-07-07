@@ -27,10 +27,11 @@
     angular_kd: 1.8 #some values that have worked nicely 1.9
     angular_ki: 0.0000 #some values that have worked nicely 0.008
     angular_kp: 0.20 #some values that have worked nicely 0.265
-    ball_colour: blue
+    blueSide: True
     contour_area_threshold: 0
-    desired_contour_area: 385000
+    desired_contour_area: 380000
     difference_threshold: 600
+    contour_area_fluctuation_threshold: 6000
     linear_kd: 0.0
     linear_ki: 0.00
     linear_kp: 0.5 #some values that have worked nicely 0.5
@@ -47,21 +48,21 @@
     angular_z_max: 2.0
     angular_z_min: -2.0
     kd_angular: 0.0
-    kd_linear_x: 0.0
-    kd_linear_y: 0.0
+    kd_linear_x: 0.4
+    kd_linear_y: 0.7
     ki_angular: 0.0028
-    ki_linear_x: 0.0068
-    ki_linear_y: 0.0068
+    ki_linear_x: 0.009
+    ki_linear_y: 0.007 # 0.0068
     kp_angular: 0.08
-    kp_linear_x: 1.8
-    kp_linear_y: 1.8
+    kp_linear_x: 1.95
+    kp_linear_y: 1.9
     linear_x_max: 2.0
     linear_x_min: -2.0
     linear_y_max: 2.0
     linear_y_min: -2.0
     logging: false
-    capture_x: 1.9
-    capture_y: 1.8
+    capture_x: 1.92
+    capture_y: 2.07
     silo_1_x: 0.10
     silo_1_y: 3.12
     silo_2_x: 0.10
@@ -96,7 +97,7 @@
 /silo_deciding_server:
   ros__parameters:
     logging: false
-    our_ball_color: b
+    blueSide: True
     use_sim_time: false
 
 

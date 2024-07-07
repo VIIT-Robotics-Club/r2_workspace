@@ -78,6 +78,7 @@ class SiloDetectionNode(Node):
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
         self.logging = self.get_parameter("logging").value
+        self.create_subscription(Bool, 'halt', self.halt_callback, 10)
 
         self.linear_error_sum = 0.0
         self.linear_last_error = 0.0
@@ -111,7 +112,19 @@ class SiloDetectionNode(Node):
        
               
         #Publisher
-    
+    def halt_callback(self, msg):
+        self.linear_error_sum = 0.0
+        self.linear_last_error = 0.0
+        
+        self.angular_error_sum = 0.0
+        self.angular_last_error = 0.0
+        self.silos = []
+        self.balls = []
+        self.reached=0
+        self.class_ids_list = []
+        self.xyxys_list = []
+        self.contour_areas_list = []
+        self.differences_list = []
     def parameters_callback(self, params):
         for param in params:
             param_name = param.name

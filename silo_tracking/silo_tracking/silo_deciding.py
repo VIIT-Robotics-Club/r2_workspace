@@ -52,11 +52,14 @@ class SiloDetectionNode(Node):
         self.logging = self.get_parameter('logging').value
         
         # Declare the parameter for the team ball color
-        self.declare_parameter('our_ball_color', 'b')
-        self.our_ball_color = self.get_parameter('our_ball_color').value
-        
+        self.declare_parameter('blueSide', True)
+        self.blueSide = self.get_parameter('blueSide').value
+        self.blueSide=""
         self.add_on_set_parameters_callback(self.parameters_callback)
-        
+        if self.blueSide:
+            self.our_ball_color="b"
+        else:
+            self.our_ball_color="r"
         # Set opponent's ball color
         self.opponent_ball_color = 'r' if self.our_ball_color == 'b' else 'b'
         

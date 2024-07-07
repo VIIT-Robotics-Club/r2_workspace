@@ -76,10 +76,10 @@ def generate_launch_description():
     camera_params = PathJoinSubstitution([share ,"config", "cam.yaml"])
     
     camera_node = Node(package="camera_ros", executable="camera_node",
-                        arguments=[
-                        "--ros-args",
-                        "--params-file",
-                        camera_params],
+                        # arguments=[
+                        # "--ros-args",
+                        # "--params-file",
+                        # camera_params],
                         
                        remappings=[
                            ("/camera/image_raw", "/image_raw"),
@@ -107,16 +107,24 @@ def generate_launch_description():
                         "--params-file",
                         imuParams])
     
+    
+    yolo_results = Node(
+        package="ball_tracking",
+        name='yolo_results',
+        executable="ball_detect_sim",
+        parameters=[startup_params]
+    )
 
     nodes = {
+        yolo_results,
         # launch arguments,    
         # ball_tracking,
         # silo_tracking,    
         joy_node,
         teleop_node,
         twist_mux,
-        # camera_node,
-        camStreamDecompress,
+        camera_node,
+        # camStreamDecompress,
         imuFilter
     }
     
@@ -126,6 +134,6 @@ def generate_launch_description():
                 share, 'launch/plex_system.launch.py'
             ])]))
 
-    nodes.add(otherNode)
+    # nodes.add(otherNode)
 
     return LaunchDescription(nodes)

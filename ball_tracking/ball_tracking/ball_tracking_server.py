@@ -19,11 +19,11 @@ class BallTrackingNode(Node):
         self.declare_parameters(
             namespace='',
             parameters=[
-                ('desired_contour_area', 385000), #change according to camera position
+                ('desired_contour_area', 364000), #change according to camera position
                 ('linear_kp', 0.50),
                 ('linear_ki', 0.000),
                 ('linear_kd', 0.0),
-                ('angular_kp', 0.17),
+                ('angular_kp', 0.2),
                 ('angular_ki', 0.00000),
                 ('angular_kd', 1.8),
                 ('max_linear_speed', 2.0),
@@ -31,7 +31,7 @@ class BallTrackingNode(Node):
                 ('max_angular_speed', 1.0),
                 ('contour_area_threshold', 0000),
                 ('difference_threshold', 600),
-                ('ball_condition', False),
+                ('blueSide', True),
                 ('logging', True),
                 ('contour_area_fluctuation_threshold', 6000),  # New parameter for fluctuation threshold
                 # ('set_contour_area', 6000)  # New parameter for fluctuation threshold
@@ -50,7 +50,7 @@ class BallTrackingNode(Node):
         self.max_integral = self.get_parameter('max_integral').value
         self.contour_area_threshold = self.get_parameter('contour_area_threshold').value
         self.difference_threshold = self.get_parameter('difference_threshold').value
-        self.ball_condition = self.get_parameter('ball_condition').value
+        self.blueSide = self.get_parameter('blueSide').value
         self.logging = self.get_parameter("logging").value
         self.contour_area_fluctuation_threshold = self.get_parameter('contour_area_fluctuation_threshold').value  # New parameter
         # self.set_error_area = self.get_parameter('set_error_area').value  # New parameter
@@ -98,11 +98,13 @@ class BallTrackingNode(Node):
         self.int_error_area=0
         self.enableEdgeCases = False
         # self.center_aligned = False 
+        self.target_y_dist = 200
 
         self.create_service(SetBool, "/ball_tracking_srv", self.ball_tracking_callback)
         self.add_on_set_parameters_callback(self.parameters_callback)
 
         self.create_subscription(YoloResults, 'yolo_results', self.yolo_results_callback, 10)
+        self.create_subscription(Bool, 'halt', self.halt_callback, 10)
         # self.create_timer()
         self.luna_rf_subscriber = self.create_subscription(         #Right Front
             Int32,   'luna_rf', self.luna_rf_callback, 10
@@ -123,7 +125,50 @@ class BallTrackingNode(Node):
         )        
         
 
-
+    def halt_callback(self,msg:Bool):
+        self.linear_error_sum = 0.0
+        self.linearX_last_error = 0.0
+        self.angular_error_sum = 0.0
+        self.angular_last_error = 0.0
+        self.tracking_our_ball = False
+        self.difference_error = 0.0
+        self.contour_area_error = 0.0
+        self.previous_contour_area = None  # New attribute to store the previous contour area
+        self.contour_area=0
+        self.cmd_vel_pub_count = 0
+        self.counter=0
+        self.class_ids_list = []
+        self.contour_areas_list = []
+        self.contour_areas_list_2 = []
+        self.differences_list = []
+        self.confidences_list = []
+        self.tracking_ids_list = []
+        self.xyxys_list = []
+        self.xywhs_list = []
+        self.wall_dist=10
+        self.wall_dist_align=80
+        self.int_error_diff = 0
+        self.closest_our_ball = {
+            'class_id': None,
+            'contour_area': None,
+            'difference': None,
+            'confidence': None,
+            'tracking_id': None,
+            'xyxy': None,
+            'xywh': None
+        }
+        self.our_id = -1
+        self.current_contour_area=0
+        self.opp_id = -1
+        self.reached = True
+        self.last_seen_direction = None
+        self.active = False
+        self.luna_rf=0
+        self.int_error_area=0
+        self.enableEdgeCases = False
+        # self.center_aligned = False 
+        self.target_y_dist = 200
+        
     def luna_lb_callback(self, msg: Int32):
         try:
             self.luna_lb = float(msg.data)
@@ -160,7 +205,7 @@ class BallTrackingNode(Node):
         response.success = True
         response.message = "Ball tracking started"
         # self.center_aligned = False # Flag to activate center alignment during ball tracking using Lunas
-        # self.center_yaw_aligned = False 
+        
         return response
 
     def parameters_callback(self, params):
@@ -183,6 +228,7 @@ class BallTrackingNode(Node):
             self.tracking_ids_list.clear()
             self.xyxys_list.clear()
             self.xywhs_list.clear()
+            self.current_contour_area=0
 
             self.class_ids_list.extend(msg.class_ids)
             self.contour_areas_list.extend(msg.contour_area)
@@ -207,10 +253,10 @@ class BallTrackingNode(Node):
                 return (our_tl_x >= silo_tl_x and our_tl_y >= silo_tl_y and our_br_x <= silo_br_x and our_br_y <= silo_br_y)
 
             # Update IDs based on ball color
-            if self.ball_condition :
+            if self.blueSide == False:
                 self.our_id = 2
                 self.opp_id = 0
-            elif self.ball_condition ==False:
+            elif self.blueSide:
                 self.our_id = 0
                 self.opp_id = 2
 
@@ -229,7 +275,7 @@ class BallTrackingNode(Node):
 
 
                 for j, class_id in enumerate(self.class_ids_list):
-                    if class_id in [1, self.opp_id]:  # Purple and Red ball  or Purple or Blue Ball
+                    if class_id in [1, self.opp_id]:  # Purple and Red ball or Purple or Blue Ball
                         other_ball_coords = self.xyxys_list[j]
                         if is_behind_other_ball(our_ball_coords, other_ball_coords):
                             behind_other_ball = True
@@ -275,6 +321,7 @@ class BallTrackingNode(Node):
                 else:
                     self.last_seen_direction = 'right'
 
+                
                 self.move_robot()
             else:
                 self.sweep_for_ball()
@@ -294,28 +341,38 @@ class BallTrackingNode(Node):
         # self.get_logger().info("aligned")
 
     # def move_to_center(self):
-    #     # Bot is on slope going downwards , time to align
-    #     if self.luna_lb <= 400 and self.luna_rb <= 400:
-    #         if not self.center_aligned: # If center 
-    #             msg = Twist()
-    #             # Consider any side luna readings and align yaw 
-    #             if abs(self.luna_rb - self.luna_rf) <= 5:
-    #                 self.center_yaw_aligned = True
+    #     twist = Twist()
+    #     if not self.center_aligned :
+    #         # Bot is on slope going downwards , time to align
+    #         while (time.time() - curr_time <= 1.5):
+    #             self.get_logger().info("Going Forwards")
+    #             twist.linear.x = 2.0
+    #             if self.blueSide: 
+    #                 twist.linear.y = 1.0
     #             else:
-    #                 if self.luna_rb < self.luna_rf :
-    #                     msg.angular.z = -0.5
-    #                 else:
-    #                     msg.angular.z = 0.5
-    #                 self.center_yaw_aligned = False
-                
-    #             # Align to reach to center area of slope
-    #             if self.luna_rf <= 125 and self.luna_rb <= 125:
-    #                 msg.linear.y = 0.5
-    #             else:# Flag to activate center alignment during ball tracking using Lunas
-    #                 if self.center_yaw_aligned :
-    #                     self.center_aligned = True
+    #                 twist.linear.y = -1.0
+    #             self.cmd_vel_pub.publish(twist)
 
-    #             self.cmd_vel_pub.publish(msg)
+    #         if self.y_diff < 0 :
+    #             self.get_logger().info("Reached Center Position")
+    #             self.center_aligned = True
+
+    #         # If Target Center postion is not reached aligning in Y direction
+    #         right_avg = (self.luna_rf + self.luna_rb) / 2.0
+    #         self.y_diff = right_avg - self.target_y_dist
+    #         self.int_y_diff += self.y_diff
+    #         print(self.y_diff)
+    #         twist.linear.y = self.pid_controller(self.y_diff, self.prev_y_diff, self.int_y_diff, self.kp_linear_y, self.ki_linear_y, self.kd_linear_y, dt)
+    #         self.prev_y_diff = self.y_diff
+    #         twist.linear.y = max(min(twist.linear.y, self.linear_y_max), self.linear_y_min) 
+
+    #         if not self.blueSide: # If Red side
+    #             twist.linear.y = - twist.linear.y
+
+    #         if self.logging:
+    #             self.get_logger().info('Aligning in y : %f' % twist.linear.y) #Apply PID controller for angular Z
+    #         self.cmd_vel_pub.publish(twist)
+                        
 
     def move_robot(self):
         twist_msg = Twist()
@@ -378,14 +435,17 @@ class BallTrackingNode(Node):
             twist_msg.linear.x = max(min(twist_msg.linear.x, self.max_linear_speed), -self.max_linear_speed)
             twist_msg.angular.z = max(min(twist_msg.angular.z, self.max_angular_speed), -self.max_angular_speed)
             # twist_msg.linear.y = max(min(twist_msg.angular.y, self.max_angular_speed), -self.max_angular_speed)
-            if self.current_contour_area <50000:
-                twist_msg.linear.x=abs(twist_msg.angular.z) + twist_msg.linear.x       
+            if self.current_contour_area <30000:
+                cutoff_lin_x=twist_msg.linear.x/4
+                cutoff_ang_z=twist_msg.angular.z/3
+                twist_msg.angular.z=twist_msg.angular.z  +cutoff_ang_z
+                twist_msg.linear.x=abs(cutoff_ang_z) + twist_msg.linear.x +cutoff_lin_x
+
             self.linearX_last_error = self.contour_area_error / 120000
             self.angular_last_error = self.difference_error / 170
-            self.cmd_vel_pub_count += 1
-            if self.cmd_vel_pub_count > 9:
-                self.cmd_vel_pub.publish(twist_msg)
-                self.cmd_vel_pub_count = 0
+            # self.cmd_vel_pub_count += 1
+            self.cmd_vel_pub.publish(twist_msg)
+                # self.cmd_vel_pub_count = 0
 
             if self.logging:
                 self.get_logger().info(f"Publishing cmd_vel: linear_x = {twist_msg.linear.x}, angular_z = {twist_msg.angular.z}")

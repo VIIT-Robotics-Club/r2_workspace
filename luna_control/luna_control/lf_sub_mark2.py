@@ -78,6 +78,12 @@ class LineFollowerService(Node):
             '/line_lsa',
             self.lsa_callback,
             10)
+
+        self.halt_sub = self.create_subscription(
+            Bool,
+            '/halt',
+            self.halt_callback,
+            10)
         
         # create subscription for junctions
         self.subscription = self.create_subscription(
@@ -95,6 +101,35 @@ class LineFollowerService(Node):
             Bool,
             "status",
             10)
+
+    def halt_callback(self, msg:Bool):
+        self.error_sum = 0           # Sum of errors (for integral term)
+        self.last_error = 0          # Last error (for derivative term)
+        # self.state = "FOLLOWING"     # Initial State
+        
+        self.nodeCount = 0
+        self.pitch = 1.5
+        self.prev_junction_data = 0
+
+        self.curr_junction_time = time.time()
+        self.prev_junction_time = self.curr_junction_time
+
+        self.state = False
+        self.delay = 0.2
+
+        self.node_2_state = False
+        self.initial_junction_data = 0     # 0
+        self.switch = False
+
+        self.new_junction = True
+
+        # self.false_junction_counter = 0
+        
+        self.execute = False
+        self.retry = True
+
+        self.prev_jnc_data = 0
+        self.prev_data = 0
         
     def serviceCallback(self, request, response):
         self.get_logger().info("line follower is active")
@@ -142,7 +177,7 @@ class LineFollowerService(Node):
             self.curr_junction_time = time.time()
 
             if (self.curr_junction_time - self.prev_junction_time) > self.pitch:
-                self.get_logger().info("time diff = " + str(self.curr_junction_time - self.prev_junction_time))
+                # self.get_logger().info("time diff = " + str(self.curr_junction_time - self.prev_junction_time))
                 # use difference between current junction count (msg.data) and initial junction count (initial_junction_data) as nodeCount
                 self.nodeCount = msg.data - self.initial_junction_data
                 self.prev_junction_data = msg.data
@@ -200,6 +235,10 @@ class LineFollowerService(Node):
             twist.linear.y = 0.0
             twist.angular.z = 0.0
             self.execute = False
+
+            msg = Bool()
+            msg.data = True
+            self.status_pub.publish(msg)
 
         elif self.nodeCount == 2 and data == 255:
 

@@ -29,7 +29,7 @@ COPY ./ /ws/src/
 WORKDIR /ws
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && rosdep init && rosdep update && rosdep install --from-paths src -y --ignore-src && colcon build --symlink-install"
 
-CMD /bin/bash -c "source /opt/ros/humble/setup.bash && source /ws/install/setup.bash && ros2 launch r2_bringup testing.launch.py"
+CMD /bin/bash -c "source /opt/ros/humble/setup.bash && source /ws/install/setup.bash && ros2 launch r2_bringup go.launch.py"
 
 
 
